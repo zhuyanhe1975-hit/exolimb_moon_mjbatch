@@ -12,3 +12,7 @@ MUJOCO_LOG.TXT
 imgui.ini
 *.pid
 *.so
+
+.venv-cpu/
+
+.DS_Store

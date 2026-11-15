@@ -32,6 +32,9 @@ def display_spec(simulator,*,single=False):
     if os.environ.get('MOON_FILAMENT_SCENE')=='1':
         from filament_scene import add_astronaut
         add_astronaut(spec)
+        if os.environ.get('MOON_VIEWER')=='classic':
+            from classic_materials import adapt
+            adapt(spec)
     return spec
 
 

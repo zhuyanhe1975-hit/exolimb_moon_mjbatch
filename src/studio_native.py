@@ -5,7 +5,7 @@ NativeViewer setup follows the installed Apache-2.0 MuJoCo Studio implementation
 The C++ mjrf API already supports a null target for direct window presentation;
 the installed Python Renderer only implements explicit offscreen readback targets.
 """
-def install():
+def install(*, ui_bridge="local"):
     from studio_shortcuts import install as install_shortcuts
     install_shortcuts()
     from mujoco import mjrf
@@ -47,7 +47,7 @@ def install():
                 import numpy as np
                 from PIL import Image
                 out=Path(__file__).resolve().parents[1]/'outputs/playground_play/studio_audit'
-                out.mkdir(exist_ok=True)
+                out.mkdir(parents=True,exist_ok=True)
                 pixels=np.empty((height,width,3),dtype=np.uint8)
                 self.target('audit',pixels)
                 renderer.Renderer.render(self,[dataclasses.replace(view,target='audit') for view in views])
@@ -71,7 +71,7 @@ def install():
             self._renderer=None
             self._native_frames=0
             from pathlib import Path
-            Path(__file__).resolve().parents[1].joinpath("outputs/playground_play/studio_audit").mkdir(exist_ok=True)
+            Path(__file__).resolve().parents[1].joinpath("outputs/playground_play/studio_audit").mkdir(parents=True,exist_ok=True)
             try:
                 context=mjrf.Context(mjrf.ContextConfig(
                     graphics_api=mjrf.GraphicsApi.GRAPHICS_API_OPENGL,
@@ -83,8 +83,11 @@ def install():
                 native.ux.set_implot_context(native.window.GetImPlotContext())
                 native.implot.set_imgui_context(native.window.GetImGuiContext())
                 native.implot.set_implot_context(native.window.GetImPlotContext())
-                from native_ui_bridge import NativeUiBridge
-                self._imgui_bridge=NativeUiBridge(context,self._renderer.scene('ux'),native.window.GetImGuiContext())
+                if ui_bridge == "native":
+                    self._imgui_bridge=native._viewer.ImguiBridge(context,self._renderer.scene('ux'))
+                else:
+                    from native_ui_bridge import NativeUiBridge
+                    self._imgui_bridge=NativeUiBridge(context,self._renderer.scene('ux'),native.window.GetImGuiContext())
                 self.dispatch(native.viewer_protocol.ViewerInitEvent(viewer=self))
             except BaseException:
                 self.close()

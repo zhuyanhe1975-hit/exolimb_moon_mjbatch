@@ -1,6 +1,7 @@
 """Display independent people on one shared terrain; never step the CPU copy."""
 import mujoco
 import numpy as np
+import os,time
 
 
 def offsets(count):
@@ -14,6 +15,7 @@ def world_count(model):
 
 def share_actor_assets(spec):
     """Canonicalise actor-instance references before compiling/uploading assets."""
+    spec.dedup_assets()
     def canonical(name):
         if name.startswith('world_') and '/' in name:
             return 'world_0/'+name.split('/',1)[1]
@@ -44,7 +46,10 @@ def build_grid(simulator):
     spec.add_numeric(name='display_shared_terrain',data=[1])
     # Build the bank once. Other attachments contain actors only, with no
     # hfield assets or hidden terrain geoms to upload into Filament.
+    profile=os.environ.get('MOON_STARTUP_PROFILE')=='1'
+    started=time.monotonic();stages={'copy':0.,'attach':0.}
     shared=display_spec(simulator,single=True)
+    if profile:print('[Display profile] shared spec',time.monotonic()-started,flush=True)
     actors=shared.copy()
     # Renderer options are scene-wide names, not prefixed actor metadata.
     for numeric in list(shared.numerics):
@@ -53,6 +58,7 @@ def build_grid(simulator):
             shared.delete(numeric)
     for numeric in list(actors.numerics):
         if numeric.name.startswith('filament.'):actors.delete(numeric)
+    spec.visual.headlight.active=shared.visual.headlight.active
     for channel in ('ambient','diffuse','specular'):
         setattr(spec.visual.headlight,channel,getattr(shared.visual.headlight,channel))
     # Lighting belongs to the scene, not to an actor instance. Multiple copies
@@ -69,16 +75,42 @@ def build_grid(simulator):
     for geom in list(actors.geoms):
         if geom.name in terrain_names:actors.delete(geom)
     for hfield in list(actors.hfields):actors.delete(hfield)
+    # Actor-only attachments may reference the parent's shared assets after
+    # namespacing. Remove declarations here, while the template is small,
+    # rather than deleting thousands of duplicate assets from a 64-actor spec.
+    for collection in ('materials','textures','meshes'):
+        for asset in list(getattr(actors,collection)):actors.delete(asset)
     spec.option.timestep=shared.option.timestep
     spec.option.gravity=shared.option.gravity
     spec.option.integrator=shared.option.integrator
     spec.option.ccd_iterations=shared.option.ccd_iterations
     for i,offset in enumerate(offsets(simulator.nworld)):
+        tick=time.monotonic()
         child=shared if i==0 else actors.copy()
+        stages['copy']+=time.monotonic()-tick
         for key in list(child.keys):child.delete(key)
+        # Removing key objects does not clear the source XML's explicit
+        # <size nkey="1"> allocation. Display poses come from live state.
+        child.nkey=0
         frame=spec.worldbody.add_frame(pos=offset)
+        tick=time.monotonic()
         spec.attach(child,prefix=f'world_{i}/',frame=frame)
+        stages['attach']+=time.monotonic()-tick
+        if i:
+            prefix=f'world_{i}/'
+            for collection in ('geoms','sites','skins','tendons'):
+                for element in getattr(spec,collection):
+                    if not element.name.startswith(prefix):continue
+                    for attr in ('meshname','material'):
+                        if hasattr(element,attr):
+                            value=getattr(element,attr)
+                            if value.startswith(prefix):setattr(element,attr,'world_0/'+value[len(prefix):])
+        if profile and (i+1)%8==0:print('[Display profile]',i+1,stages,flush=True)
+        elif not profile and simulator.nworld>=16 and ((i+1)%16==0 or i+1==simulator.nworld):
+            print(f'[Startup] Attached {i+1}/{simulator.nworld} people; textures/materials remain shared',flush=True)
+    tick=time.monotonic()
     share_actor_assets(spec)
+    if profile:print('[Display profile] dedup',time.monotonic()-tick,'total',time.monotonic()-started,flush=True)
     spec.stat.center=[0,0,1.];spec.stat.extent=8.
     return spec
 

@@ -18,7 +18,13 @@ class FilamentModelScene:
     def __init__(self,context,scene,model):
         self._overlays=[];self._shown=0
         self._context=context;self._scene=scene;self._model=model
+        import time
+        started=time.monotonic()
+        print(f'[Startup] Uploading Studio render resources: {model.nskin} skins, {model.ntex} shared textures...',flush=True)
         self._content=ModelScene(context,model,scene)
+        print(f'[Startup] Studio render resources ready in {time.monotonic()-started:.2f}s',flush=True)
+        from selection_highlight import SelectionHighlight
+        self._selection=SelectionHighlight(model,self._content)
         self._diagnostics=mujoco.MjvScene(model,maxgeom=model.ngeom+2000)
         self._overlays=[]
         self._overlay_types=[]
@@ -32,6 +38,7 @@ class FilamentModelScene:
     def sync(self,width,height,model,data,perturb,camera,vis_options,extra_geoms):
         self._content._renderables.set_options(vis_options)
         self._content.update(data)
+        self._selection.update(perturb.select)
         # Keep picking/camera/diagnostic geometry derived by native mjv.
         mujoco.mjv_updateScene(model,data,vis_options,perturb,camera,
                               mujoco.mjtCatBit.mjCAT_ALL,self._diagnostics)

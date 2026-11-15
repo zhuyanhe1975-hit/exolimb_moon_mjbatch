@@ -105,7 +105,7 @@ def main(argv):
     for name in ('state.npz','metadata.json','manifest.json'):
         shutil.copy2(ROOT/'assets/playground'/name,snapshot/name)
     record['source_checkpoint_sha256']=digest(source) if source else None
-    record['source_sha256']={name:digest(ROOT/'src'/name) for name in ('lunar_stand_training.py','moon_device.py','moon_scene.py','balance_features.py','local_lunar_terrain.py','training_logs.py','tensor_graph.py','rollout_logger.py','measurement_terrain.py')}
+    record['source_sha256']={name:digest(ROOT/'src'/name) for name in ('lunar_stand_training.py','moon_device.py','moon_device_core.py','moon_scene.py','balance_features.py','local_lunar_terrain.py','training_logs.py','tensor_graph.py','rollout_logger.py','measurement_terrain.py')}
     (logdir/'training_config.json').write_text(json.dumps(record,indent=2)+'\n')
     env=None
     try:

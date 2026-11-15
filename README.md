@@ -12,7 +12,45 @@
 - 随机地形/安全出生点/朝向、全鞋底覆盖余量、1m 活动范围及60度跌倒终止；训练默认水平扰动，回放默认关闭。
 - Playground 原生 REAF Device/TaskLayer 与 RSL-RL train/play 入口。新日志独立保存，检查点显式核对导出地形 SHA；不匹配需显式 `--terrain-transfer`。
 
-## 环境与运行
+## macOS / 原生 MuJoCo CPU 回放
+
+`./run.sh` 现在默认启动 CPU 回放（`./run_cpu.sh` 等价）；旧 CUDA/Playground 入口保留为 `./run_playground.sh`。不需要 CUDA、Warp、REAF 或原作者的共享环境。使用原生 MuJoCo 4.0.1 动力学和 CPU PyTorch 推理，复用原地形、MoonDeviceCore 的复位/观测/动作计算和导入策略（严格加载网络及观测归一化）。原 Playground 入口保持原用途。
+
+```bash
+uv venv --python 3.12 .venv-cpu
+uv pip install --python .venv-cpu/bin/python -r requirements-cpu.txt
+./run_cpu.sh                         # 原生 classic 窗口，单人，默认第12块地形
+./run.sh --viewer studio --viz skin --num-envs 8  # CPU物理/推理 + Studio八人航天服显示
+./run_cpu.sh --terrain-idx 24
+./run_cpu.sh --headless --seconds 5 --report outputs/cpu_check.json
+```
+
+`./run.sh --help` 查看 CPU CLI 中文帮助；兼容 `--resume-path` / `--resume_path`、`--terrain_idx` 等旧名称。可显式设置 `--device cpu --viewer classic --viz physx --num-envs 1`；当前支持 `--viewer classic|studio` 和 `--viz physx|skin`；`--num-envs N` 设置独立CPU环境数（默认1），支持 `--num-envs 8` 在同一块月面上显示8人；人物互不碰撞、随机分散出生，跌倒/超时独立复位。多环境使用独立 MjData，共享同一物理模型；显示端共享地形、纹理/网格/灯光，蒙皮逐人独立。`--headless` 必须配合正数 `--seconds`。帮助和参数校验不会加载仿真运行时。
+
+macOS classic 窗口自动通过 `mjpython` 启动，Studio使用普通Python主线程。空格暂停/继续，R复位，`[` / `]` 切换64块地形；关闭窗口退出。窗口默认显示物理代理人体；`./run.sh --viewer studio --viz skin` 启动原生 Studio + 航天服 PBR 蒙皮。Studio 在 macOS 主线程运行，使用安装包自带的 ImGui bridge，无需编译旧 Linux UI 扩展。物理模型和显示模型独立，地形切换复用显示资源。动力学120Hz、策略60Hz，窗口按墙钟1×限速，10秒回合自动复位；回放不训练、不施加随机扰动。物理和策略均在 CPU，OpenGL 负责显示。
+
+多人启动优化：构建多人显示时先剥离人体模板里的重复资产声明，再将每个人引用到第一人的共享纹理/材质/网格；保留独立蒙皮、骨骼和全部人体。避免64人拼接完成后才逐个删除大量重复资产。当前Mac实测64人skin显示spec拼接约34秒→0.8秒，编译后模型约1.3秒就绪（不含解释器导入/窗口首帧），未降低模型或贴图精度。Studio/classic各64人的原生窗口短启动检查通过，非长时稳定性或实时帧率保证。启动日志分段显示CPU环境、人体挂接、显示模型编译、窗口和渲染资源上传进度。
+
+交互统一性：`classic + physx`、`classic + skin`、`studio + physx`、`studio + skin` 共用相同按键控制器、人体/body映射和原生扰动力计算。显示样式只改变外观；鼠标点选也会同步当前人体编号。Studio底部状态栏和classic窗口文字提示均显示当前人体及相机模式。四种组合已通过原生窗口集成检查（输入层注入按键事件，覆盖切换、跟踪、总览、地形键及扰动力映射/松手清零）。
+
+相机与人体选择（CPU classic/Studio，恢复原标点键位）：`,` 上一个人体、`.` 下一个人体（首尾循环并进入近距跟随）；`/` 开启/关闭当前人体跟踪；`A` 切换全体总览与原视角；`Esc` 退出跟踪；`[` / `]` 仍切换上一块/下一块地形，`R` 复位。切换人体会选中其骨盆并清除旧鼠标外力，所有独立环境继续运行。Studio底部状态栏及终端显示当前人体编号/相机模式。点击画面后按键，使用英文半角标点；在文本输入框中编辑时不触发快捷键。T/N/P保持原生显示选项，不作为相机或人体切换的别名。
+
+
+macOS Studio输入焦点：窗口完成首帧渲染后仅请求一次激活，并开启SDL首次点击穿透，防止画面持续刷新但新窗口没有键鼠焦点。切换到其他应用后不会重复抢回焦点。启动日志 `[Studio input] keyboard_focus=True` 表示该窗口已经获得键盘焦点；启动时先False再True是正常的焦点交接。Studio现同时接受Control和Command作为鼠标扰动修饰键；classic原生Control不变，因此两者可统一使用Control。修饰键拖拽不会同时移动相机。
+
+Studio选中高亮：双击选中后，以黄色轮廓标出当前人体；逗号/句号切人也同步轮廓，点击空白/地形取消。高亮只作用于当前人体的renderable，不修改共享材质贴图、蒙皮或施力锚点；skin和physx均有选择反馈。
+
+classic skin显示适配：共享Studio的模型、UV、清洁版服装颜色贴图和太阳方向，额外使用classic支持的补光、布料/面罩高光及RGB颜色空间适配，避免直接使用无法上传的Filament KTX环境光。多人仍共享一套模型资产与场景灯光。classic旧OpenGL不支持同等PBR法线、金属度/粗糙度贴图和环境镜面反射，因此外观为近似对齐，不保证与Studio逐像素一致。
+
+Studio skin拾取修复：项目内 `skin_picking.py` 使用原生更新的蒙皮顶点、相同相机投影和可见性设置进行拾取，避开本机Studio原Pick的多skin顶点缓存累加错误。拖拽锚点取鼠标射线与蒙皮的真实表面交点，不再用最近顶点位置代替；拾取不会推进跟踪相机的平滑状态。仅在本进程替换Python Studio的skin拾取，physx保留原生几何拾取，不改共享安装包或物理模型。原生窗口双击处理入口集成检查及单人/8人蒙皮、遮挡/表面交点检查通过（输入层注入，非本轮真实OS鼠标验收）。
+
+鼠标施力：先左键双击选中人体部位，再按住 **Control（⌃）+鼠标右键拖动** 施加平移外力；**Control+左键拖动** 施加旋转扰动（转矩），配合Shift切换水平操作，Control+Option+左键可代替右键进行平移。classic使用Control；macOS Studio也统一支持Control，并保留Command兼容。施力时保持Run，松开鼠标停止施力；暂停后拖动不用于动态推人。多人模式仅作用于所选人体，实际外力映射回对应CPU世界。建议使用有左右键的鼠标。
+
+检查点原训练地形快照缺失，因此这是当前 detail3 地形上的策略迁移，不是精确重放；原生 CPU 和 Warp 轨迹不保证等价。2026-11-15 在 Apple Silicon 上第12块地形的5秒动态闭环通过，300控制步、0失败复位、无非有限值；另已打开并目视检查原生窗口。结果仅代表本次有限验证。
+
+## 原 CUDA / Playground 环境与运行
+
+以下为原 CUDA/REAF 入口说明，使用 `./run_playground.sh`；Mac CPU 回放请使用上面的 `./run.sh`。
 
 共享环境已安装在 `~/dev-envs/robotics-playground-py312`，使用本机 `~/Github/mujoco_playground` 与 vendored REAF-sim 可编辑源码。Torch2.12/CUDA13/TorchVision及其依赖通过硬链接复用，缺失普通依赖优先从清华镜像安装；MuJoCo4开发版来自仓库指定的官方源。原 MJLab/Isaac 环境未修改。
 
@@ -20,12 +58,12 @@
 
 ```bash
 ./train.sh --overrides='{"max_iterations":300}'
-./run.sh --checkpoint=/absolute/path/model_300.pt
+./run_playground.sh --checkpoint=/absolute/path/model_300.pt
 # 仅在明确需要把旧策略用于当前地形时：
-./run.sh --terrain-transfer --checkpoint=/absolute/path/model_500.pt
+./run_playground.sh --terrain-transfer --checkpoint=/absolute/path/model_500.pt
 ```
 
-`./run.sh --help` 查看完整常用参数及示例，不加载仿真。推荐连字符写法，兼容旧名称：
+`./run_playground.sh --help` 查看完整常用参数及示例，不加载仿真。推荐连字符写法，兼容旧名称：
 
 | 推荐参数 | 兼容旧名称 |
 | --- | --- |
@@ -56,7 +94,7 @@
 回放默认使用 **16×16m** 地形 bank，省略编号时随机选择，`--terrain-idx 1–64` 固定选择其中一块；所有人物共享所选地形。
 
 ```bash
-./run.sh --viewer=classic --viz=physx --num-envs 4 --terrain-idx 12
+./run_playground.sh --viewer=classic --viz=physx --num-envs 4 --terrain-idx 12
 ```
 
 运行中按 `[` / `]` 切换上一块/下一块地形（1与64循环），自动重置全部人物并复用已加载的高度场/渲染资源，当前编号打印到终端。暂停时也可切换，切换后保持暂停；Studio输入控件激活时不触发。
@@ -67,7 +105,7 @@ Studio 和 classic 回放默认按墙钟 **1× 实时**限速（60Hz 控制对�
 
 ```bash
 cd ~/myWorks/exolimb_moon_mujoco_playground
-./run.sh
+./run_playground.sh
 ```
 
 默认优先最新原生训练 run 的最大编号模型，没有训练结果时兜底已复制的 `logs/2026-11-15_import_mjlab_v15_groundsync1/model_200.pt`，单人、关闭扰动，直接打开 **开发版 MuJoCo Studio 原生 OpenGL 窗口**。不默认浏览器或独立simulate程序。
@@ -85,19 +123,19 @@ cd ~/myWorks/exolimb_moon_mujoco_playground
 回放的窗口与外观独立选择：`--viewer=classic|studio`、`--viz=physx|skin`，默认`studio + skin`。`physx`按用户命名表示物理代理几何显示，动力学后端仍为MuJoCo/Warp；`skin`显示完整航天服蒙皮和贴图。四种组合都复用相同策略、月面和物理，仅显示副本不同：
 
 ```bash
-./run.sh --viewer=classic --viz=physx
-./run.sh --viewer=classic --viz=skin
-./run.sh --viewer=studio --viz=physx
-./run.sh --viewer=studio --viz=skin --num-envs=8
+./run_playground.sh --viewer=classic --viz=physx
+./run_playground.sh --viewer=classic --viz=skin
+./run_playground.sh --viewer=studio --viz=physx
+./run_playground.sh --viewer=studio --viz=skin --num-envs=8
 ```
 
 多人体显示模型只保留一套高度场 bank 和一套场景灯光（1 盏 sun，头灯仍为场景单份），并共享人体静态 mesh、贴图和材质；仅姿态、骨骼绑定和蒙皮变形数据按人体独立保留。
 
-Studio 和 classic 多环境回放默认在同一块地形上显示全部人物（独立物理 world，人物间不相互碰撞），所有 world 使用同一个固定地形块；不做八块地形平铺，启动日志打印 requested_worlds 和 simulated/displayed 数量。回放环境数支持 `./run.sh --viewer=studio --num-envs 8`（等价于`--nworld=8`，两者不要同时传）。回放默认全体共享本次会话首次抽取的固定月面块，Reset只重置人体的出生位置/朝向和状态；人物是独立物理 world，不互相碰撞。单世界需在 Reset 换地形时可用 `--env-overrides='{"resample_terrain":true,"shared_terrain":false}'`；多世界共享显示要求各 world 地形一致，不能关闭 shared_terrain。训练仍独立随机换地形。Studio的C/F/H及0–5显示快捷键可在Reset按钮取得焦点后继续使用，文本输入和正在操作的控件仍保留键盘输入。
+Studio 和 classic 多环境回放默认在同一块地形上显示全部人物（独立物理 world，人物间不相互碰撞），所有 world 使用同一个固定地形块；不做八块地形平铺，启动日志打印 requested_worlds 和 simulated/displayed 数量。回放环境数支持 `./run_playground.sh --viewer=studio --num-envs 8`（等价于`--nworld=8`，两者不要同时传）。回放默认全体共享本次会话首次抽取的固定月面块，Reset只重置人体的出生位置/朝向和状态；人物是独立物理 world，不互相碰撞。单世界需在 Reset 换地形时可用 `--env-overrides='{"resample_terrain":true,"shared_terrain":false}'`；多世界共享显示要求各 world 地形一致，不能关闭 shared_terrain。训练仍独立随机换地形。Studio的C/F/H及0–5显示快捷键可在Reset按钮取得焦点后继续使用，文本输入和正在操作的控件仍保留键盘输入。
 
 经典viewer默认开启真实接触可视化：红点为接触位置，青色箭头为求解器接触力（长度0.003米/牛顿，方向由原生接触坐标系转换到世界系）。使用窗口的Contact point/Contact force显示开关控制。数据从选中world的Warp原生contacts/efc_force读取，非显示模型重新求解；额外同步仅用于经典回放，不影响训练路径。
 
-经典交互窗口可选 `./run.sh --viewer=classic`，默认仍为开发版Studio（`--viewer=studio`）。经典窗口支持鼠标相机控制；双击选中身体后按住Ctrl拖拽鼠标，外力会施加到Playground实际仿真，和任务扰动相加。空格暂停/继续，R复位，N切换world（配合`--nworld=...`），Esc关闭。经典窗口的CPU模型仅用于显示/计算鼠标扰动力，策略与动力学仍由Playground执行；面板中的CPU控制量/物理选项编辑不回写GPU任务。两种窗口使用同样的检查点选择和地形显示同步。示例：`./run.sh --viewer=classic --checkpoint=/absolute/path/model_300.pt`。
+经典交互窗口可选 `./run_playground.sh --viewer=classic`，默认仍为开发版Studio（`--viewer=studio`）。经典窗口支持鼠标相机控制；双击选中身体后按住Ctrl拖拽鼠标，外力会施加到Playground实际仿真，和任务扰动相加。空格暂停/继续，R复位，N切换world（配合`--nworld=...`），Esc关闭。经典窗口的CPU模型仅用于显示/计算鼠标扰动力，策略与动力学仍由Playground执行；面板中的CPU控制量/物理选项编辑不回写GPU任务。两种窗口使用同样的检查点选择和地形显示同步。示例：`./run_playground.sh --viewer=classic --checkpoint=/absolute/path/model_300.pt`。
 
 训练任务 `WangyuMoonStandLunarTrainV1` 在 `src/lunar_stand_training.py`，训练入口 `scripts/train_stand.py`。默认从头训练，复用现有共享环境；训练不加载 Studio、显示副本或相机。
 
@@ -133,7 +171,7 @@ PPO对齐原项目：32步/环境/更新；actor/critic各128×128 ELU及观测�
 
 原始导入策略缺训练地形快照，初始化时打印当前detail3迁移说明；不同地形的其他模型需显式 `--terrain-transfer`。完整续训校验任务MDP签名，不能把旧MJLab检查点作为本任务原样续训。续训的环境回合重新随机出生。
 
-日志写入 `logs/<上海时间>_wangyu_moon_playground_stand_v1_detail3/`，含 `training_config.json`（PPO、奖励、来源、代码SHA）、`terrain/`（实际bank状态、资产清单）、`terrain_manifest.json`、TensorBoard、`model_*.pt` 和最终状态。训练产生本项目检查点后，`./run.sh` 优先选最新原生训练run中编号最大的模型，避免同日import目录名遮住新结果；回放仍默认关闭扰动。
+日志写入 `logs/<上海时间>_wangyu_moon_playground_stand_v1_detail3/`，含 `training_config.json`（PPO、奖励、来源、代码SHA）、`terrain/`（实际bank状态、资产清单）、`terrain_manifest.json`、TensorBoard、`model_*.pt` 和最终状态。训练产生本项目检查点后，`./run_playground.sh` 优先选最新原生训练run中编号最大的模型，避免同日import目录名遮住新结果；回放仍默认关闭扰动。
 
 已通过CPU配置、网络严格加载、批量脉冲/部分复位和模型选择测试及dry-run。2026-11-15 已完成下述8192世界短训练性能验证；短测不代表策略收敛。
 
@@ -172,7 +210,7 @@ Studio界面使用项目内 `native_ui_bridge.py`，通过公开mjrf上传ImGui�
 
 原始资源另核对了`~/myWorks/3d models/chinese-moon-spacesuit-empty-rigged-for-maya`：纹理包共19张，12张源图与项目缓存SHA一致；原包额外含Helmet_Opacity、Helmet_Refraction、烘焙bump和位移图，不能把它们自动当成金膜光学参数。解包只写入`outputs/original_spacesuit`，核对报告`source_audit.json`。最新零物理步静态图为`outputs/render_reference/visor_mirror_lunar.png`，此前`visor_pbr_*`仍有可见网格绑定错误，不作为修复后的证据。
 
-可借鉴用户提供的[Three.js示例源码](https://github.com/mrdoob/three.js/blob/dev/examples/webgl_postprocessing_3dlut.html)：环境反射来自HDRI，LUT只做末端调色。`./run.sh --viewer=studio --viz=skin --reflection-env royal`使用该示例同名Royal Esplanade的官方r180 HDR源图，离线转成线性RGB16F KTX六面体和GGX粗糙度mip；源URL/SHA及转换设置在`assets/reflection_reference/royal_esplanade.json`，脚本`prepare_reflection_environment.py`。这是参考环境模式，不把室内倒影冒充月面；默认`--reflection-env lunar`。也可传入自己的HDR预过滤KTX路径。KTX按上游pbr.xml以type=2d容器加载，实际六面体由KTX头定义，全场共享一次加载。参考近景`outputs/render_reference/visor_mirror_royal.png`可见完整弯曲建筑倒影。
+可借鉴用户提供的[Three.js示例源码](https://github.com/mrdoob/three.js/blob/dev/examples/webgl_postprocessing_3dlut.html)：环境反射来自HDRI，LUT只做末端调色。`./run_playground.sh --viewer=studio --viz=skin --reflection-env royal`使用该示例同名Royal Esplanade的官方r180 HDR源图，离线转成线性RGB16F KTX六面体和GGX粗糙度mip；源URL/SHA及转换设置在`assets/reflection_reference/royal_esplanade.json`，脚本`prepare_reflection_environment.py`。这是参考环境模式，不把室内倒影冒充月面；默认`--reflection-env lunar`。也可传入自己的HDR预过滤KTX路径。KTX按上游pbr.xml以type=2d容器加载，实际六面体由KTX头定义，全场共享一次加载。参考近景`outputs/render_reference/visor_mirror_royal.png`可见完整弯曲建筑倒影。
 
 衣服背光面的硬黑斑修复：此前PNG月面IBL只有镜面反射，且Royal转换KTX也没有`sh`元数据；MuJoCo仅在KTX含SH时调用Filament的`irradiance(3, ...)`，布料缺少月面反弹漫反射。两个环境现均保存线性HDR KTX与9个RGB辐照SH系数（包含余弦卷积及Lambert 1/π），无需额外头灯、复制光源或抬高曝光。月面反射仍保留原黑天空/地面分界，自阴影及太阳直射保留。CPU测试验证常量环境能量守恒、下半球照明方向和KTX元数据；固定姿态同相机前后图`suit_shadow_before.png`/`suit_shadow_irradiance.png`、另一侧`suit_shadow_fixed.png`，均0物理步。原始材质/模型/策略及训练逻辑未变，环境资产需重启窗口重新加载。
 

@@ -67,3 +67,27 @@
 - 用户要求改善衣服阴影/暗区：根因为PNG月面IBL及原Royal转换KTX仅有反射，缺失漫反射辐照SH；ModelLights只有读取KTX SH后才调用Filament irradiance(3,sh)。现两个环境保存线性RGB16F KTX+9个RGB SH，按官方IndirectLight/CubemapSH多项式预缩放、余弦卷积和Lambert 1/pi。lunar.ktx替代生产PNG引用，PNG仅预览；源/产物SHA保持校验。衣服法线/几何/太阳强度/灯数量/曝光未变，未通过删除纹理或增加头灯掩盖黑斑。CPU验证常量辐射能量守恒、地面半球方向、HDR与SH元数据；静态固定姿态suit_shadow_before/irradiance同相机及另一侧suit_shadow_fixed证实暗部恢复连续皱褶。未启动动态回放、训练、Kit或改共享依赖。
 
 - 用户继续要求消除衣服脏污观感：静态图检查原Suit白布albedo均匀约213，黑划痕主要来自过强法线，布料原金属度约43/255。新增prepare_clean_cloth.py与assets/clean_cloth派生显示图，白布低饱和区域局部+22 sRGB（上限245），红蓝/国旗/CMS色彩不改；白布/红织物metallic=0、roughness>=209/255，布料法线向平面混合.28、其他区域.55、头盔外壳法线.45。保留原几何、缝线、UV与骨骼及面罩镜面，不修改原资产/策略/共享环境。生产直接重指向既有texture文件，不增加纹理数量，多人继续共享一次加载；manifest校验源和派生SHA。静态同相机cloth_source_comparison.png/cloth_clean_final.png；新增白布金属度/粗糙度、法线倾角降低及彩色标识逐像素保真CPU检查。未启动回放、训练或Kit。此条覆盖此前“衣服法线未变”的显示外观约定。
+
+- 2026-11-15 当前用户明确要求克隆到 Apple Silicon Mac 并用 CPU MuJoCo 运行。新增 run_cpu.sh / scripts/play_cpu.py，使用隔离 .venv-cpu、MuJoCo4.0.1 原生 mj_step 和 CPU Torch 策略；复用 moon_device_core.py 的原有张量逻辑，moon_device.py 保留 REAF 适配。原策略/资产不变，不安装或改动共享环境。CPU classic 窗口已启动并目视确认，5秒300控制步闭环无失败/非有限值。不把原生CPU回放当作Warp轨迹等价或训练收敛证据。
+
+- 当前用户要求修复 CPU run.sh 对 --viewer studio --viz skin 的拒绝。CPU入口现支持 classic/studio × physx/skin，单人；cpu_viewer.py 用独立显示模型复用原skin/PBR和固定高度场bank，物理仍原生CPU mj_step。macOS Studio必须用普通Python主线程创建原生Window，classic仍用mjpython；studio_native.install(ui_bridge='native')使用安装包自带UI bridge（macOS已目视确认文字/控件正常），原REAF默认local桥接保留。不得将仅参数接受当作原生窗口验收。
+
+- 用户要求 CPU --viewer studio --viz skin --num-envs 8：CpuWorlds 使用独立MjData、共享相同地形/物理模型和CPU批量策略，复用原安全分散出生与独立部分复位。CPU显示端复用build_grid/sync_grid，8人仅一套地形/纹理/网格/光源。单人限制由本条覆盖，原生CPU不改回Warp、不启动训练。
+
+- 用户要求Mac键鼠施力：CPU显示端现在将Studio App计算的xfrc或classic原生扰动力按body/world映射回CpuWorlds.mouse_forces，并在每个物理子步加到任务外力；松手后清零，多人体只作用于选中world。Studio按R也接入复位队列。动态回归验证100N仅改变选中world、松手无残留，以及8人body映射；尚未声称已用真实鼠标拖拽验收。
+
+- 用户要求恢复跟踪/退出跟踪/键盘切换当前人体。CPU classic/Studio共用CameraControls：T跟踪开关、N/P循环人体、A总览、Esc自由视角，Studio额外Shift+N。Studio用CpuApp优先处理，避免T透明/N岛/P接触分割/A自动连接冲突；文本编辑不拦截。选择人体映射到真实display body并清除旧鼠标外力；跟踪中切换保持跟踪，自由模式切换只对焦。Mac原生Studio实按T/N/P/Shift+N/A/Esc及状态栏已验收。
+
+- 用户纠正必须使用原标点键位，覆盖刚新增的T/N/P方案：`,`上一人体、`.`下一人体并按原SharedMoonViewer语义进入近距跟踪，`/`开关跟踪，A原总览，Esc自由视角；`[`/`]`仍按原项目切换地形。T/N/P撤回自定义覆盖，不设相机别名。README/CLI/状态栏/测试统一。
+
+- 用户要求各种显示配置交互统一，明确包含physx。CpuDisplay.handle_key共用标点键路由；update_mouse_interaction在classic/Studio均直接调用原生mjv_applyPerturbForce并统一选择/外力world映射，classic也同步鼠标选中的人体及HUD。修复主入口无条件启用SKIN标志。四组合各8人原生窗口集成检查通过（按键输入层注入，不是本轮真实OS按键验收），涵盖跟踪、切人、总览、地形键、选中world施力和松手清零；统一控制器覆盖单人/8人各显示组合。
+
+- 用户报告skin双击错选/偏移：复现原Studio ux.Pick在29个可见skin点中24个错选/漏选；上游MakeSkin复用vertex_buffer且累加前未清零。新增skin_picking.NativeSkinPicker以原生mjv_updateScene/mjv_select获取正确变形顶点和body，再用mju_raySkin真实交点作为施力锚点；跟踪相机使用当前lookat的独立free副本，避免拾取推进平滑。仅当前CPU Studio进程的Python ux.Pick被替换，physx委托原函数，classic仍用原生mjv_select。单人/8人、多skin、遮挡、交点和相机不变测试通过；Studio原生窗口的App双击输入入口及实际localpos锚点集成检查通过，不冒充真实OS双击验收。
+
+- 用户报告Studio间歇启动键鼠全失效但画面/steps继续，Classic正常；确认Studio用Command而Classic用Control。真实SDK诊断曾记录新Studio窗口120帧均无SDL键盘/鼠标焦点。新增studio_input：创建窗口前设置本进程SDL前台/首次点击穿透提示、禁用Control单击转右键；创建后仅一次RaiseWindow/SetWindowInputFocus，不持续抢焦点。新启动skin/physx集成日志focus=True。Studio Python鼠标输入接受Control或Command并在扰动时禁止同时移动相机；classic不改，两者可统一Control。原生窗口输入入口测试验证两修饰键产生相同外力，非真实OS组合拖拽验收；不承诺已排除所有偶发输入原因。
+
+- 焦点请求进一步移到首个完整Studio渲染帧结束后（不是模型/纹理初始化之前），只执行一次；输入日志在SDL焦点变化时报告。skin/physx分别3秒正常CLI启动都观察到False→True。Classic未改输入后端；用户确认原Studio=Command/Classic=Control，当前统一Control且Studio兼容Command。
+
+- 用户要求classic skin外观向Studio对齐，并补Studio双击选中高亮。classic_materials仅改classic显示spec：共享原RGB/UV/蒙皮，legacy RGB颜色空间/Phong高光与受支持的spot月面反弹补光，去掉不支持的KTX image light；源资产/CPU物理不改，PBR法线/环境镜面不能逐项等价。注意classic不支持mjLIGHT_POINT和IMAGE，补光必须SPOT；multiworld需复制headlight.active。SelectionHighlight在Filament renderable材质selected字段标当前人体黄色轮廓；按body_rootid只选一人，切换/取消清除旧轮廓，不改model.mat_rgba或共享贴图/物理。静态出图已目视确认黄色轮廓，8人真实Filament资源检查覆盖切换/取消/其他人体不高亮。
+
+- 用户报告64人启动很慢/无法启动。分段计时确认CPU64环境<1秒，旧display_spec拼接/事后资产删除约34秒，compile约0.6秒、峰值约4GB。build_grid现先从actor-only小模板去除materials/textures/meshes，再attach并将新人体静态资产引用重定向world_0；保留独立skin/bones/全部64人。native dedup_assets作为最终保护；64人拼接实测约0.79秒，完整显示模型约1.34秒就绪，未降贴图/网格精度。启动进度分段输出。Studio+skin和classic+skin各64人原生窗口+6控制步短启动检查通过（384 transitions，无NaN/失败），不当作长时稳定或实时帧率验收。64人编译前共享资源回归及8人状态同步/部分复位回归通过。
