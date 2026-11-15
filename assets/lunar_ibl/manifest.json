@@ -1,0 +1,64 @@
+{
+  "source": "assets/regolith_pbr/diffuse.png",
+  "source_sha256": "d1b7c9168ce02d8e3b7cedef9cb91e9aa90277bcde88db21ebaeea0df1f276e3",
+  "normal_source": "assets/regolith_pbr/normal.png",
+  "normal_sha256": "ced6a94363e0b9c9316c422895c8bd44d67d50f64484d23b6972224d9c327afb",
+  "files": {
+    "lunar.png": "ba1c76ec380555c119678adfd19a2efc36db723a59de44859d546fca829a5b88",
+    "lunar.ktx": "2a6b6f9323ca892d178537138d29cbadff240103031c79b12a0815d8cffdd810"
+  },
+  "irradiance_sh": [
+    [
+      0.016898612605402128,
+      0.014428863411120495,
+      0.013553686555836102
+    ],
+    [
+      -0.016901707394032933,
+      -0.014431337298615829,
+      -0.013555911452184849
+    ],
+    [
+      -4.577096669135835e-06,
+      -3.945725727431326e-06,
+      -3.356947282428148e-06
+    ],
+    [
+      5.74286136967755e-05,
+      5.170332195788358e-05,
+      4.954418530816617e-05
+    ],
+    [
+      -0.00010199262458210633,
+      -9.202683587787011e-05,
+      -8.81466653525091e-05
+    ],
+    [
+      1.0395750290112343e-06,
+      1.0397709218411239e-06,
+      4.362921450866696e-07
+    ],
+    [
+      -2.0037423508838758e-05,
+      -1.8147585154961802e-05,
+      -1.7441509554000365e-05
+    ],
+    [
+      -5.2672524591159495e-06,
+      -4.863226417497662e-06,
+      -4.671456402822061e-06
+    ],
+    [
+      2.0116670004368265e-05,
+      1.8349319558918854e-05,
+      1.7707802857690616e-05
+    ]
+  ],
+  "layout": "RLUDFB",
+  "face_size": 512,
+  "colorspace": "sRGB",
+  "model": "black sky / normal-mapped Lambertian plane, sun elevation 45 degrees",
+  "view_height_m": 1.7,
+  "texture_repeat_m": 4,
+  "limitations": "shared static approximation; no active terrain or actor reflections"
+}

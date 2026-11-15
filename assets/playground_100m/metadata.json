@@ -1,0 +1,52 @@
+{
+  "extent_m": [
+    100,
+    100
+  ],
+  "half_extent_m": 50.0,
+  "resolution_m": 0.1,
+  "shape": [
+    1001,
+    1001
+  ],
+  "source_center_m": [
+    820.0,
+    880.0
+  ],
+  "removed_altitude_m": 2.3681640625,
+  "detail": {
+    "kind": "procedural, not measured",
+    "reference": "OmniLRS layered DEM / crater / roughness approach",
+    "configuration": {
+      "enabled": true,
+      "seed": 20261114,
+      "resolution_m": 0.1,
+      "roughness_amplitude_m": 0.008,
+      "crater_density_m2": 0.12,
+      "crater_radius_m": [
+        0.3,
+        1.0
+      ],
+      "crater_depth_radius_ratio": 0.075,
+      "rim_depth_ratio": 0.3,
+      "min_rim_sigma_cells": 1.5,
+      "mound_density_m2": 0.18,
+      "mound_radius_m": [
+        0.4,
+        0.6
+      ],
+      "mound_height_m": [
+        0.01,
+        0.035
+      ]
+    },
+    "sha256": "9b9085a8a40bdb5a697ed070493aa5dfb38e06b858a7367e8b199ae83f65e75b"
+  },
+  "exact_replay": false,
+  "note": "New 100m crop, not a stretched 16m patch; legacy assets unchanged.",
+  "generator_sha256": {
+    "scripts/build_100m_terrain.py": "c662a20633663f3ecc8361d02db32cbe2e27a46322fe89aff3d7b6e062ebb108",
+    "src/lunar_details.py": "45e830c67eacd82ad3705b841270465df20038eaee0e2d2855911f6c09395d8e",
+    "src/local_lunar_terrain.py": "b5a1ecb1679f3b46789e224f055dc59393bafe9561b39cd6624b30b454f89083"
+  }
+}

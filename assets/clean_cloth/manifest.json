@@ -1,0 +1,42 @@
+{
+  "sources": {
+    "assets/wangyu_skin/Suit_BaseColor.png": "c113bda91ab3631f2bb473dfd3c89af3dce18889fec693b44ed4d3b4c6a3f4d0",
+    "assets/suit_pbr/Suit_Metallic.png": "03b852edb1cd9431f64a84d4ac76f19b4d6c3e47ed6a5afd5dc02e7f664d638a",
+    "assets/suit_pbr/Suit_Roughness.png": "22c29e7a36f535cbaa0d034d6e6ac214bea791dc0de0eedf89144080e4032b27",
+    "assets/suit_pbr/Suit_Normal.png": "e78b2833cac4f985017e8959eef5c26972e998b926af6a7a2c38f1b724c052e2",
+    "assets/wangyu_skin/Boot_BaseColor.png": "5ee3d3665ecf15869632be811ccf20aef2be85d870aee7b3933634d2a4a08ee6",
+    "assets/suit_pbr/Boot_Metallic.png": "2f510395892ab7415468452f8772269a09740618c92641cbb6e7aeb2fb5a8b56",
+    "assets/suit_pbr/Boot_Roughness.png": "84feb2117be6dca3c6bf82a2efe951bda40d6b4640a25113b0bdad0f13b9ab6e",
+    "assets/suit_pbr/Boot_Normal.png": "1a06d5b7b69acf9f18bcf2811e8f0c3e51394666c18d319efc3f15dfbcc68b29",
+    "assets/suit_pbr/Helmet_Normal.png": "2980c277c3a0cf3c27b9648f065c0b5a817260f8e7bd9768a6ef67953fd77fe9"
+  },
+  "files": {
+    "Suit_BaseColor.png": "7a31284b5f09df9395b28fa5bd4b4b6c833f1bcc30d0a4c97b9047cd9d5849a2",
+    "Suit_Metallic.png": "c395a0748b4990728ae6ce26ac46bc1ca8b2c0f4d9766bd733a28b68cb483c1e",
+    "Suit_Roughness.png": "6c318ccd745a6c5c1257e6bb8d9bc7be58248d0b7fa1e7aacdabd240ca9f3f03",
+    "Suit_Normal.png": "e2b8f9681ce0ae3e34085c5608fd88a85da6cdc51aa0296ca494c7eb5cf06445",
+    "Boot_BaseColor.png": "230f7e09275f3af2175414c183f74fb321b3a59d4dc4fe1ec200ba0fb4bc325f",
+    "Boot_Metallic.png": "cf97978ab49d2dc7f9a9ac3e9614817e06d0e0469e4ca8b58de49aea2a3358d0",
+    "Boot_Roughness.png": "0212f60abf97ffdcce9275c1c8b835cb048bb990777f4ccb04408835bcde73a9",
+    "Boot_Normal.png": "aa93ef8241b665823857ef510bb1b525c3b9fbb36749b43eff92fbe77145c932",
+    "Helmet_Normal.png": "21b93b29426476da8845b68d80f2cac961283309d41dd1bdd9f605561eba4813"
+  },
+  "settings": {
+    "Suit": {
+      "fabric_normal_strength": 0.28,
+      "other_normal_strength": 0.55,
+      "white_albedo_lift_srgb": 22,
+      "fabric_metallic": 0,
+      "fabric_roughness_min": 0.8196078431372549
+    },
+    "Boot": {
+      "fabric_normal_strength": 0.28,
+      "other_normal_strength": 0.55,
+      "white_albedo_lift_srgb": 22,
+      "fabric_metallic": 0,
+      "fabric_roughness_min": 0.8196078431372549
+    }
+  },
+  "helmet_shell_normal_strength": 0.45,
+  "scope": "display fabric only; visor mirror unchanged"
+}

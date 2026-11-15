@@ -1,0 +1,10 @@
+{
+  "playground_commit": "fa0f150cb82b350a6cbca8f4f56d25e2c9b3e93a",
+  "files": {
+    "assets/playground/metadata.json": "f6649632e257e2c6cdb8e21683868a22f56080dd33ebe06f0ab282de91badc84",
+    "assets/playground/scene/scene.xml": "ec163640e5d2ca69e7c792394109b113b8520c98044d2d19df3dab5e34f355bc",
+    "assets/playground/state.npz": "1d6c2c7730a7621bd97653139cb1f66ee5761be9fdc32fc61f91c4b5bbe917dc",
+    "assets/playground/terrain/bank.npz": "683f78a31dc4297f04d7e5c3b64801d13edd39f6c4a1b12035129dead75cf7aa",
+    "assets/playground/terrain/metadata.json": "7caac23cae6960c94745f5f6345e7d3b389f30c35834db4564a1d6e14587f916"
+  }
+}

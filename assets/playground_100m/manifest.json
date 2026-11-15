@@ -1,0 +1,9 @@
+{
+  "files": {
+    "assets/site20/heightfield.npz": "00e04e4f3c680fae652cc48c8aea1cf3f9ea5fc7470026b71783b18463065408",
+    "assets/site20/detail_config.json": "fb2c543c02c536a55b12db728a2fcc8cb7fea7e100f2fbf3a31a171e518f6fbc",
+    "assets/playground/state.npz": "1d6c2c7730a7621bd97653139cb1f66ee5761be9fdc32fc61f91c4b5bbe917dc",
+    "assets/playground_100m/state.npz": "c0ef4d89ced5ab812ea1d5b5168681d3a7018a6fdea74c290a1d5e42f60830c9",
+    "assets/playground_100m/metadata.json": "8759bd63f5529c8d6a5eba76ed4de087818753d917364924189775ec7753e0be"
+  }
+}

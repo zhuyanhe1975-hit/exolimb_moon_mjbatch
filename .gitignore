@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+!.env.example
+outputs/
+logs/*
+!logs/2026-11-15_import_mjlab_v15_groundsync1/
+MUJOCO_LOG.TXT
+imgui.ini
+*.pid
+*.so

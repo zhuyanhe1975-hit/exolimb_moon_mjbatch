@@ -1,0 +1,94 @@
+{
+  "source": "/home/yhzhu/myWorks/exolimb_moon_mjlab",
+  "task": "Wangyu-Moon-Stand-Lunar-v15",
+  "physics_revision": "native_groundsync1_detail3",
+  "obs_dim": 146,
+  "action_dim": 23,
+  "episode_seconds": 10.0,
+  "control_dt": 0.016666666666666666,
+  "physics_dt": 0.008333333333333333,
+  "rewards": {
+    "alive": 0.2,
+    "centroidal_angular_momentum": -0.01,
+    "gravity_tilt": 0.0,
+    "action_change": -0.002,
+    "joint_pose": -0.25,
+    "joint_torques": -2e-06,
+    "airborne": -0.2,
+    "torso_velocity": -4.0,
+    "torso_angular_velocity": -0.2
+  },
+  "push": {
+    "force_range": [
+      -30.0,
+      30.0
+    ],
+    "torque_range": [
+      -0.0,
+      0.0
+    ],
+    "duration_s": [
+      0.1,
+      0.2
+    ],
+    "cooldown_s": [
+      2.0,
+      4.0
+    ]
+  },
+  "joints": [
+    "robot/WaistRoll",
+    "robot/WaistPitch",
+    "robot/WaistYaw",
+    "robot/LeftShoulderRoll",
+    "robot/LeftShoulderPitch",
+    "robot/LeftShoulderYaw",
+    "robot/LeftElbow",
+    "robot/RightShoulderRoll",
+    "robot/RightShoulderPitch",
+    "robot/RightShoulderYaw",
+    "robot/RightElbow",
+    "robot/LeftHipRoll",
+    "robot/LeftHipPitch",
+    "robot/LeftHipYaw",
+    "robot/LeftKnee",
+    "robot/LeftAnkle",
+    "robot/LeftAnkleRoll",
+    "robot/RightHipRoll",
+    "robot/RightHipPitch",
+    "robot/RightHipYaw",
+    "robot/RightKnee",
+    "robot/RightAnkle",
+    "robot/RightAnkleRoll"
+  ],
+  "terminations": {
+    "numerical_guard": {
+      "function": "numerical_guard",
+      "params": "{}"
+    },
+    "time_out": {
+      "function": "time_out",
+      "params": "{}"
+    },
+    "tilted": {
+      "function": "bad_orientation",
+      "params": "{'limit_angle': 1.0471975511965976}"
+    },
+    "fallen": {
+      "function": "fallen",
+      "params": "{}"
+    },
+    "left_station": {
+      "function": "left_station",
+      "params": "{}"
+    },
+    "torso_tilted": {
+      "function": "torso_fallen",
+      "params": "{}"
+    },
+    "terrain_edge": {
+      "function": "patch_edge",
+      "params": "{}"
+    }
+  }
+}

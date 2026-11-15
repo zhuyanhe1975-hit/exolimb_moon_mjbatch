@@ -1,0 +1,21 @@
+{
+  "reference": "/home/yhzhu/myWorks/exolimb_moon_mjlab/scripts/preview_isaacsim.py",
+  "reference_sha256": "dab674a06583ac6d706fd3e934f0515ba186d259adc9652a9c1d02a3694d935f",
+  "source_sha256": {
+    "/home/yhzhu/myWorks/zbot_exoarm_moon/assets/lunar_sites/southpole_site20/LunarRegolith4k/LunarRegolith4k_diff.jpg": "d911a8a3f506c951706fc271f083c0c90bda6b69534b8ed4ab647cad13fbb8b4",
+    "/home/yhzhu/myWorks/zbot_exoarm_moon/assets/lunar_sites/southpole_site20/LunarRegolith4k/LunarRegolith4k_rough.jpg": "ff9bd33102ea251911cb75984bcc378e75d45e7e2d48bdab3fe2e1b08616f557",
+    "/home/yhzhu/myWorks/zbot_exoarm_moon/assets/lunar_sites/southpole_site20/LunarRegolith4k/LunarRegolith4k_nor_gl.jpg": "65615aaa7f63a982136207ce7206e3223c7cb2ec2335be094078d6ee2629f7e6",
+    "/home/yhzhu/myWorks/zbot_exoarm_moon/assets/lunar_sites/southpole_site20/LunarRegolith4k/LunarRegolith4k_ao.jpg": "13de58429068c20fe5e36aabff4f56db9ba4b379f15fa1d449338a9edc315cc6"
+  },
+  "files": {
+    "diffuse.png": "d1b7c9168ce02d8e3b7cedef9cb91e9aa90277bcde88db21ebaeea0df1f276e3",
+    "orm.png": "20ccbe15706b98544f526ba25b861b592f74fdaef686f9057c4893ec57216544",
+    "normal.png": "ced6a94363e0b9c9316c422895c8bd44d67d50f64484d23b6972224d9c327afb"
+  },
+  "uv_period_m": 4.0,
+  "roughness_influence": 0.13,
+  "ao_influence": 0.35,
+  "normal_strength": 0.8,
+  "normal_flip_tangent_v": true,
+  "note": "Texture channel mapping approximates OmniPBR in Filament; different BRDF, lighting units and renderer."
+}

@@ -1,0 +1,569 @@
+{
+  "source": "/home/yhzhu/myWorks/zbot_exoarm_moon/outputs/wangyu_new_preview/wangyu_rigged.usdc",
+  "sha256": "f38195b5fde8655a807c74a8abb68bbc520d19e9c0571d0659a9f7b8efa5fb1a",
+  "shaders": {
+    "/root/_materials/Suit_MAT_VRay/Principled_BSDF": {
+      "id": "UsdPreviewSurface",
+      "inputs": {
+        "clearcoat": {
+          "value": 0.0,
+          "connections": []
+        },
+        "clearcoatRoughness": {
+          "value": 0.029999999329447746,
+          "connections": []
+        },
+        "diffuseColor": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/Image_Texture.outputs:rgb"
+          ]
+        },
+        "ior": {
+          "value": 1.5,
+          "connections": []
+        },
+        "metallic": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/Image_Texture_002.outputs:r"
+          ]
+        },
+        "normal": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/Image_Texture_003.outputs:rgb"
+          ]
+        },
+        "opacity": {
+          "value": 1.0,
+          "connections": []
+        },
+        "roughness": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/Image_Texture_001.outputs:r"
+          ]
+        },
+        "specular": {
+          "value": 0.5,
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Suit_MAT_VRay/Image_Texture": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Suit_BaseColor.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "sRGB",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Suit_MAT_VRay/uvmap": {
+      "id": "UsdPrimvarReader_float2",
+      "inputs": {
+        "varname": {
+          "value": "st",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Suit_MAT_VRay/Image_Texture_002": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Suit_Metallic.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Suit_MAT_VRay/Image_Texture_001": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Suit_Roughness.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Suit_MAT_VRay/Image_Texture_003": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "bias": {
+          "value": [
+            -1.0,
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "connections": []
+        },
+        "file": {
+          "value": "./textures/Suit_Normal.png",
+          "connections": []
+        },
+        "scale": {
+          "value": [
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ],
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Suit_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/Principled_BSDF": {
+      "id": "UsdPreviewSurface",
+      "inputs": {
+        "clearcoat": {
+          "value": 0.0,
+          "connections": []
+        },
+        "clearcoatRoughness": {
+          "value": 0.029999999329447746,
+          "connections": []
+        },
+        "diffuseColor": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/Image_Texture.outputs:rgb"
+          ]
+        },
+        "ior": {
+          "value": 1.5,
+          "connections": []
+        },
+        "metallic": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/Image_Texture_002.outputs:r"
+          ]
+        },
+        "normal": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/Image_Texture_003.outputs:rgb"
+          ]
+        },
+        "opacity": {
+          "value": 1.0,
+          "connections": []
+        },
+        "roughness": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/Image_Texture_001.outputs:r"
+          ]
+        },
+        "specular": {
+          "value": 0.5,
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/Image_Texture": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Helmet_BaseColor.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "sRGB",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/uvmap": {
+      "id": "UsdPrimvarReader_float2",
+      "inputs": {
+        "varname": {
+          "value": "st",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/Image_Texture_002": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Helmet_Metallic.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/Image_Texture_001": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Helmet_Roughness.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Helmet_MAT_VRay/Image_Texture_003": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "bias": {
+          "value": [
+            -1.0,
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "connections": []
+        },
+        "file": {
+          "value": "./textures/Helmet_Normal.png",
+          "connections": []
+        },
+        "scale": {
+          "value": [
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ],
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Helmet_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/Principled_BSDF": {
+      "id": "UsdPreviewSurface",
+      "inputs": {
+        "clearcoat": {
+          "value": 0.0,
+          "connections": []
+        },
+        "clearcoatRoughness": {
+          "value": 0.029999999329447746,
+          "connections": []
+        },
+        "diffuseColor": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/Image_Texture.outputs:rgb"
+          ]
+        },
+        "ior": {
+          "value": 1.5,
+          "connections": []
+        },
+        "metallic": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/Image_Texture_002.outputs:r"
+          ]
+        },
+        "normal": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/Image_Texture_003.outputs:rgb"
+          ]
+        },
+        "opacity": {
+          "value": 1.0,
+          "connections": []
+        },
+        "roughness": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/Image_Texture_001.outputs:r"
+          ]
+        },
+        "specular": {
+          "value": 0.5,
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/Image_Texture": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Boot_BaseColor.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "sRGB",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/uvmap": {
+      "id": "UsdPrimvarReader_float2",
+      "inputs": {
+        "varname": {
+          "value": "st",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/Image_Texture_002": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Boot_Metallic.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/Image_Texture_001": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "file": {
+          "value": "./textures/Boot_Roughness.png",
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    },
+    "/root/_materials/Boot_MAT_VRay/Image_Texture_003": {
+      "id": "UsdUVTexture",
+      "inputs": {
+        "bias": {
+          "value": [
+            -1.0,
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "connections": []
+        },
+        "file": {
+          "value": "./textures/Boot_Normal.png",
+          "connections": []
+        },
+        "scale": {
+          "value": [
+            2.0,
+            2.0,
+            2.0,
+            2.0
+          ],
+          "connections": []
+        },
+        "sourceColorSpace": {
+          "value": "raw",
+          "connections": []
+        },
+        "st": {
+          "value": null,
+          "connections": [
+            "/root/_materials/Boot_MAT_VRay/uvmap.outputs:result"
+          ]
+        },
+        "wrapS": {
+          "value": "repeat",
+          "connections": []
+        },
+        "wrapT": {
+          "value": "repeat",
+          "connections": []
+        }
+      }
+    }
+  },
+  "bindings": {
+    "/root/Bones/Suit/Mesh_015": "/root/_materials/Suit_MAT_VRay",
+    "/root/Bones/Suit_Detail_Glass/Mesh_010": "/root/_materials/Helmet_MAT_VRay",
+    "/root/Bones/Suit_Detail/Mesh_014": "/root/_materials/Helmet_MAT_VRay",
+    "/root/Bones/Suit_slade/Mesh_001": "/root/_materials/Suit_MAT_VRay",
+    "/root/Bones/Suit_Shield/Mesh_011": "/root/_materials/Helmet_MAT_VRay",
+    "/root/Bones/Boot/Mesh_016": "/root/_materials/Boot_MAT_VRay",
+    "/root/Bones/Suit_P_slade/Mesh_002": "/root/_materials/Suit_MAT_VRay",
+    "/root/Bones/Gloves/Mesh": "/root/_materials/Boot_MAT_VRay",
+    "/root/Bones/Glass/Mesh_009": "/root/_materials/Helmet_MAT_VRay"
+  }
+}

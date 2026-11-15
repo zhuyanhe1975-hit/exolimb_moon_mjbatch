@@ -1,0 +1,11 @@
+{
+  "kind": "explicit MJLab policy transfer for requested Playground replay",
+  "exact_replay": false,
+  "source_checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjlab/logs/rsl_rl/wangyu_moon_stand_lunar_v15_groundsync1/2026-11-14_22-36-08/model_200.pt",
+  "source_checkpoint_sha256": "a7ed8f3c5665ad2d13155b8ba5782bd5a7a2700f595cd3a2980a4cee5488e91b",
+  "source_terrain_snapshot": "missing; original native_groundsync1, before detail3",
+  "execution_terrain": "native_groundsync1_detail3",
+  "state_sha256": "1d6c2c7730a7621bd97653139cb1f66ee5761be9fdc32fc61f91c4b5bbe917dc",
+  "policy_sha256": "a7ed8f3c5665ad2d13155b8ba5782bd5a7a2700f595cd3a2980a4cee5488e91b",
+  "policy_only": true
+}

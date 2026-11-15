@@ -1,0 +1,55 @@
+{
+  "physics_revision": "native_groundsync1_detail3",
+  "source": {
+    "source": "/home/yhzhu/myWorks/zbot_exoarm_moon/assets/lunar_sites/southpole_site20/dem.npy",
+    "source_sha256": "695ec5127e58ff3cef09f3b795b35806777b69ae7b1a7542d8c09ee989457925",
+    "site": "Site20 / Leibnitz beta plateau",
+    "source_resolution_m": 5.0,
+    "shape": [
+      401,
+      401
+    ],
+    "half_extent_m": 1000.0,
+    "zmin_m": -266.61376953125,
+    "height_range_m": 331.64453125,
+    "removed_centre_elevation_m": 6398.8330078125,
+    "row_direction": "+Y",
+    "column_direction": "+X",
+    "triangle_diagonal": "(row,col) to (row+1,col+1)",
+    "spawn_cells": 118182,
+    "spawn_max_slope_deg": 15.0,
+    "spawn_jitter_m": 1.0,
+    "note": "Real DEM crop, no vertical exaggeration, no synthesized sub-5m rocks. Slopes >15deg are not spawn centres but remain collidable.",
+    "asset_sha256": "00e04e4f3c680fae652cc48c8aea1cf3f9ea5fc7470026b71783b18463065408"
+  },
+  "detail": {
+    "kind": "procedural, not measured",
+    "reference": "OmniLRS layered DEM / crater / roughness approach",
+    "configuration": {
+      "enabled": true,
+      "seed": 20261114,
+      "resolution_m": 0.1,
+      "roughness_amplitude_m": 0.008,
+      "crater_density_m2": 0.12,
+      "crater_radius_m": [
+        0.3,
+        1.0
+      ],
+      "crater_depth_radius_ratio": 0.075,
+      "rim_depth_ratio": 0.3,
+      "min_rim_sigma_cells": 1.5,
+      "mound_density_m2": 0.18,
+      "mound_radius_m": [
+        0.4,
+        0.6
+      ],
+      "mound_height_m": [
+        0.01,
+        0.035
+      ]
+    },
+    "sha256": "9b9085a8a40bdb5a697ed070493aa5dfb38e06b858a7367e8b199ae83f65e75b"
+  },
+  "fingerprint": "5ff2ed25452db74e19a15419b5f8864baa5e69c8798af8d20d36c1ae4ce68b8a",
+  "archive_sha256": "683f78a31dc4297f04d7e5c3b64801d13edd39f6c4a1b12035129dead75cf7aa"
+}

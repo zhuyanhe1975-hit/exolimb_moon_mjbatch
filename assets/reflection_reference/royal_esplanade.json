@@ -1,0 +1,58 @@
+{
+  "source": "outputs/render_reference/royal_esplanade_1k.hdr",
+  "source_url": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/textures/equirectangular/royal_esplanade_1k.hdr",
+  "source_sha256": "d72031e24581a0f13911fbcdee475db0f8cafcf48bf1771c6b971c3310db6cb2",
+  "sha256": "4cf9a73bd1e5ce2b6c5cd7e583ca7cd8712b0fa22e8d9d5f57eac031f0f6fc90",
+  "format": "KTX1 RGB16F linear",
+  "face_size": 256,
+  "mip_levels": 9,
+  "prefilter": "GGX importance sampling, 128 samples per texel",
+  "irradiance_sh": [
+    [
+      0.7902467935725486,
+      0.6416416942628665,
+      0.63550191966748
+    ],
+    [
+      0.8852598407371562,
+      0.7664877629366522,
+      0.7046787500163303
+    ],
+    [
+      -0.03685770428772979,
+      -0.06610040529074471,
+      -0.19502327377230988
+    ],
+    [
+      -0.0477628473187681,
+      -0.02427060779772615,
+      0.010439194739719215
+    ],
+    [
+      -0.0794730585598767,
+      -0.04540896975352655,
+      0.004914038186965368
+    ],
+    [
+      0.0591732352956039,
+      0.0024017325751129865,
+      -0.14425150649080173
+    ],
+    [
+      -0.13482442667304478,
+      -0.10165879246938885,
+      -0.052508370647673296
+    ],
+    [
+      -0.015949668967444118,
+      -0.032607625039428594,
+      -0.09269326955556687
+    ],
+    [
+      -0.4231244031382853,
+      -0.34040461930201094,
+      -0.22800808791418992
+    ]
+  ],
+  "purpose": "reference HDRI reflection, not the lunar scene"
+}

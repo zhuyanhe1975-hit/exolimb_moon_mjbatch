@@ -1,0 +1,36 @@
+{
+  "sources": {
+    "color": {
+      "path": "assets/wangyu_skin/Helmet_BaseColor.png",
+      "sha256": "e8a6da930827d3821a47f8241ed429e2be81c112489c1896220fbc96feaf0ca1"
+    },
+    "roughness": {
+      "path": "assets/suit_pbr/Helmet_Roughness.png",
+      "sha256": "934a1c31027c8cdeb29264826f8e1c6d7085e67b01ac894210b1206e9102d357"
+    },
+    "normal": {
+      "path": "assets/suit_pbr/Helmet_Normal.png",
+      "sha256": "2980c277c3a0cf3c27b9648f065c0b5a817260f8e7bd9768a6ef67953fd77fe9"
+    }
+  },
+  "files": {
+    "visor_color.png": "922bc740ffbc62095ab101d49ddcfcdf4ba301371409f1d74eb4254c0335bf9c",
+    "visor_metallic.png": "2b1a46b19780528e4664663a2f2a61e37e1d162f5fa7437ba1f3f332f8721cdd",
+    "visor_roughness.png": "b1ebfb09b84bea4c7151b94a73322d7c5e6b61c188cd6802d71445e2fdcc4b07",
+    "visor_normal.png": "e3858b498b3fcef95d097c43b3ce84ab384f8c74e8981fae553b98c4d4733032",
+    "shell_color.png": "46eba34587d1111c91021d90e7fcaf89420197d60bccd0f1402fa423594d89eb",
+    "shell_roughness.png": "13486ff07b82b30ee9810ab9ec7796149055866167936648f4b16c27f9153b1e"
+  },
+  "visible_skin": "skin_Suit_Shield_0",
+  "mask": "source gold islands: R-B>45, G-B>25, R>G",
+  "gold_pixels": 3502691,
+  "gold_srgb": [
+    1.0,
+    0.85,
+    0.57,
+    1.0
+  ],
+  "roughness": 0.04,
+  "shell": "gold-painted atlas islands remapped to dielectric white for helmet shell only",
+  "geometry_modified": false
+}
