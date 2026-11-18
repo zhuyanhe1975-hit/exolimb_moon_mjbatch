@@ -190,6 +190,25 @@ class CpuDisplay:
             forces[:] = 0
         self.state['mouse_forces'] = np.array(forces,copy=True)
 
+    def update_contacts(self):
+        """Display collisions from the solver, never the collision-free skin model."""
+        from contact_display import draw_contacts
+        points=bool(self.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT])
+        forces=bool(self.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE])
+        sources=getattr(self.simulator,'native_data',[self.source_data])
+        if self.kind == 'classic':
+            scene=self.native.user_scn
+        else:
+            if not hasattr(self,'_contact_scene'):
+                self._contact_scene=mujoco.MjvScene(self.source_model,maxgeom=10000)
+            scene=self._contact_scene
+        scene.ngeom=0
+        if points or forces:
+            for data in sources:
+                draw_contacts(self.source_model,data,scene,points=points,forces=forces,append=True)
+        if self.kind == 'studio':
+            self.native.extra_geoms[:]=list(scene.geoms[:scene.ngeom])
+
     def lock(self):
         return self.native.lock() if self.kind == 'classic' else nullcontext()
 
@@ -200,6 +219,7 @@ class CpuDisplay:
         with self.lock():
             self._copy_state()
             if self.kind == 'classic': self._classic_keys()
+            if self.kind == 'classic': self.update_contacts()
         if self.kind == 'classic':
             self.native.sync()
             with self.lock():
@@ -229,6 +249,7 @@ class CpuDisplay:
                 self.state['keyboard_focused']=focused
             self.native.dispatch(messages.UpdateEvent())
             self.update_mouse_interaction()
+            self.update_contacts()
             self.native.dispatch(messages.BuildGuiEvent())
             self.native.sync()
             if not self._input_focus_requested:

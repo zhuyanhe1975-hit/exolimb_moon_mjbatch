@@ -3,12 +3,55 @@ import argparse
 from contextlib import nullcontext
 import json
 from pathlib import Path
+import re
 import sys
 import threading
 import time
+from zipfile import is_zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
+EXO_CHECKPOINT = ROOT / 'bests/exo_jump_position_pd500_2026-11-19/model_199.pt'
+EXO_BASE_CHECKPOINT = ROOT / 'bests/forward_jump_boot_yaw_2026-11-18/model_104.pt'
+IMPORTED_CHECKPOINT = ROOT / 'logs/2026-11-15_import_mjlab_v15_groundsync1/model_200.pt'
+
+
+def training_env_config(run_dir):
+    try:
+        env = json.loads((run_dir / 'config.json').read_text())['env']
+        if isinstance(env, dict) and env.get('backend') == 'native_mujoco_cpu':
+            return env
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+    return {}
+
+
+def training_terrain(run_dir):
+    terrain = training_env_config(run_dir).get('terrain_idx')
+    return terrain if type(terrain) is int and 1 <= terrain <= 64 else None
+
+
+def latest_training_checkpoint(log_dir, task=None):
+    candidates = []
+    for run in log_dir.iterdir() if log_dir.is_dir() else ():
+        if not run.is_dir() or not (run / 'terrain_manifest.json').is_file():
+            continue
+        if training_terrain(run) is None:
+            continue
+        if task is not None and training_env_config(run).get('task', 'stand') != task:
+            continue
+        for checkpoint in run.glob('model_*.pt'):
+            match = re.fullmatch(r'model_(\d+)\.pt', checkpoint.name)
+            if match and checkpoint.is_file():
+                try:
+                    candidates.append((checkpoint.stat().st_mtime_ns, int(match[1]), checkpoint))
+                except FileNotFoundError:
+                    continue
+    for _, _, checkpoint in sorted(candidates, reverse=True):
+        # PyTorch writes the ZIP directory at the end of a checkpoint save.
+        if is_zipfile(checkpoint):
+            return checkpoint
+    return None
 
 
 def main():
@@ -32,10 +75,25 @@ def main():
 """)
     parser.add_argument('--headless', action='store_true', help='不打开窗口；必须设置 --seconds')
     parser.add_argument('--seconds', type=float, default=0, help='运行的仿真秒数；默认0表示持续运行到窗口关闭')
-    parser.add_argument('--terrain-idx', '--terrain_idx', type=int, choices=range(1, 65), metavar='1–64', default=12, help='16米地形编号，默认12')
+    parser.add_argument('--terrain-idx', '--terrain_idx', type=int, choices=range(1, 65), metavar='1–64',
+                        help='16米地形编号，默认采用检查点的训练地形或第12块')
     parser.add_argument('--seed', type=int, default=42, help='随机种子，默认42')
     parser.add_argument('--checkpoint', '--resume-path', '--resume_path', type=Path,
-        default=ROOT / 'logs/2026-11-15_import_mjlab_v15_groundsync1/model_200.pt', help='策略检查点；默认导入的 model_200.pt')
+                        help='策略检查点，可覆盖启动脚本的默认值')
+    parser.add_argument('--latest-training', action='store_true',
+                        help='自动选择本地最新训练检查点（run_cpu.sh 默认）')
+    parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump'),
+                        help='按任务筛选最新的本地训练检查点')
+    height_args = parser.add_mutually_exclusive_group()
+    height_args.add_argument('--jump-height', type=float, metavar='M',
+                             help='设定高度指令型跳跃策略的目标跳高（米），例如 0.15')
+    height_args.add_argument('--jump-height-cm', type=float, help=argparse.SUPPRESS)
+    parser.add_argument('--jump-speed', type=float, metavar='MPS',
+                        help='设定前进跳跃的目标速度（米/秒），例如 1.0')
+    parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
+                        help='外骨骼每根支杆的助力上限（0–500 N，默认采用检查点记录的值）')
+    parser.add_argument('--geometry', choices=('legacy', 'fitted'),
+                        help='物理几何版本，默认采用检查点的训练配置')
     parser.add_argument('--terrain-transfer', '--terrain_transfer', action='store_true', help='显式允许检查点向当前地形迁移')
     parser.add_argument('--report', type=Path, help='退出时保存 JSON 验证报告')
     compatible = parser.add_argument_group('计算与显示')
@@ -44,6 +102,24 @@ def main():
     compatible.add_argument('--viz', choices=('physx','skin'), default='physx', help='物理代理几何或航天服蒙皮，默认physx')
     compatible.add_argument('--num-envs', '--num_envs', '--nworld', type=int, default=1, help='独立环境/人数，默认1；多人共享同一块地形')
     args = parser.parse_args()
+    forward_tasks = ('forward_jump', 'exo_jump')
+    if args.assist_force is not None:
+        if args.task not in (None, 'exo_jump'):
+            parser.error('--assist-force 只能用于外骨骼跳跃任务')
+        args.task = 'exo_jump'
+    fixed_height = args.jump_height
+    if args.jump_height_cm is not None:
+        fixed_height = args.jump_height_cm / 100
+    if fixed_height is not None:
+        if args.task == 'stand':
+            parser.error('--jump-height 只能用于跳跃策略')
+    if args.jump_speed is not None:
+        if args.task is not None and args.task not in forward_tasks:
+            parser.error('--jump-speed 只能用于前进跳跃策略')
+        if args.task is None and args.checkpoint is None:
+            args.task = 'forward_jump'
+    elif fixed_height is not None and args.task is None and args.checkpoint is None:
+        args.task = 'jump'
     if args.num_envs <= 0:
         parser.error('--num-envs 必须是正整数')
     import math
@@ -53,32 +129,240 @@ def main():
         parser.error('--headless 必须配合 --seconds > 0')
     if args.seconds > 0 and round(args.seconds * 60) < 1:
         parser.error('--seconds 至少需要一个控制步（约0.0167秒）')
+    if args.checkpoint is None and (args.latest_training or args.task):
+        log_root = 'cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'
+        args.checkpoint = latest_training_checkpoint(ROOT / 'logs' / log_root, task=args.task)
+        if args.checkpoint is None and args.task == 'exo_jump':
+            args.checkpoint = EXO_CHECKPOINT if EXO_CHECKPOINT.is_file() else EXO_BASE_CHECKPOINT
+        if args.checkpoint is None:
+            if args.task == 'forward_jump':
+                parser.error('未找到前进跳跃检查点，请先运行 ./train_forward_jump.sh')
+            if args.task == 'jump':
+                parser.error('未找到本地跳跃检查点，请先运行 ./train_jump.sh')
+            print('[CPU] 未找到已保存的本地训练检查点，加载导入策略。', flush=True)
+    if args.checkpoint is None:
+        args.checkpoint = IMPORTED_CHECKPOINT
+    if args.terrain_idx is None:
+        args.terrain_idx = training_terrain(args.checkpoint.parent) or 12
     if not args.checkpoint.is_file():
         parser.error(f'检查点不存在：{args.checkpoint}')
     import mujoco
     import torch
     from tensordict import TensorDict
     from rsl_rl.models import MLPModel
+    from cpu_jump_task import (BILATERAL_SOLE_ACTUATION, COORDINATED_LANDING_ACTUATION,
+                               MIRRORED_LANDING_ACTUATION, PHASE_MIRRORED_LANDING_ACTUATION,
+                               FORWARD_FACING_BOOT_ACTUATION, SOLE_COLLISION_ACTUATIONS,
+                               SOLE_EDGE_PROBE_ACTUATIONS, SOLE_PLANE_LANDING_ACTUATION,
+                               SOLE_PROBE_ACTUATIONS)
     from cpu_simulation import CpuWorlds
     from moon_scene import scene_spec
     from provenance import verify_checkpoint
+    from suit_proxy_geometry import LEGACY, PROFILES
     torch.set_num_threads(1)
     torch.manual_seed(args.seed)
     verify_checkpoint(args.checkpoint, allow_transfer=args.terrain_transfer)
+    checkpoint = torch.load(args.checkpoint, map_location='cpu', weights_only=False)
+    infos = checkpoint.get('infos') or {}
+    env_config = training_env_config(args.checkpoint.parent)
+    task = infos.get('task', env_config.get('task', 'stand'))
+    if task not in ('stand', 'jump', *forward_tasks):
+        parser.error(f'未知检查点任务：{task}')
+    if args.task == 'exo_jump' and task == 'forward_jump':
+        task = 'exo_jump'
+    if args.task is not None and args.task != task:
+        parser.error(f'检查点任务为 {task}，与 --task {args.task} 不一致')
+    if args.jump_speed is not None and task not in forward_tasks:
+        parser.error('--jump-speed 只能用于前进跳跃策略')
+    actuation = infos.get('jump_actuation', env_config.get('jump_actuation'))
+    assist_force = None
+    exo_policy_io = None
+    exo_pd_force = None
+    if task == 'exo_jump':
+        if actuation != FORWARD_FACING_BOOT_ACTUATION:
+            parser.error('外骨骼回放需要 v32 前进跳跃策略或由它续训的外骨骼策略')
+        from exoskeleton import DEFAULT_FORCE_N, POLICY_IO, validate_assist_force, validate_policy_io
+        default_force = infos.get('assist_force_n', DEFAULT_FORCE_N)
+        try:
+            assist_force = validate_assist_force(
+                default_force if args.assist_force is None else args.assist_force)
+            exo_policy_io = validate_policy_io(infos.get('exo_policy_io', env_config.get('exo_policy_io')))
+            exo_pd_force = assist_force if exo_policy_io == POLICY_IO else None
+        except ValueError as exc:
+            parser.error(str(exc))
+    height_range = None
+    if task != 'stand':
+        from cpu_jump_task import (DEFAULT_JUMP_HEIGHT_RANGE, FREE_HEIGHT_FORWARD_ACTUATIONS,
+                                   HEIGHT_JUMP_ACTUATIONS,
+                                   validate_jump_height_range)
+        if fixed_height is not None and actuation in FREE_HEIGHT_FORWARD_ACTUATIONS:
+            parser.error('当前前进跳跃策略使用自由高度，请省略 --jump-height')
+        if actuation in HEIGHT_JUMP_ACTUATIONS:
+            try:
+                height_range = validate_jump_height_range(infos.get(
+                    'jump_height_range_m', env_config.get('jump_height_range_m', DEFAULT_JUMP_HEIGHT_RANGE)))
+            except (TypeError, ValueError) as exc:
+                parser.error(f'检查点跳高范围无效：{exc}')
+    if fixed_height is not None:
+        if height_range is None:
+            parser.error('此检查点不支持指定跳高，请选用新版事件驱动跳跃策略')
+        low, high = height_range
+        if not low <= fixed_height <= high:
+            parser.error(f'目标跳高须在 {low:g}–{high:g} 米之间')
+    speed_range = None
+    if task in forward_tasks:
+        from cpu_forward_jump import DEFAULT_SPEED_RANGE, validate_speed_range
+        try:
+            speed_range = validate_speed_range(infos.get(
+                'jump_speed_range_mps', env_config.get('jump_speed_range_mps', DEFAULT_SPEED_RANGE)))
+        except (TypeError, ValueError) as exc:
+            parser.error(f'检查点速度范围无效：{exc}')
+        low, high = speed_range
+        if args.jump_speed is not None and not low <= args.jump_speed <= high:
+            parser.error(f'目标速度须在 {low:g}–{high:g} 米/秒之间')
+    trained_geometry = infos.get('geometry', env_config.get('geometry', LEGACY))
+    geometry = args.geometry or trained_geometry
+    if geometry not in PROFILES:
+        parser.error(f'未知检查点物理几何：{geometry}')
+    if geometry != trained_geometry:
+        print(f'[CPU] Geometry override: checkpoint={trained_geometry}; playback={geometry}', flush=True)
     startup_started=time.monotonic()
     print(f'[Startup] Preparing {args.num_envs} independent CPU environments...',flush=True)
-    physics_spec = scene_spec()
-    worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx)
+    physics_spec = scene_spec(geometry=geometry, sole_probes=actuation in SOLE_PROBE_ACTUATIONS,
+                              exoskeleton=assist_force is not None, exo_pd_force=exo_pd_force,
+                              sole_collision=actuation in SOLE_COLLISION_ACTUATIONS,
+                              sole_edge_probes=actuation in SOLE_EDGE_PROBE_ACTUATIONS)
+    worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx,
+                       inward_heading=task in forward_tasks, assist_force=assist_force)
     model, data, sim, device = worlds.model, worlds.data[0], worlds.sim, worlds.device
     print(f'[Startup] CPU environments ready in {time.monotonic()-startup_started:.2f}s',flush=True)
-    obs = TensorDict({'policy': device.get_measurements(sim)['wangyu/state']}, batch_size=[args.num_envs])
-    actor = MLPModel(obs, {'actor': ['policy']}, 'actor', 23,
+    jump_counter = None
+    jump_commands = None
+    event_jump = None
+    adaptive_jump = None
+    forward_jump = None
+    track_hop_distance = False
+    track_support = False
+    if task != 'stand':
+        from cpu_jump_task import (ABSORBING_HOP_FORWARD_ACTUATION, ADAPTIVE_JUMP_ACTUATION,
+                                   BALANCED_FULL_SOLE_ACTUATION, BROAD_JUMP_FORWARD_ACTUATION,
+                                   CONTACT_JUMP_ACTUATION, DISTRIBUTED_SOLE_ACTUATION,
+                                   COORDINATED_BROAD_JUMP_ACTUATION, COORDINATED_TAKEOFF_ACTUATION, FLOW_JUMP_ACTUATION,
+                                   FORWARD_JUMP_ACTUATIONS, FREE_HEIGHT_FORWARD_ACTUATION,
+                                   FULL_SOLE_FORWARD_ACTUATION, LOW_SPEED_SOLE_ACTUATION,
+                                   HIGH_SPEED_LEAN_FORWARD_ACTUATION, JUMP_ACTUATION,
+                                   LANDING_PREPARATION_ACTUATION, LONG_STRIDE_FORWARD_ACTUATION,
+                                   PHASE_LEAN_FORWARD_ACTUATION, REBOUND_JUMP_ACTUATION,
+                                   SPEED_TRACKING_FORWARD_ACTUATION, STANCE_FLOW_TAKEOFF_ACTUATION,
+                                   STANCE_STRIDE_TAKEOFF_ACTUATION, SUPPORTED_TAKEOFF_ACTUATION,
+                                   STABLE_FULL_SOLE_ACTUATION, TERRAIN_ALIGNED_ACTUATION,
+                                   TIMED_JUMP_ACTUATION,
+                                   AdaptiveJumpCommands, FlowJumpCommands, ReboundJumpCommands,
+                                   CompliantJumpCommands, ContactJumpCommands, JumpCommands,
+                                   JumpCounter, foot_airborne, jump_height, jump_observation)
+        height_controllers = {ADAPTIVE_JUMP_ACTUATION: AdaptiveJumpCommands,
+                              REBOUND_JUMP_ACTUATION: ReboundJumpCommands,
+                              FLOW_JUMP_ACTUATION: FlowJumpCommands}
+        if actuation in FORWARD_JUMP_ACTUATIONS:
+            from cpu_forward_jump import (AbsorbingHopForwardJumpCommands, BalancedFullSoleForwardJumpCommands,
+                                          BilateralSoleLandingCommands, BroadJumpForwardCommands,
+                                          CoordinatedBroadJumpCommands, CoordinatedLandingCommands,
+                                          CoordinatedTakeoffCommands,
+                                          DistributedSoleForwardJumpCommands, ForwardFacingBootCommands, ForwardJumpCommands,
+                                          FreeHeightForwardJumpCommands, FullSoleForwardJumpCommands,
+                                          HighSpeedLeanForwardJumpCommands, LandingPreparationCommands,
+                                          LongStrideForwardJumpCommands, LowSpeedSoleLandingCommands,
+                                          MirroredLandingCommands, PhaseMirroredLandingCommands,
+                                          PhaseLeanForwardJumpCommands,
+                                          SpeedTrackingForwardJumpCommands, StableFullSoleForwardJumpCommands,
+                                          SolePlaneMirroredLandingCommands, StanceFlowTakeoffCommands,
+                                          StanceStrideTakeoffCommands,
+                                          SupportedTakeoffCommands, TerrainAlignedLandingCommands)
+            if actuation in FREE_HEIGHT_FORWARD_ACTUATIONS:
+                controller = {
+                    FREE_HEIGHT_FORWARD_ACTUATION: FreeHeightForwardJumpCommands,
+                    SPEED_TRACKING_FORWARD_ACTUATION: SpeedTrackingForwardJumpCommands,
+                    LONG_STRIDE_FORWARD_ACTUATION: LongStrideForwardJumpCommands,
+                    PHASE_LEAN_FORWARD_ACTUATION: PhaseLeanForwardJumpCommands,
+                    HIGH_SPEED_LEAN_FORWARD_ACTUATION: HighSpeedLeanForwardJumpCommands,
+                    ABSORBING_HOP_FORWARD_ACTUATION: AbsorbingHopForwardJumpCommands,
+                    BROAD_JUMP_FORWARD_ACTUATION: BroadJumpForwardCommands,
+                    COORDINATED_BROAD_JUMP_ACTUATION: CoordinatedBroadJumpCommands,
+                    COORDINATED_TAKEOFF_ACTUATION: CoordinatedTakeoffCommands,
+                    SUPPORTED_TAKEOFF_ACTUATION: SupportedTakeoffCommands,
+                    STANCE_FLOW_TAKEOFF_ACTUATION: StanceFlowTakeoffCommands,
+                    STANCE_STRIDE_TAKEOFF_ACTUATION: StanceStrideTakeoffCommands,
+                    LANDING_PREPARATION_ACTUATION: LandingPreparationCommands,
+                    FULL_SOLE_FORWARD_ACTUATION: FullSoleForwardJumpCommands,
+                    STABLE_FULL_SOLE_ACTUATION: StableFullSoleForwardJumpCommands,
+                    BALANCED_FULL_SOLE_ACTUATION: BalancedFullSoleForwardJumpCommands,
+                    DISTRIBUTED_SOLE_ACTUATION: DistributedSoleForwardJumpCommands,
+                    TERRAIN_ALIGNED_ACTUATION: TerrainAlignedLandingCommands,
+                    LOW_SPEED_SOLE_ACTUATION: LowSpeedSoleLandingCommands,
+                    BILATERAL_SOLE_ACTUATION: BilateralSoleLandingCommands,
+                    COORDINATED_LANDING_ACTUATION: CoordinatedLandingCommands,
+                    MIRRORED_LANDING_ACTUATION: MirroredLandingCommands,
+                    PHASE_MIRRORED_LANDING_ACTUATION: PhaseMirroredLandingCommands,
+                    SOLE_PLANE_LANDING_ACTUATION: SolePlaneMirroredLandingCommands,
+                    FORWARD_FACING_BOOT_ACTUATION: ForwardFacingBootCommands,
+                }[actuation]
+                forward_jump = controller(
+                    worlds, speed_range=speed_range, fixed_speed=args.jump_speed)
+            else:
+                forward_jump = ForwardJumpCommands(
+                    worlds, speed_range=speed_range, fixed_speed=args.jump_speed,
+                    height_range=height_range, fixed_height=fixed_height)
+            adaptive_jump = event_jump = jump_commands = forward_jump
+            track_hop_distance = isinstance(forward_jump, LongStrideForwardJumpCommands)
+            track_support = isinstance(forward_jump, SupportedTakeoffCommands)
+        elif actuation in height_controllers:
+            controller = height_controllers[actuation]
+            adaptive_jump = event_jump = jump_commands = controller(
+                worlds, height_range=height_range, fixed_height=fixed_height)
+        elif actuation == JUMP_ACTUATION:
+            event_jump = jump_commands = CompliantJumpCommands(worlds)
+        elif actuation == CONTACT_JUMP_ACTUATION:
+            event_jump = jump_commands = ContactJumpCommands(worlds)
+        elif actuation == TIMED_JUMP_ACTUATION:
+            jump_commands = JumpCommands(worlds)
+        elif actuation is not None:
+            parser.error(f'未知跳跃动作配置：{actuation}')
+        counter_options = {'max_interval': adaptive_jump.max_landing_interval()} if adaptive_jump else {}
+        jump_counter = JumpCounter(args.num_envs, **counter_options)
+
+    assist = worlds.exoskeleton
+    if assist is not None:
+        assist.bind(forward_jump, policy_io=exo_policy_io)
+        mode = exo_policy_io or 'scheduled force'
+        print(f'[CPU] Exoskeleton {mode}: up to {assist_force:g} N per strut', flush=True)
+
+    def jump_phase():
+        return event_jump.phase() if event_jump is not None else sim.data.time
+
+    def policy_observation():
+        state = device.get_measurements(sim)['wangyu/state']
+        if adaptive_jump is not None:
+            state = adaptive_jump.observation(state)
+            return assist.observation(state) if assist is not None else state
+        return jump_observation(state, jump_phase()) if task != 'stand' else state
+
+    obs = TensorDict({'policy': policy_observation()}, batch_size=[args.num_envs])
+    num_actions = adaptive_jump.NUM_ACTIONS if adaptive_jump is not None else 23
+    if exo_policy_io is not None:
+        num_actions += len(assist.actuators)
+    actor = MLPModel(obs, {'actor': ['policy']}, 'actor', num_actions,
         hidden_dims=(128, 128), activation='elu', obs_normalization=True,
         distribution_cfg={'class_name': 'rsl_rl.modules.GaussianDistribution', 'init_std': .25, 'std_type': 'scalar'})
-    actor.load_state_dict(torch.load(args.checkpoint, map_location='cpu', weights_only=False)['actor_state_dict'], strict=True)
+    actor.load_state_dict(checkpoint['actor_state_dict'], strict=True)
+    del checkpoint
     actor.eval()
     print(f'[CPU] MuJoCo {mujoco.__version__}; physics=CPU; policy=CPU; terrain={args.terrain_idx}; worlds={args.num_envs}; 120Hz physics / 60Hz control', flush=True)
-    print('[CPU] Imported policy transferred to current terrain; native CPU trajectory is not claimed equivalent to Warp.', flush=True)
+    print(f'[CPU] Checkpoint: {args.checkpoint}', flush=True)
+    print(f'[CPU] Task: {task}; geometry={geometry}', flush=True)
+    if fixed_height is not None:
+        print(f'[CPU] Jump height target: {fixed_height:g} m', flush=True)
+    if args.jump_speed is not None:
+        print(f'[CPU] Forward jump speed target: {args.jump_speed:g} m/s', flush=True)
     state = {'paused': False}
     reset_requested = threading.Event()
     terrain_requested = []
@@ -98,6 +382,17 @@ def main():
                          key, state, reset_requested, simulator=sim)
     steps = failures = timeouts = 0
     episode_steps = torch.zeros(args.num_envs, dtype=torch.long)
+    if forward_jump is not None:
+        forward_distance = torch.zeros(args.num_envs)
+        forward_air_distance = torch.zeros_like(forward_distance)
+        forward_air_steps = torch.zeros_like(episode_steps)
+    if track_hop_distance:
+        completed_hop_distance = torch.zeros_like(forward_distance)
+        longest_forward_hop = torch.zeros_like(forward_distance)
+    if track_support:
+        completed_support_time = torch.zeros_like(forward_distance)
+        completed_push_speed_gain = torch.zeros_like(forward_distance)
+        completed_peak_load = torch.zeros_like(forward_distance)
     start = time.monotonic()
     max_action = 0.
     with context as viewer, torch.inference_mode():
@@ -117,35 +412,95 @@ def main():
                         args.terrain_idx = (args.terrain_idx - 1 + terrain_requested.pop(0)) % 64 + 1
                         device.select_terrain(args.terrain_idx)
                     worlds.reset(); state.pop('mouse_forces',None); episode_steps.zero_(); reset_requested.clear()
+                    if jump_counter is not None:
+                        jump_counter.reset()
+                    if event_jump is not None:
+                        event_jump.reset()
                     print(f'[CPU] Reset terrain={args.terrain_idx}', flush=True)
                 if not state['paused']:
-                    obs['policy'] = device.get_measurements(sim)['wangyu/state']
+                    obs['policy'] = policy_observation()
                     action = actor(obs)
                     if not torch.isfinite(action).all():
                         raise FloatingPointError('Non-finite policy action')
                     max_action = max(max_action, float(action.abs().max()))
+                    if assist is not None:
+                        action = assist.policy_actions(action)
+                    elif adaptive_jump is not None:
+                        action = adaptive_jump(action)
+                    elif jump_commands is not None:
+                        action = jump_commands(action, jump_phase())
+                    if forward_jump is not None:
+                        before_xy = sim.data.qpos[:, :2].clone()
                     worlds.mouse_forces[:] = state.get('mouse_forces',0.)
                     measured = worlds.step(action)
+                    if event_jump is not None:
+                        event_jump.advance(measured)
                     steps += 1; episode_steps += 1
                     failed = measured['wangyu/failed']
                     timeout = episode_steps >= 600
+                    if forward_jump is not None:
+                        timeout |= forward_jump.course_finished()
+                        distance = ((sim.data.qpos[:, :2] - before_xy) * forward_jump.heading).sum(-1)
+                        forward_distance += distance
+                        airborne = foot_airborne(measured) & (forward_jump.stage == forward_jump.FLIGHT)
+                        forward_air_distance += distance * airborne
+                        forward_air_steps += airborne
+                        if track_hop_distance:
+                            completed_hop_distance += forward_jump.hop_distance
+                            longest_forward_hop = longest_forward_hop.maximum(forward_jump.hop_distance)
+                        if track_support:
+                            completed_support_time += forward_jump.completed * forward_jump.takeoff_support_time
+                            completed_push_speed_gain += forward_jump.completed * forward_jump.takeoff_push_speed_gain
+                            completed_peak_load += forward_jump.completed * forward_jump.takeoff_peak_load_ratio
                     done = failed | timeout
+                    if adaptive_jump is not None:
+                        jump_counter.record_completed(adaptive_jump.completed)
+                    elif jump_counter is not None:
+                        jump_counter.update(jump_height(worlds), foot_airborne(measured), failed)
                     if bool(done.any()):
                         failures += int(failed.sum()); timeouts += int((timeout & ~failed).sum())
                         worlds.reset(done)
                         episode_steps[done] = 0
+                        if jump_counter is not None:
+                            jump_counter.reset(done)
+                        if event_jump is not None:
+                            event_jump.reset(done)
                     if steps % 60 == 0:
                         print(f'[CPU] steps={steps} simulated={steps / 60:.1f}s failures={failures} timeouts={timeouts}', flush=True)
             if viewer:
                 viewer.sync()
                 time.sleep(max(0, 1 / (60 * state.get('speed', 1.)) - (time.monotonic() - tick)))
     report = dict(backend='native_mujoco_cpu', policy_device='cpu', mujoco=mujoco.__version__,
-        viewer=args.viewer, viz=args.viz, num_envs=args.num_envs,
+        task=task, geometry=geometry, viewer=args.viewer, viz=args.viz, num_envs=args.num_envs,
         transitions=steps * args.num_envs,
         checkpoint=str(args.checkpoint), terrain_idx=args.terrain_idx, steps=steps,
         simulated_seconds=steps / 60, wall_seconds=time.monotonic() - start,
         failure_resets=failures, timeout_resets=timeouts, max_raw_action=max_action,
         finite=True, training=False, exact_replay=False)
+    if worlds.exoskeleton is not None:
+        report['exoskeleton'] = worlds.exoskeleton.report()
+    if jump_counter is not None:
+        report.update(jump_actuation=actuation, jumps_per_env=jump_counter.count.tolist(),
+                      best_jump_streak_per_env=jump_counter.best_streak.tolist())
+    if height_range is not None:
+        report['jump_height_range_m'] = height_range
+        report['jump_height_target_m'] = fixed_height
+    if forward_jump is not None:
+        report.update(jump_speed_range_mps=speed_range, jump_speed_target_mps=args.jump_speed,
+                      forward_distance_per_env_m=forward_distance.tolist(),
+                      airborne_forward_distance_per_env_m=forward_air_distance.tolist(),
+                      mean_forward_speed_per_env_mps=(forward_distance / max(steps / 60, 1e-6)).tolist(),
+                      mean_airborne_forward_speed_per_env_mps=(
+                          forward_air_distance / (forward_air_steps.clamp_min(1) / 60)).tolist())
+    if track_hop_distance:
+        report.update(mean_forward_hop_distance_per_env_m=(
+                          completed_hop_distance / jump_counter.count.clamp_min(1)).tolist(),
+                      longest_forward_hop_per_env_m=longest_forward_hop.tolist())
+    if track_support:
+        hops = jump_counter.count.clamp_min(1)
+        report.update(mean_loaded_working_support_per_env_s=(completed_support_time / hops).tolist(),
+                      mean_supported_push_speed_gain_per_env_mps=(completed_push_speed_gain / hops).tolist(),
+                      mean_sampled_peak_sole_load_per_env_lunar_bodyweights=(completed_peak_load / hops).tolist())
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(report, indent=2) + '\n')

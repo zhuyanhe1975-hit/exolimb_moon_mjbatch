@@ -3,9 +3,9 @@ import mujoco
 import numpy as np
 
 
-def draw_contacts(model,data,scene,*,points=True,forces=True):
+def draw_contacts(model,data,scene,*,points=True,forces=True,append=False):
     """Draw native contact positions and world-space solver forces (0.003 m/N)."""
-    scene.ngeom=0
+    if not append: scene.ngeom=0
     force=np.zeros(6)
     for i in range(data.ncon):
         contact=data.contact[i]

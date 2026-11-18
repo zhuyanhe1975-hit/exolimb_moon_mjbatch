@@ -1,0 +1,40 @@
+{
+  "archived_at": "2026-11-19T00:12:08+08:00",
+  "selected_checkpoint": "model_199.pt",
+  "source_training_run": "logs/cpu_exo_train/2026-11-18_23-57-56_model119_pd500",
+  "source_evaluation": "outputs/exoskeleton_training/model119_pd500_2026-11-18_23-57-56",
+  "initial_checkpoint": "logs/cpu_exo_train/2026-11-18_model104_supported_work_sharing_v3/model_119.pt",
+  "initial_checkpoint_sha256": "d4256d333fc116c25c9a786490ed5ac0c8b8109021c4ce95e179e41ceaf7902e",
+  "training": {
+    "environments": 1024,
+    "iterations": 200,
+    "terrain_count": 16,
+    "force_cap_per_strut_n": 500
+  },
+  "evaluation_speed_mps": [
+    0.0,
+    0.5,
+    1.0,
+    1.5
+  ],
+  "notes": [
+    "检查点、能耗统计和四档回放来自 500 N 支杆位置 PD 训练。",
+    "肩部指令收幅是在这批动态回放之后加入控制器的。当前代码回放归档检查点会应用收幅，收幅版已做静态指令检查。"
+  ],
+  "files_sha256": {
+    "0.5mps_comparison.mp4": "90e7f376fbde80ffbe0aacc28cbf5948b1f6c525632178818202e7bb99384d90",
+    "0mps_comparison.mp4": "6e55bdc25c6d308b57229467021612effa37d8a26607a62cab5345244f9d7c14",
+    "1.5mps_comparison.mp4": "2798bfd27b44058e2bb29ad9017b217da2e568441d95821574b3589dcdab8850",
+    "1mps_comparison.mp4": "9435cc839db1e7de1fe25ad5c05a24f5ec5f6f70d3356de3ec0131eaa0606f46",
+    "1mps_peak_excerpt.mp4": "569b99f69d83a3ac47f4df2dbb8ff0f74f3be68e00bee7638f0f9dbd76f6e299",
+    "comparison.json": "89a5deef428ccba24885cb1e0cf10cb606ec67d94d739781d8942396fa40c7a4",
+    "config.json": "441b02867d2f80bf2acd002a3685b32379c798dc603dadc47bd4c1149cdae713",
+    "events.out.tfevents.1795017484.zhuyanhedeMacBook-Pro.local.17925.0": "d4a4e7989ef19a4ef2ce5309de5e2825473503b3f2a0cf134ee528cf8ecb7f98",
+    "holdout_after.json": "bf16a599bdaee1c91efeb0a8b08f9d45392dd9a83e66eef0dabb3adb27cfeea0",
+    "holdout_before.json": "4897daee469f93cc21bc6bef5d0c113e11e4a1ddc838735ef423053486a944ce",
+    "holdout_pd_init.json": "c0c7be5c993c1ff1413f8c7526845a9d816fcdb6326627b987370a36f36c7ec3",
+    "model_199.pt": "e59c64f8b699c46af1200d3d69dc2ee47f1be943800cca8dafb9171b0fc6fdf6",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "training_efficiency.json": "74a6871e702bbfe4d66fc6fae08d34c5ffbbfdcf3bfd5bf2b9d18bd115ba74c2"
+  }
+}

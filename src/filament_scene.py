@@ -35,7 +35,8 @@ def add_astronaut(spec):
             vertweight=[floats(b,'vertweight') for b in bones])
     # Proxy geoms stay in the model for picking/state layout, hidden by group.
     for geom in spec.geoms:
-        if geom.name.startswith('robot/'):geom.group=4
+        if geom.name.startswith('robot/') and not geom.name.startswith('robot/exo_'):
+            geom.group=4
     if os.environ.get('MOON_FILAMENT_TERRAIN_PBR','1')=='1':
         from reference_materials import add_reference_environment
         add_reference_environment(spec)

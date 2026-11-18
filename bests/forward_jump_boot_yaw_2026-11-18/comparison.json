@@ -1,0 +1,3076 @@
+{
+  "baseline_checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt",
+  "selected_checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt",
+  "training": {
+    "env": {
+      "backend": "native_mujoco_cpu",
+      "physics_backend": "mjbatch",
+      "task": "forward_jump",
+      "terrain_idx": 12,
+      "pushes": true,
+      "seed": 42,
+      "physics_workers": 16,
+      "geometry": "fitted",
+      "jump_actuation": "forward_boot_yaw_free_height_v32",
+      "jump_objective": "forward_with_phase_mirroring_and_boot_yaw_alignment",
+      "jump_speed_range_mps": [
+        0.0,
+        1.5
+      ],
+      "update_device": "mps",
+      "init_checkpoint": "/Users/yhzhu/Documents/myWorks/exolimb_moon_mujoco_playground/logs/cpu_train/2026-11-18_boot_yaw/model_144.pt"
+    },
+    "runner": {
+      "num_steps_per_env": 32,
+      "save_interval": 25,
+      "logger": "tensorboard",
+      "obs_groups": {
+        "actor": [
+          "policy"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "actor": {
+        "class_name": "rsl_rl.models.MLPModel",
+        "hidden_dims": [
+          128,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "distribution_cfg": {
+          "class_name": "rsl_rl.modules.GaussianDistribution",
+          "init_std": 0.25,
+          "std_type": "scalar"
+        }
+      },
+      "critic": {
+        "class_name": "rsl_rl.models.MLPModel",
+        "hidden_dims": [
+          128,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true
+      },
+      "algorithm": {
+        "class_name": "cpu_sampling_ppo.CpuSamplingMpsPPO",
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.0003,
+        "schedule": "adaptive",
+        "gamma": 0.995,
+        "lam": 0.95,
+        "entropy_coef": 0.001,
+        "desired_kl": 0.01,
+        "clip_param": 0.2,
+        "max_grad_norm": 1.0,
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "normalize_advantage_per_mini_batch": false
+      }
+    },
+    "iterations": 105,
+    "torch_threads": 4
+  },
+  "replay": {
+    "terrain": 12,
+    "worlds_per_speed": 16,
+    "seconds_per_world": 30,
+    "primary_seed": 42,
+    "holdout_seed": 43,
+    "control_hz": 60,
+    "physics_hz": 120,
+    "boot_overlap_threshold_m": -1e-05
+  },
+  "four_speeds": {
+    "0": {
+      "before": {
+        "target_mps": 0.0,
+        "actual_mean_mps": 0.009446585172554478,
+        "mean_absolute_along_heading_com_speed_mps": 0.04267665837396041,
+        "median_distance_from_spawn_m": 0.1401468813419342,
+        "p90_distance_from_spawn_m": 0.324240979552269,
+        "mean_stride_m": 0.0011478879235007546,
+        "median_stride_m": 0.0026040077209472656,
+        "max_stride_m": 0.16075992584228516,
+        "mean_airtime_s": 0.9915043290043289,
+        "mean_com_rise_m": 0.173423350679797,
+        "mean_airborne_shoulder_pitch_range_deg": 7.354938055013681,
+        "median_liftoff_pitch_deg": -0.28220340609550476,
+        "median_prelanding_pitch_deg": 6.827991485595703,
+        "median_liftoff_waist_pitch_deg": -2.7441976070404053,
+        "median_prelanding_waist_pitch_deg": 29.441201210021973,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.2597402597402597,
+        "mean_landing_flexion_50ms_deg": 12.963616612669709,
+        "mean_landing_flexion_150ms_deg": 25.6064779665563,
+        "hops": 308,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.07356905026161407,
+        "median_prelanding_knee_deg": 22.746387481689453,
+        "median_last_150ms_airborne_flexion_deg": 5.837276220321655,
+        "completed_hops_per_person_min": 38.5,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": null,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.0,
+        "longest_backlean_s": 0.0,
+        "median_pitch_deg": {
+          "compression": 4.733112573623657,
+          "extension": 2.149214267730713,
+          "rising": 1.844947338104248,
+          "descending": 6.243758916854858
+        },
+        "phase_backlean_fraction": {
+          "compression": 0,
+          "extension": 0,
+          "rising": 0,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.01948051948051948,
+        "paired_hop_count": 308,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.03386813402175903,
+          "right": 0.0778307169675827
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.05321916192770004,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 10437,
+            "heel_load_fraction": 0.26329405001437195,
+            "forefoot_load_fraction": 0.7618089489316854,
+            "heel_and_forefoot_fraction": 0.03085177733065057,
+            "forefoot_only_fraction": 0.7309571716010348
+          },
+          "compression": {
+            "loaded_foot_samples": 11681,
+            "heel_load_fraction": 0.23842136803355876,
+            "forefoot_load_fraction": 0.7853779642153925,
+            "heel_and_forefoot_fraction": 0.029021487886311103,
+            "forefoot_only_fraction": 0.7563564763290814
+          },
+          "extension": {
+            "loaded_foot_samples": 11083,
+            "heel_load_fraction": 0.01994044933682216,
+            "forefoot_load_fraction": 0.9833077686546964,
+            "heel_and_forefoot_fraction": 0.0040602724893981776,
+            "forefoot_only_fraction": 0.9792474961652982
+          },
+          "all": {
+            "loaded_foot_samples": 22147,
+            "heel_load_fraction": 0.13297512078385335,
+            "forefoot_load_fraction": 0.8812028717207748,
+            "heel_and_forefoot_fraction": 0.017248385785885223,
+            "forefoot_only_fraction": 0.8639544859348895
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 4707,
+              "heel_load_fraction": 0.5838113448056087,
+              "forefoot_load_fraction": 0.47185043552156364,
+              "heel_and_forefoot_fraction": 0.06840875292118122,
+              "forefoot_only_fraction": 0.40344168260038243
+            },
+            "right": {
+              "loaded_foot_samples": 5730,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5155,
+              "heel_load_fraction": 0.5402521823472357,
+              "forefoot_load_fraction": 0.5136760426770126,
+              "heel_and_forefoot_fraction": 0.06576139670223084,
+              "forefoot_only_fraction": 0.44791464597478176
+            },
+            "right": {
+              "loaded_foot_samples": 6526,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2551,
+              "heel_load_fraction": 0.08663269306154449,
+              "forefoot_load_fraction": 0.9274794198353586,
+              "heel_and_forefoot_fraction": 0.01764014112112897,
+              "forefoot_only_fraction": 0.9098392787142298
+            },
+            "right": {
+              "loaded_foot_samples": 8532,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 7566,
+              "heel_load_fraction": 0.3892413428495903,
+              "forefoot_load_fraction": 0.6522601110229976,
+              "heel_and_forefoot_fraction": 0.05048902987047317,
+              "forefoot_only_fraction": 0.6017710811525244
+            },
+            "right": {
+              "loaded_foot_samples": 14581,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": 0.009279163659011382,
+          "overlap_samples": 0,
+          "boot_pair_contact_samples": 0,
+          "overlap_fraction": 0.0,
+          "boot_pair_contact_fraction": 0.0
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28593,
+            "left_median_signed_deg": 43.61568069458008,
+            "right_median_signed_deg": 7.476025581359863,
+            "pair_center_median_signed_deg": 27.380480527877808,
+            "pair_center_median_absolute_deg": 27.54141664505005
+          },
+          "flight": {
+            "samples": 19051,
+            "left_median_signed_deg": 48.713653564453125,
+            "right_median_signed_deg": 7.989778518676758,
+            "pair_center_median_signed_deg": 29.238050915300846,
+            "pair_center_median_absolute_deg": 29.238050915300846
+          },
+          "early_support": {
+            "samples": 4566,
+            "left_median_signed_deg": 34.951133728027344,
+            "right_median_signed_deg": 11.177227020263672,
+            "pair_center_median_signed_deg": 25.103223085403446,
+            "pair_center_median_absolute_deg": 26.38270378112793
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4566,
+          "median_mirror_error_leg_deg": 11.040146827697754,
+          "median_knee_gap_deg": 16.25785255432129,
+          "median_ankle_pitch_gap_deg": 7.158055305480957,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 34.00624465942383,
+            "right": 51.26264953613281
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 0,
+          "median_absolute_angle_deg": null,
+          "median_signed_angle_deg": null
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 17.2912144096298,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 20.030312167991557,
+              "ShoulderPitch": 8.012276455920878,
+              "ShoulderYaw": 20.295648165529396,
+              "Elbow": 20.826620849077358
+            },
+            "foot_stagger_median_cm": 4.593189477920532,
+            "foot_stagger_p90_cm": 10.669042587280273,
+            "samples": 4666
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 15.403964677526991,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 3.6683005289163124,
+              "ShoulderPitch": 5.851228065851643,
+              "ShoulderYaw": 27.910341822328583,
+              "Elbow": 24.185988293011427
+            },
+            "foot_stagger_median_cm": 4.928396940231323,
+            "foot_stagger_p90_cm": 10.52096405029297,
+            "samples": 4568
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 8.528792503793866,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 1.3898337090755433,
+              "ShoulderPitch": 1.6444766388137801,
+              "ShoulderYaw": 4.922875294361386,
+              "Elbow": 26.157984372924762
+            },
+            "foot_stagger_median_cm": 3.945302128791809,
+            "foot_stagger_p90_cm": 9.092428207397461,
+            "samples": 8816
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 11.871957378383994,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 19.540131433606454,
+              "ShoulderPitch": 2.130069319395744,
+              "ShoulderYaw": 2.3157536071729883,
+              "Elbow": 23.501875153360796
+            },
+            "foot_stagger_median_cm": 3.053218364715576,
+            "foot_stagger_p90_cm": 7.867029905319215,
+            "samples": 9032
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 12.157973979006549,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 10.888489676727552,
+              "ShoulderPitch": 3.53610590692757,
+              "ShoulderYaw": 10.12522411564009,
+              "Elbow": 24.08207621673098
+            },
+            "foot_stagger_median_cm": 3.8246631622314453,
+            "foot_stagger_p90_cm": 9.396449279785156,
+            "samples": 28593
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 16.66936322219937,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 30.859209525120722,
+              "ShoulderPitch": 5.044803032748304,
+              "ShoulderYaw": 7.721239035100564,
+              "Elbow": 23.052201295827892
+            },
+            "foot_stagger_median_cm": 4.437386512756348,
+            "foot_stagger_p90_cm": 9.288592624664307,
+            "samples": 308
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3833334445953369,
+          "median_effective_support_s": 0.34648387134075165,
+          "median_peak_lunar_bodyweights": 9.030308246612549,
+          "median_peak_sole_load_n": 1872.1457403622999,
+          "median_sole_load_integral_bw_s": 1.5566022396087646,
+          "median_com_descent_cm": 8.195275068283081,
+          "median_com_rebound_cm": 12.054041028022766,
+          "median_knee_flexion_deg": 30.041156768798828,
+          "median_knee_reextension_deg": 25.57645606994629,
+          "median_pre_takeoff_reextension_deg": 23.67503547668457,
+          "median_max_knee_flexion_deg": 30.36614990234375,
+          "median_rebound_before_liftoff_cm": 9.517920762300491,
+          "median_supported_extension_s": 0.2,
+          "median_upward_speed_gain_mps": 0.7878643572330475,
+          "p90_peak_lunar_bodyweights": 24.32294235229492,
+          "p99_loaded_sample_lunar_bodyweights": 23.315543899536248,
+          "lower_flex_and_reextend_fraction": 1,
+          "supported_compression_then_extension_fraction": 1,
+          "stance_count": 260,
+          "p90_peak_sole_load_n": 5042.5845579532925
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt"
+      },
+      "selected": {
+        "target_mps": 0.0,
+        "actual_mean_mps": 0.0006311596662271768,
+        "mean_absolute_along_heading_com_speed_mps": 0.03222678273304812,
+        "median_distance_from_spawn_m": 0.1140848807990551,
+        "p90_distance_from_spawn_m": 0.3273745894432068,
+        "mean_stride_m": -0.005630514084898083,
+        "median_stride_m": -0.009893298149108887,
+        "max_stride_m": 0.11888694763183594,
+        "mean_airtime_s": 0.9917770419426049,
+        "mean_com_rise_m": 0.17657194641844326,
+        "mean_airborne_shoulder_pitch_range_deg": 8.995719317568849,
+        "median_liftoff_pitch_deg": 0.5493420660495758,
+        "median_prelanding_pitch_deg": 10.478373050689697,
+        "median_liftoff_waist_pitch_deg": -5.120445013046265,
+        "median_prelanding_waist_pitch_deg": 25.9472599029541,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.2582781456953642,
+        "mean_landing_flexion_50ms_deg": 13.56942023978328,
+        "mean_landing_flexion_150ms_deg": 25.42595603766031,
+        "hops": 302,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.17326652658800712,
+        "median_prelanding_knee_deg": 26.186978816986084,
+        "median_last_150ms_airborne_flexion_deg": 6.814987659454346,
+        "completed_hops_per_person_min": 37.75,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": null,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.0,
+        "longest_backlean_s": 0.0,
+        "median_pitch_deg": {
+          "compression": 7.26853609085083,
+          "extension": 3.595613956451416,
+          "rising": 2.9415892362594604,
+          "descending": 9.329740524291992
+        },
+        "phase_backlean_fraction": {
+          "compression": 0,
+          "extension": 0,
+          "rising": 0,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.06291390728476821,
+        "paired_hop_count": 302,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.03353627026081085,
+          "right": 0.0846649706363678
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.05422407388687134,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 10199,
+            "heel_load_fraction": 0.37895872144327875,
+            "forefoot_load_fraction": 0.6584959309736249,
+            "heel_and_forefoot_fraction": 0.047063437591920776,
+            "forefoot_only_fraction": 0.6114324933817041
+          },
+          "compression": {
+            "loaded_foot_samples": 11518,
+            "heel_load_fraction": 0.36421253689876715,
+            "forefoot_load_fraction": 0.6725994096197256,
+            "heel_and_forefoot_fraction": 0.04775134571974301,
+            "forefoot_only_fraction": 0.6248480638999826
+          },
+          "extension": {
+            "loaded_foot_samples": 11136,
+            "heel_load_fraction": 0.1775323275862069,
+            "forefoot_load_fraction": 0.8292923850574713,
+            "heel_and_forefoot_fraction": 0.011404454022988507,
+            "forefoot_only_fraction": 0.8178879310344828
+          },
+          "all": {
+            "loaded_foot_samples": 22055,
+            "heel_load_fraction": 0.277397415552029,
+            "forefoot_load_fraction": 0.7451824982997053,
+            "heel_and_forefoot_fraction": 0.030605304919519384,
+            "forefoot_only_fraction": 0.7145771933801859
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 4869,
+              "heel_load_fraction": 0.793797494352023,
+              "forefoot_load_fraction": 0.2846580406654344,
+              "heel_and_forefoot_fraction": 0.09858287122612445,
+              "forefoot_only_fraction": 0.1860751694393099
+            },
+            "right": {
+              "loaded_foot_samples": 5330,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5410,
+              "heel_load_fraction": 0.7754158964879853,
+              "forefoot_load_fraction": 0.30295748613678375,
+              "heel_and_forefoot_fraction": 0.10166358595194085,
+              "forefoot_only_fraction": 0.2012939001848429
+            },
+            "right": {
+              "loaded_foot_samples": 6108,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2694,
+              "heel_load_fraction": 0.7338530066815144,
+              "forefoot_load_fraction": 0.2943578322197476,
+              "heel_and_forefoot_fraction": 0.04714179658500371,
+              "forefoot_only_fraction": 0.24721603563474387
+            },
+            "right": {
+              "loaded_foot_samples": 8442,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 7995,
+              "heel_load_fraction": 0.765228267667292,
+              "forefoot_load_fraction": 0.2970606629143214,
+              "heel_and_forefoot_fraction": 0.08442776735459662,
+              "forefoot_only_fraction": 0.21263289555972484
+            },
+            "right": {
+              "loaded_foot_samples": 14060,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": 0.012492902710269526,
+          "overlap_samples": 0,
+          "boot_pair_contact_samples": 0,
+          "overlap_fraction": 0.0,
+          "boot_pair_contact_fraction": 0.0
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28575,
+            "left_median_signed_deg": 25.016483306884766,
+            "right_median_signed_deg": -17.51485252380371,
+            "pair_center_median_signed_deg": 4.01228666305542,
+            "pair_center_median_absolute_deg": 4.506840229034423
+          },
+          "flight": {
+            "samples": 19269,
+            "left_median_signed_deg": 25.39613914489746,
+            "right_median_signed_deg": -16.53438949584961,
+            "pair_center_median_signed_deg": 4.648642063140869,
+            "pair_center_median_absolute_deg": 4.720347404479979
+          },
+          "early_support": {
+            "samples": 4403,
+            "left_median_signed_deg": 22.296276092529297,
+            "right_median_signed_deg": -20.51279067993164,
+            "pair_center_median_signed_deg": 1.7463369369506843,
+            "pair_center_median_absolute_deg": 4.284799575805663
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4403,
+          "median_mirror_error_leg_deg": 10.128180503845215,
+          "median_knee_gap_deg": 15.233875274658203,
+          "median_ankle_pitch_gap_deg": 11.8504638671875,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 37.51579284667969,
+            "right": 52.72810745239258
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 0,
+          "median_absolute_angle_deg": null,
+          "median_signed_angle_deg": null
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 13.888664180765947,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 11.99407928144171,
+              "ShoulderPitch": 8.203567755948521,
+              "ShoulderYaw": 13.459712030562567,
+              "Elbow": 21.89729765511099
+            },
+            "foot_stagger_median_cm": 7.494535446166992,
+            "foot_stagger_p90_cm": 16.33749008178711,
+            "samples": 4493
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 13.350337929259036,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 3.5849846429953094,
+              "ShoulderPitch": 6.050763070833387,
+              "ShoulderYaw": 19.37999575124214,
+              "Elbow": 24.3856082519653
+            },
+            "foot_stagger_median_cm": 8.304758071899414,
+            "foot_stagger_p90_cm": 15.277144432067871,
+            "samples": 4511
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 8.068425063441481,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 0.8338248855137664,
+              "ShoulderPitch": 3.7294275958225453,
+              "ShoulderYaw": 1.4360376916317148,
+              "Elbow": 26.274410080797896
+            },
+            "foot_stagger_median_cm": 8.02567720413208,
+            "foot_stagger_p90_cm": 12.48719482421875,
+            "samples": 8954
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 9.92437917793585,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 11.84146050873004,
+              "ShoulderPitch": 2.6917463901603527,
+              "ShoulderYaw": 0.5005910852608276,
+              "Elbow": 24.663718727592176
+            },
+            "foot_stagger_median_cm": 8.754435539245605,
+            "foot_stagger_p90_cm": 13.223717308044433,
+            "samples": 9069
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 10.418975581426775,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 6.704166453057576,
+              "ShoulderPitch": 4.397024979060143,
+              "ShoulderYaw": 5.803731724695862,
+              "Elbow": 24.770979168893522
+            },
+            "foot_stagger_median_cm": 8.322829246520996,
+            "foot_stagger_p90_cm": 13.725447845458985,
+            "samples": 28575
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 12.7073504793274,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 20.47291584628702,
+              "ShoulderPitch": 5.734989483487663,
+              "ShoulderYaw": 1.1042209478177667,
+              "Elbow": 23.517275639717152
+            },
+            "foot_stagger_median_cm": 8.695637702941895,
+            "foot_stagger_p90_cm": 15.421282482147221,
+            "samples": 302
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3833334445953369,
+          "median_effective_support_s": 0.3500000834465027,
+          "median_peak_lunar_bodyweights": 8.07236099243164,
+          "median_peak_sole_load_n": 1673.5460001951471,
+          "median_sole_load_integral_bw_s": 1.4923295378684998,
+          "median_com_descent_cm": 9.057387709617615,
+          "median_com_rebound_cm": 12.647002935409546,
+          "median_knee_flexion_deg": 31.23358917236328,
+          "median_knee_reextension_deg": 26.503101348876953,
+          "median_pre_takeoff_reextension_deg": 24.559940338134766,
+          "median_max_knee_flexion_deg": 31.469289779663086,
+          "median_rebound_before_liftoff_cm": 9.991258382797241,
+          "median_supported_extension_s": 0.2,
+          "median_upward_speed_gain_mps": 0.8583746254444122,
+          "p90_peak_lunar_bodyweights": 21.053950500488316,
+          "p99_loaded_sample_lunar_bodyweights": 18.04065816879269,
+          "lower_flex_and_reextend_fraction": 1,
+          "supported_compression_then_extension_fraction": 1,
+          "stance_count": 254,
+          "p90_peak_sole_load_n": 4364.863598324418
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt"
+      },
+      "video": "gait_comparison_0mps.mp4"
+    },
+    "0.5": {
+      "before": {
+        "target_mps": 0.5,
+        "actual_mean_mps": 0.48733474127948284,
+        "mean_absolute_along_heading_com_speed_mps": 0.4841708920981101,
+        "median_distance_from_spawn_m": 2.1764309406280518,
+        "p90_distance_from_spawn_m": 4.373604679107666,
+        "mean_stride_m": 0.5579513045330774,
+        "median_stride_m": 0.5585945844650269,
+        "max_stride_m": 0.7875276207923889,
+        "mean_airtime_s": 1.0935409457900807,
+        "mean_com_rise_m": 0.2093130924503696,
+        "mean_airborne_shoulder_pitch_range_deg": 13.201899267810438,
+        "median_liftoff_pitch_deg": -7.012477397918701,
+        "median_prelanding_pitch_deg": 5.9526591300964355,
+        "median_liftoff_waist_pitch_deg": -8.593894004821777,
+        "median_prelanding_waist_pitch_deg": 30.26103401184082,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.9896193771626297,
+        "mean_landing_flexion_50ms_deg": 11.364383374118475,
+        "mean_landing_flexion_150ms_deg": 21.59637004363908,
+        "hops": 289,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0,
+        "median_prelanding_knee_deg": 30.605088233947754,
+        "median_last_150ms_airborne_flexion_deg": 6.834721565246582,
+        "completed_hops_per_person_min": 36.125,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.02270421549763862,
+        "longest_backlean_s": 0.26666666666666666,
+        "median_pitch_deg": {
+          "compression": 3.2982362508773804,
+          "extension": -3.0669147968292236,
+          "rising": -3.572935938835144,
+          "descending": 5.805232048034668
+        },
+        "phase_backlean_fraction": {
+          "compression": 0,
+          "extension": 0.04393149664929263,
+          "rising": 0.04968421052631579,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.8927335640138409,
+        "paired_hop_count": 289,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.013034354895353317,
+          "right": 0.07747075706720352
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.0412137508392334,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 9298,
+            "heel_load_fraction": 0.22391912239191225,
+            "forefoot_load_fraction": 0.7824263282426328,
+            "heel_and_forefoot_fraction": 0.011507851150785115,
+            "forefoot_only_fraction": 0.7709184770918477
+          },
+          "compression": {
+            "loaded_foot_samples": 10171,
+            "heel_load_fraction": 0.20558450496509684,
+            "forefoot_load_fraction": 0.8008062137449612,
+            "heel_and_forefoot_fraction": 0.011110018680562384,
+            "forefoot_only_fraction": 0.7896961950643988
+          },
+          "extension": {
+            "loaded_foot_samples": 9750,
+            "heel_load_fraction": 0.04082051282051282,
+            "forefoot_load_fraction": 0.9621538461538461,
+            "heel_and_forefoot_fraction": 0.003282051282051282,
+            "forefoot_only_fraction": 0.9588717948717949
+          },
+          "all": {
+            "loaded_foot_samples": 19413,
+            "heel_load_fraction": 0.12579199505486013,
+            "forefoot_load_fraction": 0.8790501210529027,
+            "heel_and_forefoot_fraction": 0.007469221655591614,
+            "forefoot_only_fraction": 0.8715808993973111
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 3512,
+              "heel_load_fraction": 0.5928246013667426,
+              "forefoot_load_fraction": 0.4239749430523918,
+              "heel_and_forefoot_fraction": 0.030466970387243737,
+              "forefoot_only_fraction": 0.3935079726651481
+            },
+            "right": {
+              "loaded_foot_samples": 5786,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 3845,
+              "heel_load_fraction": 0.5438231469440832,
+              "forefoot_load_fraction": 0.4730819245773732,
+              "heel_and_forefoot_fraction": 0.029388816644993498,
+              "forefoot_only_fraction": 0.4436931079323797
+            },
+            "right": {
+              "loaded_foot_samples": 6326,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2306,
+              "heel_load_fraction": 0.17259323503902863,
+              "forefoot_load_fraction": 0.8399826539462273,
+              "heel_and_forefoot_fraction": 0.013876843018213356,
+              "forefoot_only_fraction": 0.8261058109280138
+            },
+            "right": {
+              "loaded_foot_samples": 7444,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 6077,
+              "heel_load_fraction": 0.40184301464538424,
+              "forefoot_load_fraction": 0.6136251439855192,
+              "heel_and_forefoot_fraction": 0.023860457462563767,
+              "forefoot_only_fraction": 0.5897646865229554
+            },
+            "right": {
+              "loaded_foot_samples": 13336,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.007909676367642745,
+          "overlap_samples": 7,
+          "boot_pair_contact_samples": 7,
+          "overlap_fraction": 0.00012152777777777777,
+          "boot_pair_contact_fraction": 0.00012152777777777777
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28585,
+            "left_median_signed_deg": 33.43769073486328,
+            "right_median_signed_deg": 34.870609283447266,
+            "pair_center_median_signed_deg": 34.535688400268555,
+            "pair_center_median_absolute_deg": 34.69532012939453
+          },
+          "flight": {
+            "samples": 19919,
+            "left_median_signed_deg": 34.81357955932617,
+            "right_median_signed_deg": 37.46147155761719,
+            "pair_center_median_signed_deg": 36.60215759277344,
+            "pair_center_median_absolute_deg": 36.60215759277344
+          },
+          "early_support": {
+            "samples": 4364,
+            "left_median_signed_deg": 23.8204402923584,
+            "right_median_signed_deg": 29.381400108337402,
+            "pair_center_median_signed_deg": 27.325895309448242,
+            "pair_center_median_absolute_deg": 28.856896400451657
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4364,
+          "median_mirror_error_leg_deg": 12.466926574707031,
+          "median_knee_gap_deg": 24.079652786254883,
+          "median_ankle_pitch_gap_deg": 6.6097023487091064,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 33.16441535949707,
+            "right": 59.95779991149902
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 19718,
+          "median_absolute_angle_deg": 4.709914207458496,
+          "median_signed_angle_deg": 1.8299890160560608
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 16.227720696118986,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 18.75734973232358,
+              "ShoulderPitch": 12.544709377615925,
+              "ShoulderYaw": 18.246948178377338,
+              "Elbow": 15.361875496159092
+            },
+            "foot_stagger_median_cm": 7.046651840209961,
+            "foot_stagger_p90_cm": 25.15225067138672,
+            "samples": 4348
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 11.770503699142806,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 5.987438280827008,
+              "ShoulderPitch": 5.198240442002572,
+              "ShoulderYaw": 13.327534699632867,
+              "Elbow": 22.568801374108777
+            },
+            "foot_stagger_median_cm": 4.113919734954834,
+            "foot_stagger_p90_cm": 25.292081069946303,
+            "samples": 4029
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 8.567517828926297,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 2.0910917991434155,
+              "ShoulderPitch": 3.9321407915966393,
+              "ShoulderYaw": 3.2314891976061246,
+              "Elbow": 25.01534952735901
+            },
+            "foot_stagger_median_cm": 4.682145595550537,
+            "foot_stagger_p90_cm": 10.804540920257569,
+            "samples": 9500
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 11.231766692595528,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 11.93392428358453,
+              "ShoulderPitch": 3.096633430365593,
+              "ShoulderYaw": 7.930752838125789,
+              "Elbow": 21.9657562183062
+            },
+            "foot_stagger_median_cm": 4.119814395904541,
+            "foot_stagger_p90_cm": 9.550381088256835,
+            "samples": 9297
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 11.119221237902556,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 8.676785697862824,
+              "ShoulderPitch": 5.114485109934305,
+              "ShoulderYaw": 8.575288891102245,
+              "Elbow": 22.110325252710847
+            },
+            "foot_stagger_median_cm": 4.709325790405273,
+            "foot_stagger_p90_cm": 12.391814041137701,
+            "samples": 28585
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 18.647840542406986,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 21.744275693662438,
+              "ShoulderPitch": 11.002275686053668,
+              "ShoulderYaw": 21.00857408318965,
+              "Elbow": 20.83623670672218
+            },
+            "foot_stagger_median_cm": 3.11818265914917,
+            "foot_stagger_p90_cm": 9.106563186645507,
+            "samples": 289
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.35833340883255005,
+          "median_effective_support_s": 0.31666672229766846,
+          "median_peak_lunar_bodyweights": 8.294133186340332,
+          "median_peak_sole_load_n": 1719.52337514386,
+          "median_sole_load_integral_bw_s": 1.514746069908142,
+          "median_com_descent_cm": 8.323925733566284,
+          "median_com_rebound_cm": 13.216584920883179,
+          "median_knee_flexion_deg": 23.557519912719727,
+          "median_knee_reextension_deg": 24.07048988342285,
+          "median_pre_takeoff_reextension_deg": 24.388004302978516,
+          "median_max_knee_flexion_deg": 24.287185668945312,
+          "median_rebound_before_liftoff_cm": 10.40450930595398,
+          "median_supported_extension_s": 0.18333333333333332,
+          "median_upward_speed_gain_mps": 0.8063241243362427,
+          "p90_peak_lunar_bodyweights": 18.609085083007812,
+          "p99_loaded_sample_lunar_bodyweights": 15.506577491760213,
+          "lower_flex_and_reextend_fraction": 1,
+          "supported_compression_then_extension_fraction": 1,
+          "stance_count": 241,
+          "p90_peak_sole_load_n": 3857.9989097560956
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt"
+      },
+      "selected": {
+        "target_mps": 0.5,
+        "actual_mean_mps": 0.5195682272315025,
+        "mean_absolute_along_heading_com_speed_mps": 0.517044967643456,
+        "median_distance_from_spawn_m": 2.3624907732009888,
+        "p90_distance_from_spawn_m": 4.633628988265992,
+        "mean_stride_m": 0.6095711912752854,
+        "median_stride_m": 0.6113798022270203,
+        "max_stride_m": 0.9736323356628418,
+        "mean_airtime_s": 1.1113425925925926,
+        "mean_com_rise_m": 0.21642069704830647,
+        "mean_airborne_shoulder_pitch_range_deg": 12.137206532888943,
+        "median_liftoff_pitch_deg": -7.177948951721191,
+        "median_prelanding_pitch_deg": 6.357947826385498,
+        "median_liftoff_waist_pitch_deg": -10.006990909576416,
+        "median_prelanding_waist_pitch_deg": 30.064684867858887,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.9965277777777778,
+        "mean_landing_flexion_50ms_deg": 11.95242061217626,
+        "mean_landing_flexion_150ms_deg": 22.001797563499874,
+        "hops": 288,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0022727272727272726,
+        "median_prelanding_knee_deg": 31.49127769470215,
+        "median_last_150ms_airborne_flexion_deg": 7.452672958374023,
+        "completed_hops_per_person_min": 36.0,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.038431921596079804,
+        "longest_backlean_s": 0.38333333333333336,
+        "median_pitch_deg": {
+          "compression": 3.357598662376404,
+          "extension": -4.023535251617432,
+          "rising": -4.95626425743103,
+          "descending": 5.8686792850494385
+        },
+        "phase_backlean_fraction": {
+          "compression": 0,
+          "extension": 0.07843638221768012,
+          "rising": 0.08384566461734153,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.9965277777777778,
+        "paired_hop_count": 288,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.009334355592727661,
+          "right": 0.08035628497600555
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.04279951751232147,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 8844,
+            "heel_load_fraction": 0.22761194029850745,
+            "forefoot_load_fraction": 0.7789461781999095,
+            "heel_and_forefoot_fraction": 0.013229308005427409,
+            "forefoot_only_fraction": 0.7657168701944821
+          },
+          "compression": {
+            "loaded_foot_samples": 9752,
+            "heel_load_fraction": 0.20805988515176374,
+            "forefoot_load_fraction": 0.7977850697292863,
+            "heel_and_forefoot_fraction": 0.012305168170631665,
+            "forefoot_only_fraction": 0.7854799015586547
+          },
+          "extension": {
+            "loaded_foot_samples": 9879,
+            "heel_load_fraction": 0.038667881364510576,
+            "forefoot_load_fraction": 0.963963963963964,
+            "heel_and_forefoot_fraction": 0.0035428687114080373,
+            "forefoot_only_fraction": 0.9604210952525559
+          },
+          "all": {
+            "loaded_foot_samples": 19307,
+            "heel_load_fraction": 0.1233749417309784,
+            "forefoot_load_fraction": 0.8810276065675662,
+            "heel_and_forefoot_fraction": 0.008028176309110685,
+            "forefoot_only_fraction": 0.8729994302584555
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 3256,
+              "heel_load_fraction": 0.6182432432432432,
+              "forefoot_load_fraction": 0.39957002457002455,
+              "heel_and_forefoot_fraction": 0.03593366093366093,
+              "forefoot_only_fraction": 0.36363636363636365
+            },
+            "right": {
+              "loaded_foot_samples": 5588,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 3587,
+              "heel_load_fraction": 0.5656537496515194,
+              "forefoot_load_fraction": 0.45023696682464454,
+              "heel_and_forefoot_fraction": 0.03345413994981879,
+              "forefoot_only_fraction": 0.41678282687482576
+            },
+            "right": {
+              "loaded_foot_samples": 6165,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2619,
+              "heel_load_fraction": 0.14585719740358916,
+              "forefoot_load_fraction": 0.8640702558228331,
+              "heel_and_forefoot_fraction": 0.013363879343260786,
+              "forefoot_only_fraction": 0.8507063764795724
+            },
+            "right": {
+              "loaded_foot_samples": 7260,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 6161,
+              "heel_load_fraction": 0.3866255478006817,
+              "forefoot_load_fraction": 0.6271709138126927,
+              "heel_and_forefoot_fraction": 0.025158253530271058,
+              "forefoot_only_fraction": 0.6020126602824217
+            },
+            "right": {
+              "loaded_foot_samples": 13146,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.01466677168191694,
+          "overlap_samples": 12,
+          "boot_pair_contact_samples": 12,
+          "overlap_fraction": 0.00020833333333333335,
+          "boot_pair_contact_fraction": 0.00020833333333333335
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28570,
+            "left_median_signed_deg": 5.07727575302124,
+            "right_median_signed_deg": 4.433528184890747,
+            "pair_center_median_signed_deg": 4.247408255934716,
+            "pair_center_median_absolute_deg": 4.960294485092163
+          },
+          "flight": {
+            "samples": 20010,
+            "left_median_signed_deg": 3.2647145986557007,
+            "right_median_signed_deg": 4.693394422531128,
+            "pair_center_median_signed_deg": 3.382445439696312,
+            "pair_center_median_absolute_deg": 3.4909032583236694
+          },
+          "early_support": {
+            "samples": 4354,
+            "left_median_signed_deg": 7.166615009307861,
+            "right_median_signed_deg": 4.6233296394348145,
+            "pair_center_median_signed_deg": 6.138630613684654,
+            "pair_center_median_absolute_deg": 10.363474294543266
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4354,
+          "median_mirror_error_leg_deg": 12.30958604812622,
+          "median_knee_gap_deg": 25.612801551818848,
+          "median_ankle_pitch_gap_deg": 6.786014080047607,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 34.843048095703125,
+            "right": 62.46353340148926
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 20010,
+          "median_absolute_angle_deg": 7.144604206085205,
+          "median_signed_angle_deg": -6.726399898529053
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 15.020287179654039,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 16.62748953552834,
+              "ShoulderPitch": 10.342823739698586,
+              "ShoulderYaw": 17.02622709719583,
+              "Elbow": 16.084608346193395
+            },
+            "foot_stagger_median_cm": 7.6582348346710205,
+            "foot_stagger_p90_cm": 29.698096084594727,
+            "samples": 4358
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 11.503722692404683,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 4.175334796787907,
+              "ShoulderPitch": 7.705565830409909,
+              "ShoulderYaw": 11.778327157909139,
+              "Elbow": 22.355662984511774
+            },
+            "foot_stagger_median_cm": 6.479555606842041,
+            "foot_stagger_p90_cm": 25.61315937042237,
+            "samples": 3914
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 9.07089965828633,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 1.6394035839017438,
+              "ShoulderPitch": 5.692423123197723,
+              "ShoulderYaw": 3.0287000844911316,
+              "Elbow": 25.92307184155472
+            },
+            "foot_stagger_median_cm": 5.455132007598877,
+            "foot_stagger_p90_cm": 10.674177360534667,
+            "samples": 9434
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 10.765142795281825,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 9.833648186603801,
+              "ShoulderPitch": 1.5366191487837986,
+              "ShoulderYaw": 7.336680409337962,
+              "Elbow": 24.353623436401733
+            },
+            "foot_stagger_median_cm": 4.567861318588257,
+            "foot_stagger_p90_cm": 8.547865104675296,
+            "samples": 9474
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 10.92423718565213,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 7.2480283140252615,
+              "ShoulderPitch": 5.12328780425174,
+              "ShoulderYaw": 7.925634109167771,
+              "Elbow": 23.399998515163748
+            },
+            "foot_stagger_median_cm": 5.431411504745483,
+            "foot_stagger_p90_cm": 12.827165889739993,
+            "samples": 28570
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 15.622408545469321,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 16.387406340903706,
+              "ShoulderPitch": 6.577823977594057,
+              "ShoulderYaw": 16.917493687632184,
+              "Elbow": 22.60691017574734
+            },
+            "foot_stagger_median_cm": 5.4079813957214355,
+            "foot_stagger_p90_cm": 10.080053806304932,
+            "samples": 288
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3500000834465027,
+          "median_effective_support_s": 0.30570873618125916,
+          "median_peak_lunar_bodyweights": 7.632901191711426,
+          "median_peak_sole_load_n": 1582.438058859098,
+          "median_sole_load_integral_bw_s": 1.515552282333374,
+          "median_com_descent_cm": 8.588188886642456,
+          "median_com_rebound_cm": 13.567715883255005,
+          "median_knee_flexion_deg": 22.765260696411133,
+          "median_knee_reextension_deg": 25.62777614593506,
+          "median_pre_takeoff_reextension_deg": 26.502989768981934,
+          "median_max_knee_flexion_deg": 22.804372787475586,
+          "median_rebound_before_liftoff_cm": 10.68541705608368,
+          "median_supported_extension_s": 0.18333333333333332,
+          "median_upward_speed_gain_mps": 0.8419463634490967,
+          "p90_peak_lunar_bodyweights": 17.2613862991333,
+          "p99_loaded_sample_lunar_bodyweights": 16.606737899780278,
+          "lower_flex_and_reextend_fraction": 0.9958333333333333,
+          "supported_compression_then_extension_fraction": 1,
+          "stance_count": 240,
+          "p90_peak_sole_load_n": 3578.5966492110483
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt"
+      },
+      "video": "gait_comparison_0.5mps.mp4"
+    },
+    "1": {
+      "before": {
+        "target_mps": 1.0,
+        "actual_mean_mps": 0.8965336941182613,
+        "mean_absolute_along_heading_com_speed_mps": 0.8990444419623943,
+        "median_distance_from_spawn_m": 3.719596743583679,
+        "p90_distance_from_spawn_m": 7.940011310577394,
+        "mean_stride_m": 1.1341837775796206,
+        "median_stride_m": 1.1994262337684631,
+        "max_stride_m": 1.6317291259765625,
+        "mean_airtime_s": 1.1777363184079601,
+        "mean_com_rise_m": 0.259831237926412,
+        "mean_airborne_shoulder_pitch_range_deg": 29.861771581777887,
+        "median_liftoff_pitch_deg": -8.240696430206299,
+        "median_prelanding_pitch_deg": 5.847697973251343,
+        "median_liftoff_waist_pitch_deg": -10.04946231842041,
+        "median_prelanding_waist_pitch_deg": 29.693906784057617,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.8992537313432836,
+        "mean_landing_flexion_50ms_deg": 10.55399666259538,
+        "mean_landing_flexion_150ms_deg": 19.298684789173638,
+        "hops": 268,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0013782542113323123,
+        "median_prelanding_knee_deg": 25.793336153030396,
+        "median_last_150ms_airborne_flexion_deg": 6.8885157108306885,
+        "completed_hops_per_person_min": 33.5,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.08572128337007102,
+        "longest_backlean_s": 0.45,
+        "median_pitch_deg": {
+          "compression": 2.890674114227295,
+          "extension": -4.423651456832886,
+          "rising": -4.656381130218506,
+          "descending": 6.807688236236572
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.0006632765863365023,
+          "extension": 0.16763341067285384,
+          "rising": 0.19194823867721064,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.9589552238805971,
+        "paired_hop_count": 268,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.02015209197998047,
+          "right": 0.08264976739883423
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.0342448353767395,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 8797,
+            "heel_load_fraction": 0.2678185745140389,
+            "forefoot_load_fraction": 0.7411617596908037,
+            "heel_and_forefoot_fraction": 0.019097419574855064,
+            "forefoot_only_fraction": 0.7220643401159487
+          },
+          "compression": {
+            "loaded_foot_samples": 9709,
+            "heel_load_fraction": 0.24822329797095477,
+            "forefoot_load_fraction": 0.7613554434030281,
+            "heel_and_forefoot_fraction": 0.018745493871665464,
+            "forefoot_only_fraction": 0.7426099495313626
+          },
+          "extension": {
+            "loaded_foot_samples": 9226,
+            "heel_load_fraction": 0.04519835248211576,
+            "forefoot_load_fraction": 0.9578365488835898,
+            "heel_and_forefoot_fraction": 0.0039020160416215043,
+            "forefoot_only_fraction": 0.9539345328419684
+          },
+          "all": {
+            "loaded_foot_samples": 18265,
+            "heel_load_fraction": 0.15110867779906925,
+            "forefoot_load_fraction": 0.8555160142348754,
+            "heel_and_forefoot_fraction": 0.011935395565288803,
+            "forefoot_only_fraction": 0.8435806186695867
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 4072,
+              "heel_load_fraction": 0.5785854616895875,
+              "forefoot_load_fraction": 0.44179764243614933,
+              "heel_and_forefoot_fraction": 0.0412573673870334,
+              "forefoot_only_fraction": 0.40054027504911593
+            },
+            "right": {
+              "loaded_foot_samples": 4725,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 0.9991534391534391,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 0.9991534391534391
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 4392,
+              "heel_load_fraction": 0.5487249544626593,
+              "forefoot_load_fraction": 0.4733606557377049,
+              "heel_and_forefoot_fraction": 0.04143897996357013,
+              "forefoot_only_fraction": 0.4319216757741348
+            },
+            "right": {
+              "loaded_foot_samples": 5317,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 0.9992476960692119,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 0.9992476960692119
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2806,
+              "heel_load_fraction": 0.14861012116892375,
+              "forefoot_load_fraction": 0.8613684960798289,
+              "heel_and_forefoot_fraction": 0.012829650748396294,
+              "forefoot_only_fraction": 0.8485388453314326
+            },
+            "right": {
+              "loaded_foot_samples": 6420,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 7056,
+              "heel_load_fraction": 0.391156462585034,
+              "forefoot_load_fraction": 0.6265589569160998,
+              "heel_and_forefoot_fraction": 0.030895691609977325,
+              "forefoot_only_fraction": 0.5956632653061225
+            },
+            "right": {
+              "loaded_foot_samples": 11209,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 0.9996431439022214,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 0.9996431439022214
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.013770664717834658,
+          "overlap_samples": 73,
+          "boot_pair_contact_samples": 73,
+          "overlap_fraction": 0.001267361111111111,
+          "boot_pair_contact_fraction": 0.001267361111111111
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28581,
+            "left_median_signed_deg": 36.533424377441406,
+            "right_median_signed_deg": 37.18026351928711,
+            "pair_center_median_signed_deg": 37.005520820617676,
+            "pair_center_median_absolute_deg": 37.02134513854981
+          },
+          "flight": {
+            "samples": 20341,
+            "left_median_signed_deg": 37.810367584228516,
+            "right_median_signed_deg": 39.9918212890625,
+            "pair_center_median_signed_deg": 39.07453727722168,
+            "pair_center_median_absolute_deg": 39.07453727722168
+          },
+          "early_support": {
+            "samples": 4487,
+            "left_median_signed_deg": 26.720190048217773,
+            "right_median_signed_deg": 29.816722869873047,
+            "pair_center_median_signed_deg": 28.94925594329834,
+            "pair_center_median_absolute_deg": 29.41852951049805
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4487,
+          "median_mirror_error_leg_deg": 12.979758262634277,
+          "median_knee_gap_deg": 23.256559371948242,
+          "median_ankle_pitch_gap_deg": 10.678386688232422,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 29.456619262695312,
+            "right": 54.98349380493164
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 20341,
+          "median_absolute_angle_deg": 4.478596210479736,
+          "median_signed_angle_deg": 1.4342550039291382
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 8.863947432280776,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 7.3492757572931,
+              "ShoulderPitch": 15.97006704106611,
+              "ShoulderYaw": 8.21759078474915,
+              "Elbow": 3.91885614601474
+            },
+            "foot_stagger_median_cm": 10.062212944030762,
+            "foot_stagger_p90_cm": 24.94435768127442,
+            "samples": 4523
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 6.08752147066641,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 11.70705977167106,
+              "ShoulderPitch": 5.894325272858714,
+              "ShoulderYaw": 2.7237807408803003,
+              "Elbow": 4.024920097255565
+            },
+            "foot_stagger_median_cm": 6.971576452255249,
+            "foot_stagger_p90_cm": 20.238744163513193,
+            "samples": 3448
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 12.227082455554061,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 18.20069543016839,
+              "ShoulderPitch": 13.669107878188772,
+              "ShoulderYaw": 12.342357111995955,
+              "Elbow": 4.696169401863134
+            },
+            "foot_stagger_median_cm": 7.969298839569092,
+            "foot_stagger_p90_cm": 13.975953674316406,
+            "samples": 9737
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 10.392887822738341,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 5.340874694587643,
+              "ShoulderPitch": 16.72859271287921,
+              "ShoulderYaw": 11.864256256362218,
+              "Elbow": 7.6378276271243
+            },
+            "foot_stagger_median_cm": 5.586328983306885,
+            "foot_stagger_p90_cm": 11.675644874572754,
+            "samples": 9551
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 10.368729199235617,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 11.387950043025215,
+              "ShoulderPitch": 14.13989449605231,
+              "ShoulderYaw": 10.403830874737624,
+              "Elbow": 5.543241383127311
+            },
+            "foot_stagger_median_cm": 7.3104166984558105,
+            "foot_stagger_p90_cm": 14.849114418029785,
+            "samples": 28581
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 11.362185471011433,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 3.7310469505279813,
+              "ShoulderPitch": 23.103946507866702,
+              "ShoulderYaw": 13.284270814077844,
+              "Elbow": 5.329477611573199
+            },
+            "foot_stagger_median_cm": 7.013808012008667,
+            "foot_stagger_p90_cm": 13.110970306396485,
+            "samples": 268
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.33333340287208557,
+          "median_effective_support_s": 0.29330819845199585,
+          "median_peak_lunar_bodyweights": 9.594403266906738,
+          "median_peak_sole_load_n": 1989.0928102255577,
+          "median_sole_load_integral_bw_s": 1.5900766849517822,
+          "median_com_descent_cm": 9.446227550506592,
+          "median_com_rebound_cm": 13.289427757263184,
+          "median_knee_flexion_deg": 22.9121036529541,
+          "median_knee_reextension_deg": 20.031749725341797,
+          "median_pre_takeoff_reextension_deg": 20.72024917602539,
+          "median_max_knee_flexion_deg": 23.763809204101562,
+          "median_rebound_before_liftoff_cm": 10.119342803955078,
+          "median_supported_extension_s": 0.16666666666666666,
+          "median_upward_speed_gain_mps": 0.8523892164230347,
+          "p90_peak_lunar_bodyweights": 20.432811737060547,
+          "p99_loaded_sample_lunar_bodyweights": 18.01788949966429,
+          "lower_flex_and_reextend_fraction": 0.9817351598173516,
+          "supported_compression_then_extension_fraction": 0.9908675799086758,
+          "stance_count": 219,
+          "p90_peak_sole_load_n": 4236.090331856862
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt"
+      },
+      "selected": {
+        "target_mps": 1.0,
+        "actual_mean_mps": 0.8703002035617828,
+        "mean_absolute_along_heading_com_speed_mps": 0.8709494736604191,
+        "median_distance_from_spawn_m": 3.586034893989563,
+        "p90_distance_from_spawn_m": 7.680254554748536,
+        "mean_stride_m": 1.0949148003231077,
+        "median_stride_m": 1.1700764894485474,
+        "max_stride_m": 1.5804516077041626,
+        "mean_airtime_s": 1.174264705882353,
+        "mean_com_rise_m": 0.25614471235038605,
+        "mean_airborne_shoulder_pitch_range_deg": 26.382026097353766,
+        "median_liftoff_pitch_deg": -8.865514755249023,
+        "median_prelanding_pitch_deg": 5.915338039398193,
+        "median_liftoff_waist_pitch_deg": -13.022204875946045,
+        "median_prelanding_waist_pitch_deg": 29.61587905883789,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.9742647058823529,
+        "mean_landing_flexion_50ms_deg": 10.05360130702748,
+        "mean_landing_flexion_150ms_deg": 18.612082285039566,
+        "hops": 272,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0,
+        "median_prelanding_knee_deg": 27.801265239715576,
+        "median_last_150ms_airborne_flexion_deg": 8.047645092010498,
+        "completed_hops_per_person_min": 34.0,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0,
+        "backlean_fraction": 0.11467954100195914,
+        "longest_backlean_s": 0.43333333333333335,
+        "median_pitch_deg": {
+          "compression": 2.8902039527893066,
+          "extension": -4.970787525177002,
+          "rising": -5.6222686767578125,
+          "descending": 6.875664234161377
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.0002243661655822302,
+          "extension": 0.21877716603882932,
+          "rising": 0.256483270619343,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.9926470588235294,
+        "paired_hop_count": 272,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.01886061578989029,
+          "right": 0.0806465744972229
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.03980112075805664,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 8209,
+            "heel_load_fraction": 0.22694603483980996,
+            "forefoot_load_fraction": 0.775977585576806,
+            "heel_and_forefoot_fraction": 0.006699963454744792,
+            "forefoot_only_fraction": 0.7692776221220612
+          },
+          "compression": {
+            "loaded_foot_samples": 9033,
+            "heel_load_fraction": 0.2079043507140485,
+            "forefoot_load_fraction": 0.7949739842798628,
+            "heel_and_forefoot_fraction": 0.006531606332336987,
+            "forefoot_only_fraction": 0.7884423779475257
+          },
+          "extension": {
+            "loaded_foot_samples": 9324,
+            "heel_load_fraction": 0.03389103389103389,
+            "forefoot_load_fraction": 0.9687902187902188,
+            "heel_and_forefoot_fraction": 0.003003003003003003,
+            "forefoot_only_fraction": 0.9657872157872158
+          },
+          "all": {
+            "loaded_foot_samples": 17807,
+            "heel_load_fraction": 0.12135676980962543,
+            "forefoot_load_fraction": 0.881507272420958,
+            "heel_and_forefoot_fraction": 0.0048857190992306395,
+            "forefoot_only_fraction": 0.8766215533217274
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 3267,
+              "heel_load_fraction": 0.5702479338842975,
+              "forefoot_load_fraction": 0.43709825528007346,
+              "heel_and_forefoot_fraction": 0.016835016835016835,
+              "forefoot_only_fraction": 0.42026323844505664
+            },
+            "right": {
+              "loaded_foot_samples": 4942,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 3551,
+              "heel_load_fraction": 0.5288651084201633,
+              "forefoot_load_fraction": 0.4784567727400732,
+              "heel_and_forefoot_fraction": 0.01661503801745987,
+              "forefoot_only_fraction": 0.46184173472261336
+            },
+            "right": {
+              "loaded_foot_samples": 5482,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2799,
+              "heel_load_fraction": 0.11289746337977849,
+              "forefoot_load_fraction": 0.8960342979635584,
+              "heel_and_forefoot_fraction": 0.010003572704537335,
+              "forefoot_only_fraction": 0.886030725259021
+            },
+            "right": {
+              "loaded_foot_samples": 6525,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 6280,
+              "heel_load_fraction": 0.3441082802547771,
+              "forefoot_load_fraction": 0.6640127388535032,
+              "heel_and_forefoot_fraction": 0.013853503184713376,
+              "forefoot_only_fraction": 0.6501592356687899
+            },
+            "right": {
+              "loaded_foot_samples": 11527,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": 0.0046551530343079016,
+          "overlap_samples": 0,
+          "boot_pair_contact_samples": 0,
+          "overlap_fraction": 0.0,
+          "boot_pair_contact_fraction": 0.0
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28584,
+            "left_median_signed_deg": 6.739689588546753,
+            "right_median_signed_deg": 7.521910190582275,
+            "pair_center_median_signed_deg": 6.650346875190735,
+            "pair_center_median_absolute_deg": 7.175584554672242
+          },
+          "flight": {
+            "samples": 20402,
+            "left_median_signed_deg": 4.392637491226196,
+            "right_median_signed_deg": 7.3661510944366455,
+            "pair_center_median_signed_deg": 5.516868755221367,
+            "pair_center_median_absolute_deg": 5.558131575584412
+          },
+          "early_support": {
+            "samples": 4458,
+            "left_median_signed_deg": 11.293440341949463,
+            "right_median_signed_deg": 10.335561752319336,
+            "pair_center_median_signed_deg": 10.470089673995972,
+            "pair_center_median_absolute_deg": 13.563597202301025
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4458,
+          "median_mirror_error_leg_deg": 12.415103912353516,
+          "median_knee_gap_deg": 23.96760368347168,
+          "median_ankle_pitch_gap_deg": 10.30681037902832,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 29.121139526367188,
+            "right": 56.10076904296875
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 20402,
+          "median_absolute_angle_deg": 9.880914688110352,
+          "median_signed_angle_deg": -9.880914688110352
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 9.019425970763614,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 7.947836372165299,
+              "ShoulderPitch": 13.601191766600106,
+              "ShoulderYaw": 7.928594741943345,
+              "Elbow": 6.600081002345697
+            },
+            "foot_stagger_median_cm": 9.893644332885742,
+            "foot_stagger_p90_cm": 25.493519973754882,
+            "samples": 4457
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 6.712255521748047,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 10.191391225764772,
+              "ShoulderPitch": 6.6832471970605445,
+              "ShoulderYaw": 2.874881553142825,
+              "Elbow": 7.099502111024048
+            },
+            "foot_stagger_median_cm": 7.799876689910889,
+            "foot_stagger_p90_cm": 22.753725051879883,
+            "samples": 3451
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 12.104898070504731,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 13.805090828279015,
+              "ShoulderPitch": 11.649090390615527,
+              "ShoulderYaw": 13.535875605316738,
+              "Elbow": 9.429535457807642
+            },
+            "foot_stagger_median_cm": 7.775942802429199,
+            "foot_stagger_p90_cm": 12.743225860595706,
+            "samples": 9833
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 9.12046473916188,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 2.937447581814525,
+              "ShoulderPitch": 9.495282772559193,
+              "ShoulderYaw": 11.111862634108883,
+              "Elbow": 12.937265968164917
+            },
+            "foot_stagger_median_cm": 4.486321449279785,
+            "foot_stagger_p90_cm": 9.633434486389161,
+            "samples": 9499
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 9.974622422767402,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 8.809749300698257,
+              "ShoulderPitch": 10.535348563959493,
+              "ShoulderYaw": 10.561762274572068,
+              "Elbow": 9.99162955183979
+            },
+            "foot_stagger_median_cm": 6.492167711257935,
+            "foot_stagger_p90_cm": 14.459983158111575,
+            "samples": 28584
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 10.257353316165844,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 3.0010907039224333,
+              "ShoulderPitch": 16.384557453888085,
+              "ShoulderYaw": 11.379425481372678,
+              "Elbow": 10.264339625480181
+            },
+            "foot_stagger_median_cm": 6.476515293121338,
+            "foot_stagger_p90_cm": 14.108692169189453,
+            "samples": 272
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.33333343267440796,
+          "median_effective_support_s": 0.29188641905784607,
+          "median_peak_lunar_bodyweights": 8.577263832092285,
+          "median_peak_sole_load_n": 1778.2214636182355,
+          "median_sole_load_integral_bw_s": 1.5677872896194458,
+          "median_com_descent_cm": 9.02867317199707,
+          "median_com_rebound_cm": 13.731825351715088,
+          "median_knee_flexion_deg": 20.285503387451172,
+          "median_knee_reextension_deg": 22.552892684936523,
+          "median_pre_takeoff_reextension_deg": 23.421052932739258,
+          "median_max_knee_flexion_deg": 20.950965881347656,
+          "median_rebound_before_liftoff_cm": 10.425257682800293,
+          "median_supported_extension_s": 0.16666666666666666,
+          "median_upward_speed_gain_mps": 0.8466597199440002,
+          "p90_peak_lunar_bodyweights": 16.77429504394532,
+          "p99_loaded_sample_lunar_bodyweights": 21.006211986541818,
+          "lower_flex_and_reextend_fraction": 0.9865470852017937,
+          "supported_compression_then_extension_fraction": 0.9910313901345291,
+          "stance_count": 223,
+          "p90_peak_sole_load_n": 3477.613848440103
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt"
+      },
+      "video": "gait_comparison_1mps.mp4"
+    },
+    "1.5": {
+      "before": {
+        "target_mps": 1.5,
+        "actual_mean_mps": 1.1749819293618202,
+        "mean_absolute_along_heading_com_speed_mps": 1.1788009820376824,
+        "median_distance_from_spawn_m": 3.750036358833313,
+        "p90_distance_from_spawn_m": 9.813966846466064,
+        "mean_stride_m": 1.3692267807297227,
+        "median_stride_m": 1.4282188415527344,
+        "max_stride_m": 2.1979117393493652,
+        "mean_airtime_s": 1.0732410611303345,
+        "mean_com_rise_m": 0.2269419200177011,
+        "mean_airborne_shoulder_pitch_range_deg": 13.044933159046106,
+        "median_liftoff_pitch_deg": -8.402155876159668,
+        "median_prelanding_pitch_deg": 5.451991558074951,
+        "median_liftoff_waist_pitch_deg": -9.203095436096191,
+        "median_prelanding_waist_pitch_deg": 30.01751708984375,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.8304498269896193,
+        "mean_landing_flexion_50ms_deg": 8.579938284666069,
+        "mean_landing_flexion_150ms_deg": 15.74097900984609,
+        "hops": 289,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0,
+        "median_prelanding_knee_deg": 26.276020050048828,
+        "median_last_150ms_airborne_flexion_deg": 4.752138137817383,
+        "completed_hops_per_person_min": 36.125,
+        "brief_flights_before_completion_gate": 3,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0.017391304347826087,
+        "backlean_fraction": 0.09260814783704326,
+        "longest_backlean_s": 0.5833333333333334,
+        "median_pitch_deg": {
+          "compression": 2.4463202953338623,
+          "extension": -4.823066711425781,
+          "rising": -4.741399765014648,
+          "descending": 5.60756254196167
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.0038022813688212928,
+          "extension": 0.2212791755077296,
+          "rising": 0.19787100814026298,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.8373702422145328,
+        "paired_hop_count": 289,
+        "failure_resets": 2,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 2,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.03334683179855347,
+          "right": 0.10920046642422676
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.042220234870910645,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 10409,
+            "heel_load_fraction": 0.19262176962244212,
+            "forefoot_load_fraction": 0.8170813718897109,
+            "heel_and_forefoot_fraction": 0.018061293111730232,
+            "forefoot_only_fraction": 0.7990200787779806
+          },
+          "compression": {
+            "loaded_foot_samples": 11631,
+            "heel_load_fraction": 0.1849368068093887,
+            "forefoot_load_fraction": 0.8252944716705356,
+            "heel_and_forefoot_fraction": 0.018571060098013927,
+            "forefoot_only_fraction": 0.8067234115725217
+          },
+          "extension": {
+            "loaded_foot_samples": 8384,
+            "heel_load_fraction": 0.04890267175572519,
+            "forefoot_load_fraction": 0.9583730916030534,
+            "heel_and_forefoot_fraction": 0.008826335877862596,
+            "forefoot_only_fraction": 0.9495467557251909
+          },
+          "all": {
+            "loaded_foot_samples": 19187,
+            "heel_load_fraction": 0.12920206389743055,
+            "forefoot_load_fraction": 0.8804919997915255,
+            "heel_and_forefoot_fraction": 0.015114400375254078,
+            "forefoot_only_fraction": 0.8653775994162715
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 5230,
+              "heel_load_fraction": 0.37782026768642446,
+              "forefoot_load_fraction": 0.6376673040152964,
+              "heel_and_forefoot_fraction": 0.03173996175908222,
+              "forefoot_only_fraction": 0.6059273422562141
+            },
+            "right": {
+              "loaded_foot_samples": 5179,
+              "heel_load_fraction": 0.005599536590075304,
+              "forefoot_load_fraction": 0.9982622127823905,
+              "heel_and_forefoot_fraction": 0.004247924309712299,
+              "forefoot_only_fraction": 0.9940142884726781
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5747,
+              "heel_load_fraction": 0.3692361231947103,
+              "forefoot_load_fraction": 0.6479902557856273,
+              "heel_and_forefoot_fraction": 0.033756742648338264,
+              "forefoot_only_fraction": 0.614233513137289
+            },
+            "right": {
+              "loaded_foot_samples": 5884,
+              "heel_load_fraction": 0.004928619986403807,
+              "forefoot_load_fraction": 0.9984704282800816,
+              "heel_and_forefoot_fraction": 0.0037389530931339226,
+              "forefoot_only_fraction": 0.9947314751869476
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2377,
+              "heel_load_fraction": 0.17248632730332353,
+              "forefoot_load_fraction": 0.8531762726125368,
+              "heel_and_forefoot_fraction": 0.031131678586453514,
+              "forefoot_only_fraction": 0.8220445940260833
+            },
+            "right": {
+              "loaded_foot_samples": 6007,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 7937,
+              "heel_load_fraction": 0.3086808617865692,
+              "forefoot_load_fraction": 0.7122338415018269,
+              "heel_and_forefoot_fraction": 0.03376590651379614,
+              "forefoot_only_fraction": 0.6784679349880307
+            },
+            "right": {
+              "loaded_foot_samples": 11250,
+              "heel_load_fraction": 0.002577777777777778,
+              "forefoot_load_fraction": 0.9992,
+              "heel_and_forefoot_fraction": 0.0019555555555555554,
+              "forefoot_only_fraction": 0.9972444444444445
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.011527942425703288,
+          "overlap_samples": 88,
+          "boot_pair_contact_samples": 88,
+          "overlap_fraction": 0.0015277777777777779,
+          "boot_pair_contact_fraction": 0.0015277777777777779
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28572,
+            "left_median_signed_deg": 47.76857376098633,
+            "right_median_signed_deg": 36.99019241333008,
+            "pair_center_median_signed_deg": 41.785075187683105,
+            "pair_center_median_absolute_deg": 41.785075187683105
+          },
+          "flight": {
+            "samples": 19708,
+            "left_median_signed_deg": 49.3822078704834,
+            "right_median_signed_deg": 38.76336097717285,
+            "pair_center_median_signed_deg": 43.099148750305176,
+            "pair_center_median_absolute_deg": 43.099148750305176
+          },
+          "early_support": {
+            "samples": 5134,
+            "left_median_signed_deg": 36.20884704589844,
+            "right_median_signed_deg": 30.084346771240234,
+            "pair_center_median_signed_deg": 33.30617904663086,
+            "pair_center_median_absolute_deg": 33.394493103027344
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 5134,
+          "median_mirror_error_leg_deg": 13.516355991363525,
+          "median_knee_gap_deg": 24.082992553710938,
+          "median_ankle_pitch_gap_deg": 12.755376815795898,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 29.31143093109131,
+            "right": 54.514827728271484
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 19708,
+          "median_absolute_angle_deg": 4.468751430511475,
+          "median_signed_angle_deg": 0.4978998750448227
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 5.53148446780025,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 7.839690466660886,
+              "ShoulderPitch": 10.210818601695147,
+              "ShoulderYaw": 3.9136613827867466,
+              "Elbow": 0.1617674200582212
+            },
+            "foot_stagger_median_cm": 9.877403259277344,
+            "foot_stagger_p90_cm": 22.744458198547367,
+            "samples": 5260
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 6.951726024207997,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 22.520266957849092,
+              "ShoulderPitch": 2.4826882868580213,
+              "ShoulderYaw": 2.7369684469290463,
+              "Elbow": 0.06698040519582883
+            },
+            "foot_stagger_median_cm": 7.059258937835693,
+            "foot_stagger_p90_cm": 21.383101654052734,
+            "samples": 3299
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 10.719730696550409,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 24.05681268822,
+              "ShoulderPitch": 5.989776804977881,
+              "ShoulderYaw": 12.519391430174087,
+              "Elbow": 0.31294186282967096
+            },
+            "foot_stagger_median_cm": 5.475050210952759,
+            "foot_stagger_p90_cm": 13.215542125701903,
+            "samples": 9582
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 6.119653374073236,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 5.219665832393706,
+              "ShoulderPitch": 12.043857028521806,
+              "ShoulderYaw": 7.129672769821482,
+              "Elbow": 0.08541786555594878
+            },
+            "foot_stagger_median_cm": 7.88206672668457,
+            "foot_stagger_p90_cm": 14.718400764465333,
+            "samples": 8987
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 7.815859147894767,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 14.479325965859607,
+              "ShoulderPitch": 8.519901907588629,
+              "ShoulderYaw": 8.088564981825035,
+              "Elbow": 0.17564373630579802
+            },
+            "foot_stagger_median_cm": 7.040222644805908,
+            "foot_stagger_p90_cm": 15.905884170532227,
+            "samples": 28572
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 4.337497627963561,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 2.147962658198802,
+              "ShoulderPitch": 11.014678545573332,
+              "ShoulderYaw": 4.084188308236495,
+              "Elbow": 0.10316099984561569
+            },
+            "foot_stagger_median_cm": 9.770524024963379,
+            "foot_stagger_p90_cm": 15.623179817199707,
+            "samples": 289
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3083333373069763,
+          "median_effective_support_s": 0.26077666878700256,
+          "median_peak_lunar_bodyweights": 9.441705703735352,
+          "median_peak_sole_load_n": 1957.435851830782,
+          "median_sole_load_integral_bw_s": 1.455266535282135,
+          "median_com_descent_cm": 6.790933012962341,
+          "median_com_rebound_cm": 11.367330700159073,
+          "median_knee_flexion_deg": 20.430557250976562,
+          "median_knee_reextension_deg": 12.68324089050293,
+          "median_pre_takeoff_reextension_deg": 15.0380859375,
+          "median_max_knee_flexion_deg": 23.943803787231445,
+          "median_rebound_before_liftoff_cm": 8.483542501926422,
+          "median_supported_extension_s": 0.13333333333333333,
+          "median_upward_speed_gain_mps": 0.5807153582572937,
+          "p90_peak_lunar_bodyweights": 19.717058944702142,
+          "p99_loaded_sample_lunar_bodyweights": 28.291657161712674,
+          "lower_flex_and_reextend_fraction": 0.7565217391304347,
+          "supported_compression_then_extension_fraction": 0.8043478260869565,
+          "stance_count": 230,
+          "p90_peak_sole_load_n": 4087.701871045586
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt"
+      },
+      "selected": {
+        "target_mps": 1.5,
+        "actual_mean_mps": 1.1306413561105728,
+        "mean_absolute_along_heading_com_speed_mps": 1.1322785814046397,
+        "median_distance_from_spawn_m": 3.6482375860214233,
+        "p90_distance_from_spawn_m": 9.46843128204346,
+        "mean_stride_m": 1.3135673200262004,
+        "median_stride_m": 1.3573236465454102,
+        "max_stride_m": 2.23756742477417,
+        "mean_airtime_s": 1.0755172413793104,
+        "mean_com_rise_m": 0.21773040253540565,
+        "mean_airborne_shoulder_pitch_range_deg": 14.430264190147662,
+        "median_liftoff_pitch_deg": -8.73381757736206,
+        "median_prelanding_pitch_deg": 5.1707072257995605,
+        "median_liftoff_waist_pitch_deg": -12.478841304779053,
+        "median_prelanding_waist_pitch_deg": 30.06931972503662,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.906896551724138,
+        "mean_landing_flexion_50ms_deg": 7.337082928624646,
+        "mean_landing_flexion_150ms_deg": 13.599651310361665,
+        "hops": 290,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.00388078236572493,
+        "median_prelanding_knee_deg": 26.03989315032959,
+        "median_last_150ms_airborne_flexion_deg": 5.044538378715515,
+        "completed_hops_per_person_min": 36.25,
+        "brief_flights_before_completion_gate": 0,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0.008620689655172414,
+        "backlean_fraction": 0.09366583890035325,
+        "longest_backlean_s": 0.45,
+        "median_pitch_deg": {
+          "compression": 2.527660608291626,
+          "extension": -5.603666305541992,
+          "rising": -4.74070405960083,
+          "descending": 5.057311534881592
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.006393606393606394,
+          "extension": 0.2778594531020288,
+          "rising": 0.1779102604330091,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.9482758620689655,
+        "paired_hop_count": 290,
+        "failure_resets": 0,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.03145918622612953,
+          "right": 0.09935631975531578
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.04079250991344452,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 9696,
+            "heel_load_fraction": 0.21122112211221122,
+            "forefoot_load_fraction": 0.7956889438943895,
+            "heel_and_forefoot_fraction": 0.01516089108910891,
+            "forefoot_only_fraction": 0.7805280528052805
+          },
+          "compression": {
+            "loaded_foot_samples": 10622,
+            "heel_load_fraction": 0.20146864997175673,
+            "forefoot_load_fraction": 0.805027301826398,
+            "heel_and_forefoot_fraction": 0.014592355488608549,
+            "forefoot_only_fraction": 0.7904349463377895
+          },
+          "extension": {
+            "loaded_foot_samples": 8074,
+            "heel_load_fraction": 0.06366113450582116,
+            "forefoot_load_fraction": 0.9398067872182314,
+            "heel_and_forefoot_fraction": 0.004706465196928412,
+            "forefoot_only_fraction": 0.935100322021303
+          },
+          "all": {
+            "loaded_foot_samples": 18024,
+            "heel_load_fraction": 0.14059032401242788,
+            "forefoot_load_fraction": 0.8647913892587661,
+            "heel_and_forefoot_fraction": 0.010707944962272526,
+            "forefoot_only_fraction": 0.8540834442964935
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 4873,
+              "heel_load_fraction": 0.4153498871331828,
+              "forefoot_load_fraction": 0.5955263697927354,
+              "heel_and_forefoot_fraction": 0.02688282372255284,
+              "forefoot_only_fraction": 0.5686435460701826
+            },
+            "right": {
+              "loaded_foot_samples": 4823,
+              "heel_load_fraction": 0.004976155919552146,
+              "forefoot_load_fraction": 0.9979266017001867,
+              "heel_and_forefoot_fraction": 0.0033174372797014308,
+              "forefoot_only_fraction": 0.9946091644204852
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5213,
+              "heel_load_fraction": 0.4059083061576827,
+              "forefoot_load_fraction": 0.604642240552465,
+              "heel_and_forefoot_fraction": 0.026664108958373296,
+              "forefoot_only_fraction": 0.5779781315940917
+            },
+            "right": {
+              "loaded_foot_samples": 5409,
+              "heel_load_fraction": 0.004437049362174155,
+              "forefoot_load_fraction": 0.9981512294324274,
+              "heel_and_forefoot_fraction": 0.002958032908116103,
+              "forefoot_only_fraction": 0.9951931965243114
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 1841,
+              "heel_load_fraction": 0.27919608908202065,
+              "forefoot_load_fraction": 0.7360130363932645,
+              "heel_and_forefoot_fraction": 0.020640956002172733,
+              "forefoot_only_fraction": 0.7153720803910918
+            },
+            "right": {
+              "loaded_foot_samples": 6233,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 6841,
+              "heel_load_fraction": 0.3669054231837451,
+              "forefoot_load_fraction": 0.6452273059494226,
+              "heel_and_forefoot_fraction": 0.025873410320128635,
+              "forefoot_only_fraction": 0.619353895629294
+            },
+            "right": {
+              "loaded_foot_samples": 11183,
+              "heel_load_fraction": 0.002146114638290262,
+              "forefoot_load_fraction": 0.9991057855673791,
+              "heel_and_forefoot_fraction": 0.001430743092193508,
+              "forefoot_only_fraction": 0.9976750424751856
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.007797204087741972,
+          "overlap_samples": 25,
+          "boot_pair_contact_samples": 25,
+          "overlap_fraction": 0.00043402777777777775,
+          "boot_pair_contact_fraction": 0.00043402777777777775
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28591,
+            "left_median_signed_deg": 21.12722396850586,
+            "right_median_signed_deg": 8.439002990722656,
+            "pair_center_median_signed_deg": 14.5130352973938,
+            "pair_center_median_absolute_deg": 14.756619453430174
+          },
+          "flight": {
+            "samples": 19892,
+            "left_median_signed_deg": 19.521621704101562,
+            "right_median_signed_deg": 7.843419313430786,
+            "pair_center_median_signed_deg": 13.057845115661623,
+            "pair_center_median_absolute_deg": 13.057845115661623
+          },
+          "early_support": {
+            "samples": 4954,
+            "left_median_signed_deg": 22.79494285583496,
+            "right_median_signed_deg": 13.105272769927979,
+            "pair_center_median_signed_deg": 18.487231135368347,
+            "pair_center_median_absolute_deg": 19.082780122756958
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 4954,
+          "median_mirror_error_leg_deg": 12.10887622833252,
+          "median_knee_gap_deg": 22.225927352905273,
+          "median_ankle_pitch_gap_deg": 11.782735824584961,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 29.008519172668457,
+            "right": 51.734750747680664
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 19892,
+          "median_absolute_angle_deg": 8.144869327545166,
+          "median_signed_angle_deg": -8.022688388824463
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 4.6678051038605535,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 6.7091180631341265,
+              "ShoulderPitch": 7.8568542687487986,
+              "ShoulderYaw": 3.9063370507735002,
+              "Elbow": 0.1989110327857884
+            },
+            "foot_stagger_median_cm": 9.878170013427734,
+            "foot_stagger_p90_cm": 23.231883239746097,
+            "samples": 5005
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 5.779796991962845,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 17.29340611590372,
+              "ShoulderPitch": 3.43326797205798,
+              "ShoulderYaw": 2.3319533494284643,
+              "Elbow": 0.06056053046121409
+            },
+            "foot_stagger_median_cm": 6.924500942230225,
+            "foot_stagger_p90_cm": 25.53555679321289,
+            "samples": 3401
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 7.632291490249442,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 15.611432546551729,
+              "ShoulderPitch": 5.062096326794717,
+              "ShoulderYaw": 9.576361315123753,
+              "Elbow": 0.2792757725275689
+            },
+            "foot_stagger_median_cm": 5.66430139541626,
+            "foot_stagger_p90_cm": 13.074641227722168,
+            "samples": 9561
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 4.191368582891591,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 2.830816104498073,
+              "ShoulderPitch": 7.1420786861011845,
+              "ShoulderYaw": 6.727197310779358,
+              "Elbow": 0.06538223018774628
+            },
+            "foot_stagger_median_cm": 6.549357652664185,
+            "foot_stagger_p90_cm": 13.320444774627687,
+            "samples": 9180
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 5.732065554179551,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 9.835060440921108,
+              "ShoulderPitch": 6.124358109009689,
+              "ShoulderYaw": 6.807284456323069,
+              "Elbow": 0.16155921046433186
+            },
+            "foot_stagger_median_cm": 6.657345771789551,
+            "foot_stagger_p90_cm": 16.028627395629883,
+            "samples": 28591
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 3.0691104698739435,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 0.983869408080274,
+              "ShoulderPitch": 7.146096294728541,
+              "ShoulderYaw": 4.033273619773059,
+              "Elbow": 0.11320255691389948
+            },
+            "foot_stagger_median_cm": 9.468084812164307,
+            "foot_stagger_p90_cm": 15.973212718963623,
+            "samples": 290
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3083333671092987,
+          "median_effective_support_s": 0.2666666805744171,
+          "median_peak_lunar_bodyweights": 10.310399055480957,
+          "median_peak_sole_load_n": 2137.53164853425,
+          "median_sole_load_integral_bw_s": 1.5230550169944763,
+          "median_com_descent_cm": 8.318758010864258,
+          "median_com_rebound_cm": 12.105655670166016,
+          "median_knee_flexion_deg": 17.389802932739258,
+          "median_knee_reextension_deg": 17.66979694366455,
+          "median_pre_takeoff_reextension_deg": 19.352323532104492,
+          "median_max_knee_flexion_deg": 18.924894332885742,
+          "median_rebound_before_liftoff_cm": 9.249991178512573,
+          "median_supported_extension_s": 0.15,
+          "median_upward_speed_gain_mps": 0.6680477261543274,
+          "p90_peak_lunar_bodyweights": 23.406066131591796,
+          "p99_loaded_sample_lunar_bodyweights": 30.486593017578137,
+          "lower_flex_and_reextend_fraction": 0.8405172413793104,
+          "supported_compression_then_extension_fraction": 0.8577586206896551,
+          "stance_count": 232,
+          "p90_peak_sole_load_n": 4852.499583647711
+        },
+        "seed": 42,
+        "checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt"
+      },
+      "video": "gait_comparison_1.5mps.mp4"
+    }
+  },
+  "holdout": {
+    "1.5": {
+      "before": {
+        "target_mps": 1.5,
+        "actual_mean_mps": 1.1533489376306534,
+        "mean_absolute_along_heading_com_speed_mps": 1.1575918947495327,
+        "median_distance_from_spawn_m": 3.545711040496826,
+        "p90_distance_from_spawn_m": 9.608781051635743,
+        "mean_stride_m": 1.3446940171178625,
+        "median_stride_m": 1.4131494760513306,
+        "max_stride_m": 2.2793314456939697,
+        "mean_airtime_s": 1.0699767711962833,
+        "mean_com_rise_m": 0.2276397819666497,
+        "mean_airborne_shoulder_pitch_range_deg": 12.034568570632137,
+        "median_liftoff_pitch_deg": -8.244523048400879,
+        "median_prelanding_pitch_deg": 5.667566776275635,
+        "median_liftoff_waist_pitch_deg": -8.608369827270508,
+        "median_prelanding_waist_pitch_deg": 29.986572265625,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.8710801393728222,
+        "mean_landing_flexion_50ms_deg": 8.030720478150903,
+        "mean_landing_flexion_150ms_deg": 14.945917903753939,
+        "hops": 287,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.0009463722397476341,
+        "median_prelanding_knee_deg": 26.18682622909546,
+        "median_last_150ms_airborne_flexion_deg": 4.308466911315918,
+        "completed_hops_per_person_min": 35.875,
+        "brief_flights_before_completion_gate": 1,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0.017699115044247787,
+        "backlean_fraction": 0.08505055452541721,
+        "longest_backlean_s": 0.5333333333333333,
+        "median_pitch_deg": {
+          "compression": 2.6029040813446045,
+          "extension": -4.550822734832764,
+          "rising": -4.615795135498047,
+          "descending": 5.5885910987854
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.0005659309564233164,
+          "extension": 0.20616458272753707,
+          "rising": 0.17852321113303563,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.8745644599303136,
+        "paired_hop_count": 287,
+        "failure_resets": 5,
+        "failure_causes": {
+          "tilt": 0,
+          "drift": 3,
+          "low_pelvis": 2,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.033928945660591125,
+          "right": 0.11009801924228668
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.04235351085662842,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 10136,
+            "heel_load_fraction": 0.2063930544593528,
+            "forefoot_load_fraction": 0.8074191002367798,
+            "heel_and_forefoot_fraction": 0.020422257300710338,
+            "forefoot_only_fraction": 0.7869968429360694
+          },
+          "compression": {
+            "loaded_foot_samples": 11366,
+            "heel_load_fraction": 0.1967270807672004,
+            "forefoot_load_fraction": 0.8169980644026043,
+            "heel_and_forefoot_fraction": 0.02014780925567482,
+            "forefoot_only_fraction": 0.7968502551469294
+          },
+          "extension": {
+            "loaded_foot_samples": 8642,
+            "heel_load_fraction": 0.047327007637121034,
+            "forefoot_load_fraction": 0.960425827354779,
+            "heel_and_forefoot_fraction": 0.00960425827354779,
+            "forefoot_only_fraction": 0.9508215690812312
+          },
+          "all": {
+            "loaded_foot_samples": 19131,
+            "heel_load_fraction": 0.13255971982645967,
+            "forefoot_load_fraction": 0.8792535675082327,
+            "heel_and_forefoot_fraction": 0.016204066698029377,
+            "forefoot_only_fraction": 0.8630495008102034
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 5144,
+              "heel_load_fraction": 0.4016329704510109,
+              "forefoot_load_fraction": 0.6222783825816485,
+              "heel_and_forefoot_fraction": 0.03674183514774495,
+              "forefoot_only_fraction": 0.5855365474339036
+            },
+            "right": {
+              "loaded_foot_samples": 4992,
+              "heel_load_fraction": 0.005208333333333333,
+              "forefoot_load_fraction": 0.9981971153846154,
+              "heel_and_forefoot_fraction": 0.003605769230769231,
+              "forefoot_only_fraction": 0.9945913461538461
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5682,
+              "heel_load_fraction": 0.3889475536782823,
+              "forefoot_load_fraction": 0.6355156634987681,
+              "heel_and_forefoot_fraction": 0.037134811686026045,
+              "forefoot_only_fraction": 0.598380851812742
+            },
+            "right": {
+              "loaded_foot_samples": 5684,
+              "heel_load_fraction": 0.004574243490499648,
+              "forefoot_load_fraction": 0.9984166080225193,
+              "heel_and_forefoot_fraction": 0.0031667839549612948,
+              "forefoot_only_fraction": 0.995249824067558
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 2359,
+              "heel_load_fraction": 0.17337855023314963,
+              "forefoot_load_fraction": 0.8550233149639678,
+              "heel_and_forefoot_fraction": 0.035184400169563375,
+              "forefoot_only_fraction": 0.8198389147944044
+            },
+            "right": {
+              "loaded_foot_samples": 6283,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 7829,
+              "heel_load_fraction": 0.3206028867032827,
+              "forefoot_load_fraction": 0.7060927321496998,
+              "heel_and_forefoot_fraction": 0.03729722825392771,
+              "forefoot_only_fraction": 0.6687955038957721
+            },
+            "right": {
+              "loaded_foot_samples": 11302,
+              "heel_load_fraction": 0.0023004777915413203,
+              "forefoot_load_fraction": 0.9992036807644664,
+              "heel_and_forefoot_fraction": 0.0015926384710670677,
+              "forefoot_only_fraction": 0.9976110422933994
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.011503547263937252,
+          "overlap_samples": 148,
+          "boot_pair_contact_samples": 150,
+          "overlap_fraction": 0.0025694444444444445,
+          "boot_pair_contact_fraction": 0.0026041666666666665
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28583,
+            "left_median_signed_deg": 48.49733352661133,
+            "right_median_signed_deg": 37.779048919677734,
+            "pair_center_median_signed_deg": 42.44789695739746,
+            "pair_center_median_absolute_deg": 42.44789695739746
+          },
+          "flight": {
+            "samples": 19547,
+            "left_median_signed_deg": 50.4768180847168,
+            "right_median_signed_deg": 39.62672424316406,
+            "pair_center_median_signed_deg": 44.327871322631836,
+            "pair_center_median_absolute_deg": 44.327871322631836
+          },
+          "early_support": {
+            "samples": 5193,
+            "left_median_signed_deg": 36.605045318603516,
+            "right_median_signed_deg": 29.36819839477539,
+            "pair_center_median_signed_deg": 33.09866523742676,
+            "pair_center_median_absolute_deg": 33.09866523742676
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 5193,
+          "median_mirror_error_leg_deg": 13.625049591064453,
+          "median_knee_gap_deg": 23.488685607910156,
+          "median_ankle_pitch_gap_deg": 11.325064659118652,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 29.34994125366211,
+            "right": 54.14561080932617
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 19547,
+          "median_absolute_angle_deg": 4.269259452819824,
+          "median_signed_angle_deg": 0.34667664766311646
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 5.362870545617336,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 7.722521795495312,
+              "ShoulderPitch": 9.581036940930971,
+              "ShoulderYaw": 3.9699309319315272,
+              "Elbow": 0.1779925141115329
+            },
+            "foot_stagger_median_cm": 9.666158676147461,
+            "foot_stagger_p90_cm": 21.51860809326172,
+            "samples": 5301
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 7.030671661447647,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 22.973554735744926,
+              "ShoulderPitch": 2.3495910264441546,
+              "ShoulderYaw": 2.7340598720608984,
+              "Elbow": 0.06548101154061278
+            },
+            "foot_stagger_median_cm": 6.756631851196289,
+            "foot_stagger_p90_cm": 18.586171340942418,
+            "samples": 3439
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 10.659550620481744,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 24.63133345515709,
+              "ShoulderPitch": 5.374082653422585,
+              "ShoulderYaw": 12.298683333768436,
+              "Elbow": 0.33410303957886794
+            },
+            "foot_stagger_median_cm": 5.45502233505249,
+            "foot_stagger_p90_cm": 12.433084487915043,
+            "samples": 9629
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 5.933859878146837,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 6.0843898233716205,
+              "ShoulderPitch": 10.38195616490016,
+              "ShoulderYaw": 7.14477520576853,
+              "Elbow": 0.12431831854703491
+            },
+            "foot_stagger_median_cm": 7.120012283325195,
+            "foot_stagger_p90_cm": 14.218943786621093,
+            "samples": 8809
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 7.710474447846095,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 15.123646217899427,
+              "ShoulderPitch": 7.534311145428014,
+              "ShoulderYaw": 7.981901490313898,
+              "Elbow": 0.20203893774303974
+            },
+            "foot_stagger_median_cm": 6.70416784286499,
+            "foot_stagger_p90_cm": 15.182380676269531,
+            "samples": 28583
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 4.248856186330399,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 2.663936658837031,
+              "ShoulderPitch": 9.644962399872567,
+              "ShoulderYaw": 4.51156141865128,
+              "Elbow": 0.17496426796071812
+            },
+            "foot_stagger_median_cm": 8.690648078918457,
+            "foot_stagger_p90_cm": 15.710605049133303,
+            "samples": 287
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3125000447034836,
+          "median_effective_support_s": 0.2666666805744171,
+          "median_peak_lunar_bodyweights": 9.34558916091919,
+          "median_peak_sole_load_n": 1937.5091592642098,
+          "median_sole_load_integral_bw_s": 1.512252688407898,
+          "median_com_descent_cm": 8.044591546058655,
+          "median_com_rebound_cm": 11.79077923297882,
+          "median_knee_flexion_deg": 21.64350128173828,
+          "median_knee_reextension_deg": 13.897035598754883,
+          "median_pre_takeoff_reextension_deg": 16.055767059326172,
+          "median_max_knee_flexion_deg": 24.574722290039062,
+          "median_rebound_before_liftoff_cm": 8.750972151756287,
+          "median_supported_extension_s": 0.15,
+          "median_upward_speed_gain_mps": 0.6711285412311554,
+          "p90_peak_lunar_bodyweights": 20.75342559814453,
+          "p99_loaded_sample_lunar_bodyweights": 28.116630496978807,
+          "lower_flex_and_reextend_fraction": 0.8141592920353983,
+          "supported_compression_then_extension_fraction": 0.8539823008849557,
+          "stance_count": 226,
+          "p90_peak_sole_load_n": 4302.559366793144
+        },
+        "seed": 43,
+        "checkpoint": "logs/cpu_train/2026-11-18_sole_plane_mirror/model_100.pt"
+      },
+      "selected": {
+        "target_mps": 1.5,
+        "actual_mean_mps": 1.1104191318154335,
+        "mean_absolute_along_heading_com_speed_mps": 1.111478843428263,
+        "median_distance_from_spawn_m": 3.5986177921295166,
+        "p90_distance_from_spawn_m": 9.465536308288575,
+        "mean_stride_m": 1.3003676525391767,
+        "median_stride_m": 1.3531315326690674,
+        "max_stride_m": 2.23756742477417,
+        "mean_airtime_s": 1.0807781649245063,
+        "mean_com_rise_m": 0.22719345348221914,
+        "mean_airborne_shoulder_pitch_range_deg": 13.408558659437226,
+        "median_liftoff_pitch_deg": -9.128219604492188,
+        "median_prelanding_pitch_deg": 5.299560546875,
+        "median_liftoff_waist_pitch_deg": -12.514701843261719,
+        "median_prelanding_waist_pitch_deg": 30.052276611328125,
+        "opening_at_takeoff_and_forward_prelanding_fraction": 0.8710801393728222,
+        "mean_landing_flexion_50ms_deg": 7.117489372811666,
+        "mean_landing_flexion_150ms_deg": 13.422880624644847,
+        "hops": 287,
+        "midair_near_straight_fraction": 0.0,
+        "midair_either_knee_near_straight_fraction": 0.004216114928169894,
+        "median_prelanding_knee_deg": 25.2437801361084,
+        "median_last_150ms_airborne_flexion_deg": 4.621641159057617,
+        "completed_hops_per_person_min": 35.875,
+        "brief_flights_before_completion_gate": 3,
+        "short_fast_fraction": 0.0,
+        "fast_cycle_fraction": 0.004347826086956522,
+        "backlean_fraction": 0.09930740170700994,
+        "longest_backlean_s": 0.45,
+        "median_pitch_deg": {
+          "compression": 2.546543836593628,
+          "extension": -5.551963806152344,
+          "rising": -4.929988861083984,
+          "descending": 4.965960502624512
+        },
+        "phase_backlean_fraction": {
+          "compression": 0.006732673267326733,
+          "extension": 0.2768523836875359,
+          "rising": 0.18953979203129825,
+          "descending": 0
+        },
+        "paired_hops_with_open_rise_and_forward_descent_fraction": 0.9337979094076655,
+        "paired_hop_count": 287,
+        "failure_resets": 1,
+        "failure_causes": {
+          "tilt": 1,
+          "drift": 0,
+          "low_pelvis": 0,
+          "boundary": 0
+        },
+        "median_early_heel_clearance_m_by_foot": {
+          "left": 0.03201558440923691,
+          "right": 0.10078844428062439
+        },
+        "median_early_heel_forefoot_gap_difference_m": 0.04103556275367737,
+        "sole_support": {
+          "early_compression": {
+            "loaded_foot_samples": 9711,
+            "heel_load_fraction": 0.2234579343013078,
+            "forefoot_load_fraction": 0.7808670579754917,
+            "heel_and_forefoot_fraction": 0.010812480691998765,
+            "forefoot_only_fraction": 0.7700545772834929
+          },
+          "compression": {
+            "loaded_foot_samples": 10641,
+            "heel_load_fraction": 0.21116436425148014,
+            "forefoot_load_fraction": 0.7928766093412273,
+            "heel_and_forefoot_fraction": 0.010149422046800112,
+            "forefoot_only_fraction": 0.7827271872944273
+          },
+          "extension": {
+            "loaded_foot_samples": 8316,
+            "heel_load_fraction": 0.06854256854256854,
+            "forefoot_load_fraction": 0.9336219336219336,
+            "heel_and_forefoot_fraction": 0.003367003367003367,
+            "forefoot_only_fraction": 0.9302549302549302
+          },
+          "all": {
+            "loaded_foot_samples": 18185,
+            "heel_load_fraction": 0.1450646136926038,
+            "forefoot_load_fraction": 0.8583447896618092,
+            "heel_and_forefoot_fraction": 0.007478691229034919,
+            "forefoot_only_fraction": 0.8508660984327743
+          }
+        },
+        "sole_support_by_foot": {
+          "early_compression": {
+            "left": {
+              "loaded_foot_samples": 4998,
+              "heel_load_fraction": 0.42997198879551823,
+              "forefoot_load_fraction": 0.5766306522609044,
+              "heel_and_forefoot_fraction": 0.018207282913165267,
+              "forefoot_only_fraction": 0.5584233693477391
+            },
+            "right": {
+              "loaded_foot_samples": 4713,
+              "heel_load_fraction": 0.004455760661998727,
+              "forefoot_load_fraction": 0.9974538510502864,
+              "heel_and_forefoot_fraction": 0.002970507107999151,
+              "forefoot_only_fraction": 0.9944833439422873
+            }
+          },
+          "compression": {
+            "left": {
+              "loaded_foot_samples": 5360,
+              "heel_load_fraction": 0.4152985074626866,
+              "forefoot_load_fraction": 0.591044776119403,
+              "heel_and_forefoot_fraction": 0.01753731343283582,
+              "forefoot_only_fraction": 0.5735074626865672
+            },
+            "right": {
+              "loaded_foot_samples": 5281,
+              "heel_load_fraction": 0.003976519598560878,
+              "forefoot_load_fraction": 0.9977277030865367,
+              "heel_and_forefoot_fraction": 0.0026510130657072524,
+              "forefoot_only_fraction": 0.9950766900208294
+            }
+          },
+          "extension": {
+            "left": {
+              "loaded_foot_samples": 1863,
+              "heel_load_fraction": 0.3059581320450886,
+              "forefoot_load_fraction": 0.7037037037037037,
+              "heel_and_forefoot_fraction": 0.015029522275899088,
+              "forefoot_only_fraction": 0.6886741814278046
+            },
+            "right": {
+              "loaded_foot_samples": 6453,
+              "heel_load_fraction": 0.0,
+              "forefoot_load_fraction": 1.0,
+              "heel_and_forefoot_fraction": 0.0,
+              "forefoot_only_fraction": 1.0
+            }
+          },
+          "all": {
+            "left": {
+              "loaded_foot_samples": 6952,
+              "heel_load_fraction": 0.37643843498273877,
+              "forefoot_load_fraction": 0.6311852704257768,
+              "heel_and_forefoot_fraction": 0.017548906789413118,
+              "forefoot_only_fraction": 0.6136363636363636
+            },
+            "right": {
+              "loaded_foot_samples": 11233,
+              "heel_load_fraction": 0.0018694916763108698,
+              "forefoot_load_fraction": 0.9989317190421081,
+              "heel_and_forefoot_fraction": 0.0012463277842072464,
+              "forefoot_only_fraction": 0.9976853912579008
+            }
+          }
+        },
+        "sole_separation": {
+          "physics_samples": 57600,
+          "min_signed_distance_m": -0.005373529066700155,
+          "overlap_samples": 40,
+          "boot_pair_contact_samples": 40,
+          "overlap_fraction": 0.0006944444444444445,
+          "boot_pair_contact_fraction": 0.0006944444444444445
+        },
+        "boot_yaw_to_torso": {
+          "all": {
+            "samples": 28588,
+            "left_median_signed_deg": 21.422698974609375,
+            "right_median_signed_deg": 8.52011775970459,
+            "pair_center_median_signed_deg": 14.859242677688602,
+            "pair_center_median_absolute_deg": 15.081562399864199
+          },
+          "flight": {
+            "samples": 19765,
+            "left_median_signed_deg": 19.754737854003906,
+            "right_median_signed_deg": 7.816446304321289,
+            "pair_center_median_signed_deg": 13.513692975044249,
+            "pair_center_median_absolute_deg": 13.513692975044249
+          },
+          "early_support": {
+            "samples": 5010,
+            "left_median_signed_deg": 22.77110767364502,
+            "right_median_signed_deg": 13.151941299438477,
+            "pair_center_median_signed_deg": 18.8919894695282,
+            "pair_center_median_absolute_deg": 19.486745357513428
+          }
+        },
+        "early_landing_mirror": {
+          "control_samples": 5010,
+          "median_mirror_error_leg_deg": 12.111749649047852,
+          "median_knee_gap_deg": 22.32745933532715,
+          "median_ankle_pitch_gap_deg": 11.034818172454834,
+          "median_knee_flexion_deg_by_foot": {
+            "left": 27.941401481628418,
+            "right": 51.363019943237305
+          }
+        },
+        "body_relative_travel": {
+          "airborne_samples": 19765,
+          "median_absolute_angle_deg": 7.714207172393799,
+          "median_signed_angle_deg": -7.479859828948975
+        },
+        "coordination": {
+          "compression": {
+            "arm_mirror_error_mean_deg": 4.723855304427834,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 6.710546245923148,
+              "ShoulderPitch": 8.009646418756578,
+              "ShoulderYaw": 3.924759795524083,
+              "Elbow": 0.25046875750752884
+            },
+            "foot_stagger_median_cm": 10.144558429718018,
+            "foot_stagger_p90_cm": 23.575766754150393,
+            "samples": 5050
+          },
+          "extension": {
+            "arm_mirror_error_mean_deg": 5.836072611643985,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 17.58456227007669,
+              "ShoulderPitch": 3.336252598421706,
+              "ShoulderYaw": 2.3617151247104498,
+              "Elbow": 0.06176045336709443
+            },
+            "foot_stagger_median_cm": 6.88151478767395,
+            "foot_stagger_p90_cm": 25.59718132019043,
+            "samples": 3482
+          },
+          "rising": {
+            "arm_mirror_error_mean_deg": 7.661642261079439,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 15.776697236716648,
+              "ShoulderPitch": 4.951719859522428,
+              "ShoulderYaw": 9.64154271788549,
+              "Elbow": 0.276609230193187
+            },
+            "foot_stagger_median_cm": 5.684261322021484,
+            "foot_stagger_p90_cm": 13.126706886291517,
+            "samples": 9713
+          },
+          "descending": {
+            "arm_mirror_error_mean_deg": 4.285897537812399,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 3.0151938332113986,
+              "ShoulderPitch": 7.58832746514911,
+              "ShoulderYaw": 6.4774609723966785,
+              "Elbow": 0.06260788049240985
+            },
+            "foot_stagger_median_cm": 6.079973220825195,
+            "foot_stagger_p90_cm": 13.101057815551759,
+            "samples": 8903
+          },
+          "all": {
+            "arm_mirror_error_mean_deg": 5.815770694530391,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 10.117999263644062,
+              "ShoulderPitch": 6.224580826001842,
+              "ShoulderYaw": 6.750219714300495,
+              "Elbow": 0.17028297417516103
+            },
+            "foot_stagger_median_cm": 6.472828388214111,
+            "foot_stagger_p90_cm": 16.545788192749022,
+            "samples": 28588
+          },
+          "prelanding": {
+            "arm_mirror_error_mean_deg": 2.940984309858957,
+            "mean_per_joint_deg": {
+              "ShoulderRoll": 0.866865070642196,
+              "ShoulderPitch": 6.97865934118966,
+              "ShoulderYaw": 3.8359086851131834,
+              "Elbow": 0.08250414249078868
+            },
+            "foot_stagger_median_cm": 9.129491806030273,
+            "foot_stagger_p90_cm": 16.666366958618166,
+            "samples": 287
+          }
+        },
+        "support": {
+          "median_loaded_contact_s": 0.3166666775941849,
+          "median_effective_support_s": 0.2666666805744171,
+          "median_peak_lunar_bodyweights": 10.335750102996826,
+          "median_peak_sole_load_n": 2142.7873778321245,
+          "median_sole_load_integral_bw_s": 1.5104357600212097,
+          "median_com_descent_cm": 8.033056557178497,
+          "median_com_rebound_cm": 11.97560429573059,
+          "median_knee_flexion_deg": 18.06337833404541,
+          "median_knee_reextension_deg": 17.524229049682617,
+          "median_pre_takeoff_reextension_deg": 18.69333839416504,
+          "median_max_knee_flexion_deg": 19.576858520507812,
+          "median_rebound_before_liftoff_cm": 8.952084183692932,
+          "median_supported_extension_s": 0.15,
+          "median_upward_speed_gain_mps": 0.6854084730148315,
+          "p90_peak_lunar_bodyweights": 18.920388031005857,
+          "p99_loaded_sample_lunar_bodyweights": 26.188486099243136,
+          "lower_flex_and_reextend_fraction": 0.9,
+          "supported_compression_then_extension_fraction": 0.9043478260869565,
+          "stance_count": 230,
+          "p90_peak_sole_load_n": 3922.537624508761
+        },
+        "seed": 43,
+        "checkpoint": "logs/cpu_train/2026-11-18_boot_yaw_refine/model_104.pt"
+      }
+    }
+  }
+}

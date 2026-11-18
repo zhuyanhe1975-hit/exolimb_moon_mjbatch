@@ -8,6 +8,7 @@ if [[ ! -x "$python_bin" ]]; then
   echo "CPU Python not found: $python_bin. See README.md for .venv-cpu setup." >&2
   exit 1
 fi
+set -- --latest-training "$@"
 use_window=true
 previous=""
 for arg in "$@"; do

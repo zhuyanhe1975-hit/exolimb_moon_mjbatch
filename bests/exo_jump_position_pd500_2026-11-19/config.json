@@ -1,0 +1,105 @@
+{
+  "env": {
+    "backend": "native_mujoco_cpu",
+    "physics_backend": "mjbatch",
+    "task": "exo_jump",
+    "num_envs": 1024,
+    "terrain_idx": 12,
+    "pushes": true,
+    "seed": 42,
+    "physics_workers": 16,
+    "geometry": "fitted",
+    "terrain_indices": [
+      12,
+      1,
+      3,
+      7,
+      8,
+      14,
+      20,
+      24,
+      27,
+      32,
+      36,
+      41,
+      47,
+      54,
+      59,
+      64
+    ],
+    "spawn_sampling": "independent_position_and_36_uniform_headings",
+    "assist_force_n": 500.0,
+    "exo_mechanism": "hooke_slide_ball_v3",
+    "jump_actuation": "forward_boot_yaw_free_height_v32",
+    "jump_objective": "forward_jump_with_supported_exoskeleton_work_sharing",
+    "jump_speed_range_mps": [
+      0.0,
+      1.5
+    ],
+    "exo_policy_io": "position_pd_v1",
+    "exo_efficiency_reward": {
+      "revision": "supported_work_sharing_v3",
+      "human_absolute_power": 2.8,
+      "human_mean_squared_torque": 1.5,
+      "peak_leg_squared_torque": 1.5,
+      "supported_exo_work_share": 12.0,
+      "supported_exo_positive_power": 18.0
+    },
+    "update_device": "mps",
+    "init_checkpoint": "/Users/yhzhu/Documents/myWorks/exolimb_moon_mujoco_playground/logs/cpu_exo_train/2026-11-18_model104_supported_work_sharing_v3/model_119.pt"
+  },
+  "runner": {
+    "num_steps_per_env": 32,
+    "save_interval": 25,
+    "logger": "tensorboard",
+    "obs_groups": {
+      "actor": [
+        "policy"
+      ],
+      "critic": [
+        "critic"
+      ]
+    },
+    "actor": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "rsl_rl.modules.GaussianDistribution",
+        "init_std": 0.25,
+        "std_type": "scalar"
+      }
+    },
+    "critic": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true
+    },
+    "algorithm": {
+      "class_name": "cpu_sampling_ppo.CpuSamplingMpsPPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.0003,
+      "schedule": "adaptive",
+      "gamma": 0.995,
+      "lam": 0.95,
+      "entropy_coef": 0.001,
+      "desired_kl": 0.01,
+      "clip_param": 0.2,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "normalize_advantage_per_mini_batch": false
+    }
+  },
+  "iterations": 200,
+  "torch_threads": 4
+}

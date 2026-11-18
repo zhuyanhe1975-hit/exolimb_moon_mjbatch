@@ -1,0 +1,4656 @@
+{
+  "checkpoint": "logs/cpu_exo_train/2026-11-18_model104_supported_work_sharing_v3/model_119.pt",
+  "terrain_indices": [
+    2,
+    15,
+    25,
+    45,
+    52,
+    63
+  ],
+  "seed": 43,
+  "worlds_per_terrain": 8,
+  "seconds_per_world": 20,
+  "pushes": false,
+  "assist_force_n": 80.0,
+  "coarse_slope_threshold_deg": 3,
+  "slope_attribution": "At episode spawn, using two perpendicular 1 m baselines. Steeper lateral component is cross-slope, else positive or negative forward grade.",
+  "speeds": [
+    {
+      "target_speed_mps": 0.0,
+      "initial_slope_counts": {
+        "level": 9,
+        "uphill": 13,
+        "downhill": 9,
+        "cross_slope": 17
+      },
+      "initial_slope_magnitude_range_deg": [
+        0.899736225605011,
+        11.339797973632812
+      ],
+      "overall": {
+        "simulated_seconds": 960.0,
+        "forward_mean_mps": -0.017645408204476,
+        "mean_speed_error_mps": -0.017645408204476,
+        "instantaneous_speed_mae_mps": 0.025986352167873424,
+        "fraction_within_0_15_mps": 0.9972395833333333,
+        "completed_jumps": 627,
+        "jumps_per_minute": 39.1875,
+        "mean_jump_stride_m": -0.016111969918107684,
+        "failures": 0,
+        "falls": 0,
+        "falls_per_minute": 0.0,
+        "timeouts": 96
+      },
+      "by_slope": {
+        "level": {
+          "simulated_seconds": 170.0,
+          "forward_mean_mps": -0.02437941677725883,
+          "mean_speed_error_mps": -0.02437941677725883,
+          "instantaneous_speed_mae_mps": 0.023036083416019773,
+          "fraction_within_0_15_mps": 1.0,
+          "completed_jumps": 108,
+          "jumps_per_minute": 38.11764705882353,
+          "mean_jump_stride_m": -0.023085484350169147,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 17
+        },
+        "uphill": {
+          "simulated_seconds": 220.0,
+          "forward_mean_mps": -0.024508076956947827,
+          "mean_speed_error_mps": -0.024508076956947827,
+          "instantaneous_speed_mae_mps": 0.0305096476470032,
+          "fraction_within_0_15_mps": 0.9996969696969698,
+          "completed_jumps": 144,
+          "jumps_per_minute": 39.27272727272727,
+          "mean_jump_stride_m": -0.021894649498992495,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 22
+        },
+        "downhill": {
+          "simulated_seconds": 170.0,
+          "forward_mean_mps": -0.01372004994590688,
+          "mean_speed_error_mps": -0.01372004994590688,
+          "instantaneous_speed_mae_mps": 0.02739519980751632,
+          "fraction_within_0_15_mps": 0.9996078431372549,
+          "completed_jumps": 114,
+          "jumps_per_minute": 40.23529411764706,
+          "mean_jump_stride_m": -0.01287619874142764,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 17
+        },
+        "cross_slope": {
+          "simulated_seconds": 400.0,
+          "forward_mean_mps": -0.012677264007075664,
+          "mean_speed_error_mps": -0.012677264007075664,
+          "instantaneous_speed_mae_mps": 0.024153643627041622,
+          "fraction_within_0_15_mps": 0.9937083333333333,
+          "completed_jumps": 261,
+          "jumps_per_minute": 39.15,
+          "mean_jump_stride_m": -0.011449259174166969,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 40
+        }
+      },
+      "by_terrain": {
+        "2": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.007150851094451127,
+            "mean_speed_error_mps": -0.007150851094451127,
+            "instantaneous_speed_mae_mps": 0.03442443770262349,
+            "fraction_within_0_15_mps": 0.9838541666666667,
+            "completed_jumps": 110,
+            "jumps_per_minute": 41.25,
+            "mean_jump_stride_m": -0.005333743312142112,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 40.0,
+              "forward_mean_mps": -0.02507812950590278,
+              "mean_speed_error_mps": -0.02507812950590278,
+              "instantaneous_speed_mae_mps": 0.03678834964531461,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 28,
+              "jumps_per_minute": 42.0,
+              "mean_jump_stride_m": -0.020250541823250905,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 30.0,
+              "forward_mean_mps": 0.017684318029023417,
+              "mean_speed_error_mps": 0.017684318029023417,
+              "instantaneous_speed_mae_mps": 0.036890539533358434,
+              "fraction_within_0_15_mps": 0.9977777777777778,
+              "completed_jumps": 20,
+              "jumps_per_minute": 40.0,
+              "mean_jump_stride_m": 0.017628175020217896,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "cross_slope": {
+              "simulated_seconds": 90.0,
+              "forward_mean_mps": -0.0074615615082974625,
+              "mean_speed_error_mps": -0.0074615615082974625,
+              "instantaneous_speed_mae_mps": 0.03255177622896023,
+              "fraction_within_0_15_mps": 0.972037037037037,
+              "completed_jumps": 62,
+              "jumps_per_minute": 41.333333333333336,
+              "mean_jump_stride_m": -0.006004195059499433,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 9
+            }
+          }
+        },
+        "15": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.014201633521336455,
+            "mean_speed_error_mps": -0.014201633521336455,
+            "instantaneous_speed_mae_mps": 0.021340643889779985,
+            "fraction_within_0_15_mps": 1.0,
+            "completed_jumps": 105,
+            "jumps_per_minute": 39.375,
+            "mean_jump_stride_m": -0.01357133768144108,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 50.0,
+              "forward_mean_mps": -0.027335137694781225,
+              "mean_speed_error_mps": -0.027335137694781225,
+              "instantaneous_speed_mae_mps": 0.029079092328743172,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 31,
+              "jumps_per_minute": 37.2,
+              "mean_jump_stride_m": -0.02824974444604689,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "downhill": {
+              "simulated_seconds": 50.0,
+              "forward_mean_mps": -0.011782768235623848,
+              "mean_speed_error_mps": -0.011782768235623848,
+              "instantaneous_speed_mae_mps": 0.019410159075646333,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 34,
+              "jumps_per_minute": 40.8,
+              "mean_jump_stride_m": -0.010987933944253361,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "cross_slope": {
+              "simulated_seconds": 60.0,
+              "forward_mean_mps": -0.005272767781559651,
+              "mean_speed_error_mps": -0.005272767781559651,
+              "instantaneous_speed_mae_mps": 0.01650067420242204,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 40,
+              "jumps_per_minute": 40.0,
+              "mean_jump_stride_m": -0.004391465615481138,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            }
+          }
+        },
+        "25": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.021115595446858038,
+            "mean_speed_error_mps": -0.021115595446858038,
+            "instantaneous_speed_mae_mps": 0.02870603858095864,
+            "fraction_within_0_15_mps": 1.0,
+            "completed_jumps": 105,
+            "jumps_per_minute": 39.375,
+            "mean_jump_stride_m": -0.019827619336900255,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 10.0,
+              "forward_mean_mps": -0.032483448908533316,
+              "mean_speed_error_mps": -0.032483448908533316,
+              "instantaneous_speed_mae_mps": 0.02861295351165154,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 6,
+              "jumps_per_minute": 36.0,
+              "mean_jump_stride_m": -0.036782284577687584,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            },
+            "uphill": {
+              "simulated_seconds": 40.0,
+              "forward_mean_mps": -0.032708153527642024,
+              "mean_speed_error_mps": -0.032708153527642024,
+              "instantaneous_speed_mae_mps": 0.035269846165763855,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 28,
+              "jumps_per_minute": 42.0,
+              "mean_jump_stride_m": -0.028778258178915297,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 30.0,
+              "forward_mean_mps": -0.031201595860450956,
+              "mean_speed_error_mps": -0.031201595860450956,
+              "instantaneous_speed_mae_mps": 0.03650299845833397,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 20,
+              "jumps_per_minute": 40.0,
+              "mean_jump_stride_m": -0.028954654932022095,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "cross_slope": {
+              "simulated_seconds": 80.0,
+              "forward_mean_mps": -0.010116084568659289,
+              "mean_speed_error_mps": -0.010116084568659289,
+              "instantaneous_speed_mae_mps": 0.022511910468203666,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 51,
+              "jumps_per_minute": 38.25,
+              "mean_jump_stride_m": -0.009339646965849633,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 8
+            }
+          }
+        },
+        "45": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.017847317802506348,
+            "mean_speed_error_mps": -0.017847317802506348,
+            "instantaneous_speed_mae_mps": 0.024565308323879397,
+            "fraction_within_0_15_mps": 0.9995833333333334,
+            "completed_jumps": 100,
+            "jumps_per_minute": 37.5,
+            "mean_jump_stride_m": -0.016490671932697296,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 50.0,
+              "forward_mean_mps": -0.01945918908324529,
+              "mean_speed_error_mps": -0.01945918908324529,
+              "instantaneous_speed_mae_mps": 0.029597069841980215,
+              "fraction_within_0_15_mps": 0.9986666666666667,
+              "completed_jumps": 30,
+              "jumps_per_minute": 36.0,
+              "mean_jump_stride_m": -0.017050567269325256,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "downhill": {
+              "simulated_seconds": 20.0,
+              "forward_mean_mps": -0.020018725528188952,
+              "mean_speed_error_mps": -0.020018725528188952,
+              "instantaneous_speed_mae_mps": 0.021402818053388728,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 13,
+              "jumps_per_minute": 39.0,
+              "mean_jump_stride_m": -0.02031119053180401,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 2
+            },
+            "cross_slope": {
+              "simulated_seconds": 90.0,
+              "forward_mean_mps": -0.016469298707499688,
+              "mean_speed_error_mps": -0.016469298707499688,
+              "instantaneous_speed_mae_mps": 0.022472660873932425,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 57,
+              "jumps_per_minute": 38.0,
+              "mean_jump_stride_m": -0.015324643829412628,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 9
+            }
+          }
+        },
+        "52": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.02168413659264985,
+            "mean_speed_error_mps": -0.02168413659264985,
+            "instantaneous_speed_mae_mps": 0.024194155474956246,
+            "fraction_within_0_15_mps": 1.0,
+            "completed_jumps": 105,
+            "jumps_per_minute": 39.375,
+            "mean_jump_stride_m": -0.019876162778763543,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 40.0,
+              "forward_mean_mps": -0.018515231757135098,
+              "mean_speed_error_mps": -0.018515231757135098,
+              "instantaneous_speed_mae_mps": 0.022399663534034886,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 27,
+              "jumps_per_minute": 40.5,
+              "mean_jump_stride_m": -0.014546815995816831,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 40.0,
+              "forward_mean_mps": -0.023434430837909304,
+              "mean_speed_error_mps": -0.023434430837909304,
+              "instantaneous_speed_mae_mps": 0.026420337816922768,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 27,
+              "jumps_per_minute": 40.5,
+              "mean_jump_stride_m": -0.02236006767661483,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 80.0,
+              "forward_mean_mps": -0.022393441887777497,
+              "mean_speed_error_mps": -0.022393441887777497,
+              "instantaneous_speed_mae_mps": 0.023978310274433666,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 51,
+              "jumps_per_minute": 38.25,
+              "mean_jump_stride_m": -0.021382573188519945,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 8
+            }
+          }
+        },
+        "63": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": -0.023872914769054177,
+            "mean_speed_error_mps": -0.023872914769054177,
+            "instantaneous_speed_mae_mps": 0.022687529035042786,
+            "fraction_within_0_15_mps": 1.0,
+            "completed_jumps": 102,
+            "jumps_per_minute": 38.25,
+            "mean_jump_stride_m": -0.02227979021913865,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 160.0,
+              "forward_mean_mps": -0.023872914769054177,
+              "mean_speed_error_mps": -0.023872914769054177,
+              "instantaneous_speed_mae_mps": 0.022687529035042786,
+              "fraction_within_0_15_mps": 1.0,
+              "completed_jumps": 102,
+              "jumps_per_minute": 38.25,
+              "mean_jump_stride_m": -0.02227979021913865,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 16
+            },
+            "uphill": {
+              "simulated_seconds": 0.0
+            },
+            "downhill": {
+              "simulated_seconds": 0.0
+            },
+            "cross_slope": {
+              "simulated_seconds": 0.0
+            }
+          }
+        }
+      },
+      "exoskeleton": {
+        "mechanism": "hooke_slide_ball_v3",
+        "control": "scheduled_force",
+        "force_limit_per_strut_n": 80.0,
+        "peak_force_per_env_n": [
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ]
+        ],
+        "strut_positive_work_per_env_j": [
+          [
+            13.713623046875,
+            35.21477508544922
+          ],
+          [
+            7.81696891784668,
+            61.79370880126953
+          ],
+          [
+            11.305182456970215,
+            34.06455993652344
+          ],
+          [
+            16.487003326416016,
+            33.08378601074219
+          ],
+          [
+            15.368431091308594,
+            38.21564483642578
+          ],
+          [
+            15.22482681274414,
+            41.46316909790039
+          ],
+          [
+            14.184089660644531,
+            32.39129638671875
+          ],
+          [
+            11.83884334564209,
+            49.72569274902344
+          ],
+          [
+            9.289628982543945,
+            36.89338684082031
+          ],
+          [
+            8.382189750671387,
+            39.08250427246094
+          ],
+          [
+            8.354969024658203,
+            50.34553909301758
+          ],
+          [
+            9.464431762695312,
+            33.17094421386719
+          ],
+          [
+            6.020481586456299,
+            45.24348068237305
+          ],
+          [
+            9.013911247253418,
+            38.32290267944336
+          ],
+          [
+            4.440300941467285,
+            53.03089141845703
+          ],
+          [
+            6.091513633728027,
+            50.87160873413086
+          ],
+          [
+            15.782469749450684,
+            39.11750793457031
+          ],
+          [
+            8.595343589782715,
+            37.91819381713867
+          ],
+          [
+            10.944188117980957,
+            45.784461975097656
+          ],
+          [
+            7.416442394256592,
+            45.00168228149414
+          ],
+          [
+            7.740059852600098,
+            47.475704193115234
+          ],
+          [
+            7.206210136413574,
+            45.89375305175781
+          ],
+          [
+            4.635528087615967,
+            44.550846099853516
+          ],
+          [
+            9.72585678100586,
+            39.50967788696289
+          ],
+          [
+            13.29628849029541,
+            38.51169967651367
+          ],
+          [
+            8.153145790100098,
+            41.61537551879883
+          ],
+          [
+            10.989635467529297,
+            52.96898651123047
+          ],
+          [
+            7.832120418548584,
+            35.23386764526367
+          ],
+          [
+            4.286281585693359,
+            38.79952621459961
+          ],
+          [
+            5.642306327819824,
+            44.17698287963867
+          ],
+          [
+            6.086813449859619,
+            47.99011993408203
+          ],
+          [
+            5.065621376037598,
+            44.75114059448242
+          ],
+          [
+            6.445033550262451,
+            50.92256164550781
+          ],
+          [
+            6.046427249908447,
+            43.765506744384766
+          ],
+          [
+            8.880764961242676,
+            45.31302261352539
+          ],
+          [
+            5.414917945861816,
+            38.69792938232422
+          ],
+          [
+            7.001980781555176,
+            50.45549392700195
+          ],
+          [
+            7.139858245849609,
+            45.21054458618164
+          ],
+          [
+            4.056511878967285,
+            48.831642150878906
+          ],
+          [
+            6.7497639656066895,
+            38.21162796020508
+          ],
+          [
+            5.408324241638184,
+            46.152347564697266
+          ],
+          [
+            4.897973537445068,
+            47.69139862060547
+          ],
+          [
+            4.425702095031738,
+            44.233802795410156
+          ],
+          [
+            9.291327476501465,
+            43.66143798828125
+          ],
+          [
+            6.546534538269043,
+            41.97337341308594
+          ],
+          [
+            5.396770477294922,
+            40.659423828125
+          ],
+          [
+            6.631290435791016,
+            41.37439727783203
+          ],
+          [
+            8.604641914367676,
+            41.75986862182617
+          ]
+        ],
+        "human_joint_positive_work_per_env_j": [
+          2087.00146484375,
+          2561.790771484375,
+          2069.980224609375,
+          2169.29541015625,
+          2225.64453125,
+          2181.04833984375,
+          2125.690185546875,
+          2425.15771484375,
+          2120.48681640625,
+          2213.532470703125,
+          2371.220458984375,
+          2117.146240234375,
+          2263.991943359375,
+          2106.666748046875,
+          2430.677490234375,
+          2430.407958984375,
+          2140.32177734375,
+          2233.79296875,
+          2195.72265625,
+          2226.39306640625,
+          2315.66357421875,
+          2261.40625,
+          2336.5400390625,
+          2254.946533203125,
+          2165.099365234375,
+          2170.224853515625,
+          2451.711181640625,
+          2142.1708984375,
+          2185.269287109375,
+          2255.628173828125,
+          2324.385986328125,
+          2262.352294921875,
+          2377.8994140625,
+          2305.996826171875,
+          2414.723388671875,
+          2194.062744140625,
+          2419.6767578125,
+          2286.412353515625,
+          2354.376953125,
+          2169.15869140625,
+          2217.90478515625,
+          2236.985107421875,
+          2266.6533203125,
+          2224.0,
+          2198.2734375,
+          2252.684814453125,
+          2169.335693359375,
+          2230.038330078125
+        ],
+        "human_joint_absolute_work_per_env_j": [
+          4076.09765625,
+          4921.4775390625,
+          4104.60888671875,
+          4188.85205078125,
+          4332.265625,
+          4300.14013671875,
+          4151.7119140625,
+          4656.37744140625,
+          4160.75732421875,
+          4305.39599609375,
+          4566.93212890625,
+          4142.47265625,
+          4422.53369140625,
+          4180.572265625,
+          4639.021484375,
+          4710.62109375,
+          4211.83984375,
+          4366.517578125,
+          4265.14208984375,
+          4361.67333984375,
+          4494.69384765625,
+          4420.5,
+          4513.71337890625,
+          4403.53173828125,
+          4203.63232421875,
+          4252.5146484375,
+          4743.310546875,
+          4134.779296875,
+          4234.212890625,
+          4430.8544921875,
+          4554.39501953125,
+          4423.8212890625,
+          4612.85009765625,
+          4512.70947265625,
+          4654.37060546875,
+          4337.572265625,
+          4679.88427734375,
+          4455.70556640625,
+          4543.962890625,
+          4247.3720703125,
+          4338.29833984375,
+          4374.3662109375,
+          4372.7314453125,
+          4417.6865234375,
+          4278.36376953125,
+          4408.0322265625,
+          4322.88720703125,
+          4391.2275390625
+        ],
+        "strut_supported_work_per_env_j": [
+          40.18783950805664,
+          64.61624145507812,
+          37.994529724121094,
+          40.862003326416016,
+          45.48402786254883,
+          47.381134033203125,
+          40.489463806152344,
+          53.660682678222656,
+          40.94866180419922,
+          43.051414489746094,
+          53.16667938232422,
+          36.70378494262695,
+          46.31527328491211,
+          41.66644287109375,
+          52.208404541015625,
+          49.99095153808594,
+          46.77900314331055,
+          41.565914154052734,
+          50.120426177978516,
+          46.7320671081543,
+          50.53306198120117,
+          47.89336395263672,
+          45.30585479736328,
+          41.068748474121094,
+          43.31739807128906,
+          46.23896408081055,
+          56.407955169677734,
+          36.954429626464844,
+          40.249717712402344,
+          46.1375732421875,
+          50.46792984008789,
+          45.342533111572266,
+          52.55389404296875,
+          46.0329704284668,
+          49.19867706298828,
+          38.241146087646484,
+          53.443016052246094,
+          47.65608596801758,
+          50.02442169189453,
+          39.3419303894043,
+          47.30659103393555,
+          48.632911682128906,
+          44.95061492919922,
+          47.5347900390625,
+          43.80856704711914,
+          41.841880798339844,
+          43.399566650390625,
+          45.776424407958984
+        ],
+        "strut_share_of_positive_work_per_env": [
+          0.022907305508852005,
+          0.026453843340277672,
+          0.021447867155075073,
+          0.022340593859553337,
+          0.023509742692112923,
+          0.0253327414393425,
+          0.02144092507660389,
+          0.024757303297519684,
+          0.021315205842256546,
+          0.020992815494537354,
+          0.02415737323462963,
+          0.019740594550967216,
+          0.02214181236922741,
+          0.021976199001073837,
+          0.023097973316907883,
+          0.022900935262441635,
+          0.025008853524923325,
+          0.020397933200001717,
+          0.025185292586684227,
+          0.023002399131655693,
+          0.0232891496270895,
+          0.02294224500656128,
+          0.020616939291357994,
+          0.02136790007352829,
+          0.02336948551237583,
+          0.022418318316340446,
+          0.025424091145396233,
+          0.01970769837498665,
+          0.019335253164172173,
+          0.02160937897861004,
+          0.022736085578799248,
+          0.021545467898249626,
+          0.02355700358748436,
+          0.021144302561879158,
+          0.021950427442789078,
+          0.019709287211298943,
+          0.023195138201117516,
+          0.022383803501725197,
+          0.021970223635435104,
+          0.0203066635876894,
+          0.022719301283359528,
+          0.022969059646129608,
+          0.021016385406255722,
+          0.023255977779626846,
+          0.02159518003463745,
+          0.0200353991240263,
+          0.02165011130273342,
+          0.022085795179009438
+        ],
+        "human_leg_torque_rms_per_env_nm": [
+          25.534513473510742,
+          29.345157623291016,
+          25.402698516845703,
+          25.87796974182129,
+          26.24259376525879,
+          27.58106803894043,
+          25.418800354003906,
+          27.30706024169922,
+          26.604759216308594,
+          27.105104446411133,
+          27.59100914001465,
+          25.35702133178711,
+          27.25636863708496,
+          26.31682586669922,
+          28.4263916015625,
+          28.512130737304688,
+          27.425472259521484,
+          26.67359733581543,
+          26.880727767944336,
+          27.51637840270996,
+          26.634490966796875,
+          27.740293502807617,
+          27.423831939697266,
+          26.445262908935547,
+          25.335538864135742,
+          26.630029678344727,
+          28.75729751586914,
+          25.48624610900879,
+          26.004444122314453,
+          27.173418045043945,
+          27.21341323852539,
+          27.18977928161621,
+          27.6802978515625,
+          27.574996948242188,
+          27.995824813842773,
+          26.797138214111328,
+          28.562488555908203,
+          27.465930938720703,
+          27.890487670898438,
+          26.061063766479492,
+          26.074495315551758,
+          27.379981994628906,
+          26.595243453979492,
+          27.490705490112305,
+          26.41511344909668,
+          26.37468147277832,
+          26.89821434020996,
+          26.99397087097168
+        ],
+        "human_leg_torque_peak_per_env_nm": [
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0
+        ],
+        "mechanical_work_sample_hz": 60
+      }
+    },
+    {
+      "target_speed_mps": 0.5,
+      "initial_slope_counts": {
+        "level": 9,
+        "uphill": 13,
+        "downhill": 9,
+        "cross_slope": 17
+      },
+      "initial_slope_magnitude_range_deg": [
+        0.899736225605011,
+        11.339797973632812
+      ],
+      "overall": {
+        "simulated_seconds": 960.0,
+        "forward_mean_mps": 0.47681146687389886,
+        "mean_speed_error_mps": -0.02318853312610114,
+        "instantaneous_speed_mae_mps": 0.08623253111306807,
+        "fraction_within_0_15_mps": 0.8949131944444444,
+        "completed_jumps": 555,
+        "jumps_per_minute": 34.6875,
+        "mean_jump_stride_m": 0.5826995179459855,
+        "failures": 0,
+        "falls": 0,
+        "falls_per_minute": 0.0,
+        "timeouts": 96
+      },
+      "by_slope": {
+        "level": {
+          "simulated_seconds": 171.05,
+          "forward_mean_mps": 0.48864904449002877,
+          "mean_speed_error_mps": -0.011350955509971228,
+          "instantaneous_speed_mae_mps": 0.07918384774936868,
+          "fraction_within_0_15_mps": 0.8991522946506869,
+          "completed_jumps": 96,
+          "jumps_per_minute": 33.67436422098801,
+          "mean_jump_stride_m": 0.605602408448855,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 17
+        },
+        "uphill": {
+          "simulated_seconds": 223.46666666666667,
+          "forward_mean_mps": 0.4241675436707188,
+          "mean_speed_error_mps": -0.0758324563292812,
+          "instantaneous_speed_mae_mps": 0.09043092614150419,
+          "fraction_within_0_15_mps": 0.8917810262529833,
+          "completed_jumps": 131,
+          "jumps_per_minute": 35.173031026252985,
+          "mean_jump_stride_m": 0.49855026375246414,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 22
+        },
+        "downhill": {
+          "simulated_seconds": 190.98333333333332,
+          "forward_mean_mps": 0.5089382411695622,
+          "mean_speed_error_mps": 0.008938241169562211,
+          "instantaneous_speed_mae_mps": 0.08537442040860348,
+          "fraction_within_0_15_mps": 0.8946679465921983,
+          "completed_jumps": 110,
+          "jumps_per_minute": 34.55798935334672,
+          "mean_jump_stride_m": 0.6358666902238672,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 19
+        },
+        "cross_slope": {
+          "simulated_seconds": 374.5,
+          "forward_mean_mps": 0.486434072863213,
+          "mean_speed_error_mps": -0.013565927136787004,
+          "instantaneous_speed_mae_mps": 0.08738436232725745,
+          "fraction_within_0_15_mps": 0.894971072541166,
+          "completed_jumps": 218,
+          "jumps_per_minute": 34.92656875834446,
+          "mean_jump_stride_m": 0.596353122810705,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 38
+        }
+      },
+      "by_terrain": {
+        "2": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.4536873242543038,
+            "mean_speed_error_mps": -0.0463126757456962,
+            "instantaneous_speed_mae_mps": 0.10954596715788041,
+            "fraction_within_0_15_mps": 0.8359375,
+            "completed_jumps": 91,
+            "jumps_per_minute": 34.125,
+            "mean_jump_stride_m": 0.5555156901642516,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 43.46666666666667,
+              "forward_mean_mps": 0.35709628727051546,
+              "mean_speed_error_mps": -0.14290371272948454,
+              "instantaneous_speed_mae_mps": 0.1518014242008944,
+              "fraction_within_0_15_mps": 0.7526840490797546,
+              "completed_jumps": 25,
+              "jumps_per_minute": 34.509202453987726,
+              "mean_jump_stride_m": 0.4207341539859772,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 36.516666666666666,
+              "forward_mean_mps": 0.5124248602444087,
+              "mean_speed_error_mps": 0.012424860244408698,
+              "instantaneous_speed_mae_mps": 0.08653816904117505,
+              "fraction_within_0_15_mps": 0.8562300319488818,
+              "completed_jumps": 20,
+              "jumps_per_minute": 32.86170698311273,
+              "mean_jump_stride_m": 0.6470859676599503,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 80.01666666666667,
+              "forward_mean_mps": 0.4793518697863597,
+              "mean_speed_error_mps": -0.020648130213640314,
+              "instantaneous_speed_mae_mps": 0.0970918646178931,
+              "fraction_within_0_15_mps": 0.8719016871485107,
+              "completed_jumps": 46,
+              "jumps_per_minute": 34.49281399708394,
+              "mean_jump_stride_m": 0.588953360915184,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 8
+            }
+          }
+        },
+        "15": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.4673215658428035,
+            "mean_speed_error_mps": -0.03267843415719651,
+            "instantaneous_speed_mae_mps": 0.08058755106553761,
+            "fraction_within_0_15_mps": 0.9221875,
+            "completed_jumps": 95,
+            "jumps_per_minute": 35.625,
+            "mean_jump_stride_m": 0.5626578412557903,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 60.0,
+              "forward_mean_mps": 0.43951010534898766,
+              "mean_speed_error_mps": -0.060489894651012344,
+              "instantaneous_speed_mae_mps": 0.07582359899311844,
+              "fraction_within_0_15_mps": 0.9305555555555556,
+              "completed_jumps": 36,
+              "jumps_per_minute": 36.0,
+              "mean_jump_stride_m": 0.5164538191424476,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "downhill": {
+              "simulated_seconds": 40.0,
+              "forward_mean_mps": 0.5028360547154989,
+              "mean_speed_error_mps": 0.002836054715498859,
+              "instantaneous_speed_mae_mps": 0.0853654962519613,
+              "fraction_within_0_15_mps": 0.8933333333333333,
+              "completed_jumps": 23,
+              "jumps_per_minute": 34.5,
+              "mean_jump_stride_m": 0.6258995610734691,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 60.0,
+              "forward_mean_mps": 0.47145670042148896,
+              "mean_speed_error_mps": -0.02854329957851104,
+              "instantaneous_speed_mae_mps": 0.08216620634700765,
+              "fraction_within_0_15_mps": 0.9330555555555555,
+              "completed_jumps": 36,
+              "jumps_per_minute": 36.0,
+              "mean_jump_stride_m": 0.5684574312633939,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            }
+          }
+        },
+        "25": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.47711763705119664,
+            "mean_speed_error_mps": -0.02288236294880336,
+            "instantaneous_speed_mae_mps": 0.09451153360846476,
+            "fraction_within_0_15_mps": 0.8770833333333333,
+            "completed_jumps": 93,
+            "jumps_per_minute": 34.875,
+            "mean_jump_stride_m": 0.5815199693684937,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 8.533333333333333,
+              "forward_mean_mps": 0.5523749691539592,
+              "mean_speed_error_mps": 0.05237496915395923,
+              "instantaneous_speed_mae_mps": 0.12102742635981656,
+              "fraction_within_0_15_mps": 0.783203125,
+              "completed_jumps": 5,
+              "jumps_per_minute": 35.15625,
+              "mean_jump_stride_m": 0.692668342590332,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            },
+            "uphill": {
+              "simulated_seconds": 60.0,
+              "forward_mean_mps": 0.4324251993219756,
+              "mean_speed_error_mps": -0.0675748006780244,
+              "instantaneous_speed_mae_mps": 0.07797626645545581,
+              "fraction_within_0_15_mps": 0.9322222222222222,
+              "completed_jumps": 36,
+              "jumps_per_minute": 36.0,
+              "mean_jump_stride_m": 0.5002591121527884,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "downhill": {
+              "simulated_seconds": 33.38333333333333,
+              "forward_mean_mps": 0.5098647160906498,
+              "mean_speed_error_mps": 0.009864716090649761,
+              "instantaneous_speed_mae_mps": 0.09421209706396803,
+              "fraction_within_0_15_mps": 0.889166250624064,
+              "completed_jumps": 19,
+              "jumps_per_minute": 34.14877683474788,
+              "mean_jump_stride_m": 0.6495411803847865,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "cross_slope": {
+              "simulated_seconds": 58.083333333333336,
+              "forward_mean_mps": 0.49340705526426887,
+              "mean_speed_error_mps": -0.006592944735731132,
+              "instantaneous_speed_mae_mps": 0.1078689499817121,
+              "fraction_within_0_15_mps": 0.8269727403156385,
+              "completed_jumps": 33,
+              "jumps_per_minute": 34.08895265423242,
+              "mean_jump_stride_m": 0.6141637870759675,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            }
+          }
+        },
+        "45": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.48114776465336034,
+            "mean_speed_error_mps": -0.018852235346639656,
+            "instantaneous_speed_mae_mps": 0.08385596670053339,
+            "fraction_within_0_15_mps": 0.9033333333333333,
+            "completed_jumps": 92,
+            "jumps_per_minute": 34.5,
+            "mean_jump_stride_m": 0.5894082506065783,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 2.5166666666666666,
+              "forward_mean_mps": 0.45666030091187293,
+              "mean_speed_error_mps": -0.04333969908812707,
+              "instantaneous_speed_mae_mps": 0.1953318631930963,
+              "fraction_within_0_15_mps": 0.7549668874172185,
+              "completed_jumps": 1,
+              "jumps_per_minute": 23.841059602649008,
+              "mean_jump_stride_m": 0.7338614463806152,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 0
+            },
+            "uphill": {
+              "simulated_seconds": 30.0,
+              "forward_mean_mps": 0.4318757389099725,
+              "mean_speed_error_mps": -0.0681242610900275,
+              "instantaneous_speed_mae_mps": 0.07921748873132159,
+              "fraction_within_0_15_mps": 0.91,
+              "completed_jumps": 17,
+              "jumps_per_minute": 34.0,
+              "mean_jump_stride_m": 0.5138955186395084,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "downhill": {
+              "simulated_seconds": 42.3,
+              "forward_mean_mps": 0.509953689723446,
+              "mean_speed_error_mps": 0.009953689723446013,
+              "instantaneous_speed_mae_mps": 0.08831629011936562,
+              "fraction_within_0_15_mps": 0.8951930654058313,
+              "completed_jumps": 25,
+              "jumps_per_minute": 35.46099290780142,
+              "mean_jump_stride_m": 0.6323213386535644,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 85.18333333333334,
+              "forward_mean_mps": 0.48491959316738603,
+              "mean_speed_error_mps": -0.015080406832613968,
+              "instantaneous_speed_mae_mps": 0.07998120621084605,
+              "fraction_within_0_15_mps": 0.909411074153786,
+              "completed_jumps": 49,
+              "jumps_per_minute": 34.51379377812561,
+              "mean_jump_stride_m": 0.5907640882900783,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 9
+            }
+          }
+        },
+        "52": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.4958410246545782,
+            "mean_speed_error_mps": -0.0041589753454218115,
+            "instantaneous_speed_mae_mps": 0.0737688894154311,
+            "fraction_within_0_15_mps": 0.9233333333333333,
+            "completed_jumps": 94,
+            "jumps_per_minute": 35.25,
+            "mean_jump_stride_m": 0.6079389944355539,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 30.0,
+              "forward_mean_mps": 0.4664377119344863,
+              "mean_speed_error_mps": -0.0335622880655137,
+              "instantaneous_speed_mae_mps": 0.0668493044767274,
+              "fraction_within_0_15_mps": 0.9166666666666666,
+              "completed_jumps": 17,
+              "jumps_per_minute": 34.0,
+              "mean_jump_stride_m": 0.5561083152013666,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "downhill": {
+              "simulated_seconds": 38.78333333333333,
+              "forward_mean_mps": 0.5100440114317316,
+              "mean_speed_error_mps": 0.010044011431731614,
+              "instantaneous_speed_mae_mps": 0.07347210543454558,
+              "fraction_within_0_15_mps": 0.9363987967339923,
+              "completed_jumps": 23,
+              "jumps_per_minute": 35.582294800171894,
+              "mean_jump_stride_m": 0.6286352510037629,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 91.21666666666667,
+              "forward_mean_mps": 0.4994726001462152,
+              "mean_speed_error_mps": -0.0005273998537848046,
+              "instantaneous_speed_mae_mps": 0.07617083884228788,
+              "fraction_within_0_15_mps": 0.9199707655764663,
+              "completed_jumps": 54,
+              "jumps_per_minute": 35.5198245934588,
+              "mean_jump_stride_m": 0.6154409878783755,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 9
+            }
+          }
+        },
+        "63": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.4857534847871506,
+            "mean_speed_error_mps": -0.01424651521284942,
+            "instantaneous_speed_mae_mps": 0.07512527873056116,
+            "fraction_within_0_15_mps": 0.9076041666666667,
+            "completed_jumps": 90,
+            "jumps_per_minute": 33.75,
+            "mean_jump_stride_m": 0.599340311686198,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 16
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 160.0,
+              "forward_mean_mps": 0.4857534847871506,
+              "mean_speed_error_mps": -0.01424651521284942,
+              "instantaneous_speed_mae_mps": 0.07512527873056116,
+              "fraction_within_0_15_mps": 0.9076041666666667,
+              "completed_jumps": 90,
+              "jumps_per_minute": 33.75,
+              "mean_jump_stride_m": 0.599340311686198,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 16
+            },
+            "uphill": {
+              "simulated_seconds": 0.0
+            },
+            "downhill": {
+              "simulated_seconds": 0.0
+            },
+            "cross_slope": {
+              "simulated_seconds": 0.0
+            }
+          }
+        }
+      },
+      "exoskeleton": {
+        "mechanism": "hooke_slide_ball_v3",
+        "control": "scheduled_force",
+        "force_limit_per_strut_n": 80.0,
+        "peak_force_per_env_n": [
+          [
+            80.0,
+            80.0
+          ],
+          [
+            72.608154296875,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            0.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            57.0565185546875,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            60.062477111816406,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            35.391258239746094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            0.0,
+            80.0
+          ],
+          [
+            53.28410339355469,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            4.18179988861084,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            40.52455139160156,
+            80.0
+          ],
+          [
+            23.51675796508789,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            49.808258056640625,
+            80.0
+          ],
+          [
+            34.71022033691406,
+            80.0
+          ],
+          [
+            23.34341812133789,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            59.276939392089844,
+            80.0
+          ],
+          [
+            40.16004943847656,
+            80.0
+          ],
+          [
+            53.333335876464844,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ]
+        ],
+        "strut_positive_work_per_env_j": [
+          [
+            0.04270031675696373,
+            60.224754333496094
+          ],
+          [
+            0.372568279504776,
+            60.29667282104492
+          ],
+          [
+            0.2574993073940277,
+            60.794395446777344
+          ],
+          [
+            2.6466188430786133,
+            55.40105056762695
+          ],
+          [
+            1.9917504787445068,
+            64.43282318115234
+          ],
+          [
+            0.383859783411026,
+            62.45614242553711
+          ],
+          [
+            2.3582358360290527,
+            44.20608901977539
+          ],
+          [
+            1.9021145105361938,
+            61.410194396972656
+          ],
+          [
+            0.34013304114341736,
+            71.70567321777344
+          ],
+          [
+            0.0,
+            73.98420715332031
+          ],
+          [
+            1.645258903503418,
+            55.796875
+          ],
+          [
+            1.7131596803665161,
+            50.60166549682617
+          ],
+          [
+            0.0,
+            70.18488311767578
+          ],
+          [
+            0.18181699514389038,
+            65.9499282836914
+          ],
+          [
+            0.8410808444023132,
+            60.78108215332031
+          ],
+          [
+            1.4923944473266602,
+            51.77072525024414
+          ],
+          [
+            1.2039029598236084,
+            55.65769577026367
+          ],
+          [
+            0.09773939847946167,
+            67.95957946777344
+          ],
+          [
+            0.03711285442113876,
+            65.05511474609375
+          ],
+          [
+            0.062092430889606476,
+            62.91706848144531
+          ],
+          [
+            0.3031276762485504,
+            65.83098602294922
+          ],
+          [
+            0.33476391434669495,
+            60.21571350097656
+          ],
+          [
+            0.7066838145256042,
+            55.02106475830078
+          ],
+          [
+            0.0,
+            62.0294303894043
+          ],
+          [
+            0.24390292167663574,
+            57.763797760009766
+          ],
+          [
+            0.0,
+            64.93675994873047
+          ],
+          [
+            0.0001566727296449244,
+            67.97993469238281
+          ],
+          [
+            0.9367511868476868,
+            55.981292724609375
+          ],
+          [
+            0.19098573923110962,
+            59.93589401245117
+          ],
+          [
+            1.0060594081878662,
+            59.54506301879883
+          ],
+          [
+            0.5353123545646667,
+            64.28137969970703
+          ],
+          [
+            1.0225878953933716,
+            63.36073684692383
+          ],
+          [
+            0.0,
+            67.0845718383789
+          ],
+          [
+            0.5696141719818115,
+            63.71058654785156
+          ],
+          [
+            0.002825263887643814,
+            57.019676208496094
+          ],
+          [
+            0.0,
+            57.91007995605469
+          ],
+          [
+            0.677261471748352,
+            62.99344253540039
+          ],
+          [
+            0.29466691613197327,
+            59.780460357666016
+          ],
+          [
+            0.06665973365306854,
+            65.54287719726562
+          ],
+          [
+            0.0,
+            65.29788208007812
+          ],
+          [
+            0.013753115199506283,
+            60.389556884765625
+          ],
+          [
+            0.0,
+            66.51918029785156
+          ],
+          [
+            0.7005469799041748,
+            57.7879524230957
+          ],
+          [
+            0.5344210863113403,
+            60.53509521484375
+          ],
+          [
+            0.21304839849472046,
+            62.821163177490234
+          ],
+          [
+            0.0,
+            62.68830871582031
+          ],
+          [
+            0.021634671837091446,
+            64.33790588378906
+          ],
+          [
+            0.5144609808921814,
+            57.46969985961914
+          ]
+        ],
+        "human_joint_positive_work_per_env_j": [
+          2897.336181640625,
+          3024.963623046875,
+          2889.52490234375,
+          2922.859130859375,
+          2928.478271484375,
+          2879.677001953125,
+          2737.096435546875,
+          2900.3525390625,
+          3036.9248046875,
+          3079.7392578125,
+          2956.972412109375,
+          2833.950927734375,
+          2971.526611328125,
+          3075.04248046875,
+          2987.047119140625,
+          2813.105224609375,
+          2846.81494140625,
+          3043.841064453125,
+          3017.152587890625,
+          2857.818603515625,
+          3133.402587890625,
+          3104.184326171875,
+          2901.00048828125,
+          2790.488525390625,
+          2948.811767578125,
+          3046.744140625,
+          2893.44775390625,
+          2949.9150390625,
+          3161.58056640625,
+          3105.77490234375,
+          3006.4345703125,
+          3050.560302734375,
+          3023.7109375,
+          3122.71142578125,
+          2842.6953125,
+          2934.361083984375,
+          3038.529541015625,
+          2895.1787109375,
+          3007.847900390625,
+          2956.72314453125,
+          2930.08447265625,
+          3115.5498046875,
+          2896.7744140625,
+          2993.60400390625,
+          3045.42822265625,
+          2955.0458984375,
+          2943.030517578125,
+          2895.31787109375
+        ],
+        "human_joint_absolute_work_per_env_j": [
+          5127.0615234375,
+          5660.96923828125,
+          5406.20068359375,
+          5532.85498046875,
+          5327.23486328125,
+          5450.10888671875,
+          5197.35546875,
+          5518.64990234375,
+          5485.46826171875,
+          5719.3720703125,
+          5772.8427734375,
+          5372.78955078125,
+          5324.33447265625,
+          5641.02490234375,
+          5582.40283203125,
+          5286.16796875,
+          5339.02880859375,
+          5790.20849609375,
+          5647.93603515625,
+          5132.90283203125,
+          5879.43994140625,
+          6062.791015625,
+          5515.794921875,
+          5038.98876953125,
+          5489.2958984375,
+          5647.8251953125,
+          5297.50634765625,
+          5580.8837890625,
+          5916.09619140625,
+          5778.072265625,
+          5719.1337890625,
+          5757.314453125,
+          5690.5576171875,
+          5742.76171875,
+          5335.052734375,
+          5500.947265625,
+          5801.3046875,
+          5374.7021484375,
+          5607.2412109375,
+          5446.130859375,
+          5470.64453125,
+          5747.05419921875,
+          5352.38623046875,
+          5482.04638671875,
+          5633.93505859375,
+          5459.10791015625,
+          5461.7119140625,
+          5357.099609375
+        ],
+        "strut_supported_work_per_env_j": [
+          59.90492248535156,
+          60.03251266479492,
+          60.75950622558594,
+          55.77430725097656,
+          65.9316635131836,
+          61.53744125366211,
+          44.253170013427734,
+          61.519325256347656,
+          71.8646240234375,
+          73.07190704345703,
+          55.05718994140625,
+          49.963314056396484,
+          70.05475616455078,
+          64.0214614868164,
+          60.742881774902344,
+          52.25822067260742,
+          56.2373161315918,
+          67.05827331542969,
+          63.33161163330078,
+          62.7601432800293,
+          65.21644592285156,
+          58.642478942871094,
+          54.58263397216797,
+          61.819305419921875,
+          57.38234329223633,
+          62.91938781738281,
+          67.41545867919922,
+          55.42168426513672,
+          58.673274993896484,
+          59.004146575927734,
+          63.69081115722656,
+          63.030914306640625,
+          66.37830352783203,
+          62.639217376708984,
+          56.21165084838867,
+          56.73339080810547,
+          63.0844841003418,
+          59.598854064941406,
+          65.31151580810547,
+          65.03447723388672,
+          59.59968948364258,
+          65.95423126220703,
+          58.133609771728516,
+          60.594459533691406,
+          62.71493148803711,
+          62.47776794433594,
+          64.15951538085938,
+          57.64131546020508
+        ],
+        "strut_share_of_positive_work_per_env": [
+          0.020377125591039658,
+          0.01966184750199318,
+          0.020691512152552605,
+          0.019473157823085785,
+          0.02217920869588852,
+          0.021355867385864258,
+          0.016727730631828308,
+          0.021362844854593277,
+          0.02317352406680584,
+          0.02345932088792324,
+          0.019055817276239395,
+          0.018125435337424278,
+          0.023074142634868622,
+          0.021053191274404526,
+          0.0202128067612648,
+          0.018582090735435486,
+          0.01958262175321579,
+          0.02187003195285797,
+          0.021118447184562683,
+          0.02156231366097927,
+          0.020669905468821526,
+          0.01913287490606308,
+          0.01884777471423149,
+          0.021745499223470688,
+          0.019292045384645462,
+          0.020868707448244095,
+          0.02295517548918724,
+          0.01892956718802452,
+          0.01866304688155651,
+          0.019123464822769165,
+          0.021104326471686363,
+          0.020669177174568176,
+          0.02170463092625141,
+          0.02016955241560936,
+          0.01966484636068344,
+          0.019353218376636505,
+          0.020524369552731514,
+          0.02032824605703354,
+          0.02134714275598526,
+          0.021607356145977974,
+          0.020198481157422066,
+          0.020904378965497017,
+          0.01979130133986473,
+          0.019992157816886902,
+          0.020278260111808777,
+          0.020773304626345634,
+          0.021400462836027145,
+          0.019633671268820763
+        ],
+        "human_leg_torque_rms_per_env_nm": [
+          27.905447006225586,
+          30.028345108032227,
+          29.343252182006836,
+          30.784706115722656,
+          28.739635467529297,
+          29.655742645263672,
+          29.66132354736328,
+          30.560216903686523,
+          29.409757614135742,
+          30.89175796508789,
+          31.08772850036621,
+          29.86568832397461,
+          29.523305892944336,
+          30.447561264038086,
+          29.343252182006836,
+          29.165782928466797,
+          29.50241470336914,
+          31.033472061157227,
+          30.183330535888672,
+          27.71796417236328,
+          30.730588912963867,
+          31.893301010131836,
+          30.35586929321289,
+          27.5157470703125,
+          30.114295959472656,
+          30.48526954650879,
+          28.733617782592773,
+          30.42757225036621,
+          30.935232162475586,
+          30.485733032226562,
+          31.235931396484375,
+          30.574583053588867,
+          31.029983520507812,
+          30.56092071533203,
+          29.217958450317383,
+          29.985658645629883,
+          31.361011505126953,
+          30.007179260253906,
+          30.955102920532227,
+          30.098249435424805,
+          29.61905288696289,
+          30.488704681396484,
+          29.77751922607422,
+          30.066322326660156,
+          30.71367645263672,
+          30.19154930114746,
+          29.85211944580078,
+          29.84402847290039
+        ],
+        "human_leg_torque_peak_per_env_nm": [
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0
+        ],
+        "mechanical_work_sample_hz": 60
+      }
+    },
+    {
+      "target_speed_mps": 1.0,
+      "initial_slope_counts": {
+        "level": 9,
+        "uphill": 13,
+        "downhill": 9,
+        "cross_slope": 17
+      },
+      "initial_slope_magnitude_range_deg": [
+        0.899736225605011,
+        11.339797973632812
+      ],
+      "overall": {
+        "simulated_seconds": 960.0,
+        "forward_mean_mps": 0.8235453859744827,
+        "mean_speed_error_mps": -0.17645461402551732,
+        "instantaneous_speed_mae_mps": 0.20799066121162743,
+        "fraction_within_0_15_mps": 0.6423611111111112,
+        "completed_jumps": 497,
+        "jumps_per_minute": 31.0625,
+        "mean_jump_stride_m": 1.0818390913412606,
+        "failures": 0,
+        "falls": 0,
+        "falls_per_minute": 0.0,
+        "timeouts": 111
+      },
+      "by_slope": {
+        "level": {
+          "simulated_seconds": 165.6,
+          "forward_mean_mps": 0.8316960936347044,
+          "mean_speed_error_mps": -0.16830390636529557,
+          "instantaneous_speed_mae_mps": 0.19225477774257274,
+          "fraction_within_0_15_mps": 0.6454307568438004,
+          "completed_jumps": 83,
+          "jumps_per_minute": 30.07246376811594,
+          "mean_jump_stride_m": 1.1215026299637485,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 22
+        },
+        "uphill": {
+          "simulated_seconds": 225.7,
+          "forward_mean_mps": 0.8046415600284342,
+          "mean_speed_error_mps": -0.19535843997156577,
+          "instantaneous_speed_mae_mps": 0.23633478333193575,
+          "fraction_within_0_15_mps": 0.59644070299808,
+          "completed_jumps": 121,
+          "jumps_per_minute": 32.16659282233053,
+          "mean_jump_stride_m": 0.9902864399035115,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 25
+        },
+        "downhill": {
+          "simulated_seconds": 213.33333333333334,
+          "forward_mean_mps": 0.8253812397032604,
+          "mean_speed_error_mps": -0.17461876029673962,
+          "instantaneous_speed_mae_mps": 0.18976186733482478,
+          "fraction_within_0_15_mps": 0.690625,
+          "completed_jumps": 105,
+          "jumps_per_minute": 29.53125,
+          "mean_jump_stride_m": 1.150099800314222,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 25
+        },
+        "cross_slope": {
+          "simulated_seconds": 355.3666666666667,
+          "forward_mean_mps": 0.8306512508990241,
+          "mean_speed_error_mps": -0.16934874910097586,
+          "instantaneous_speed_mae_mps": 0.20826475360532343,
+          "fraction_within_0_15_mps": 0.6411218459806772,
+          "completed_jumps": 188,
+          "jumps_per_minute": 31.741862864646844,
+          "mean_jump_stride_m": 1.085128573661155,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 39
+        }
+      },
+      "by_terrain": {
+        "2": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8038301213101932,
+            "mean_speed_error_mps": -0.19616987868980684,
+            "instantaneous_speed_mae_mps": 0.23219935417989665,
+            "fraction_within_0_15_mps": 0.5834375,
+            "completed_jumps": 84,
+            "jumps_per_minute": 31.5,
+            "mean_jump_stride_m": 1.028976280774389,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 17
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 49.333333333333336,
+              "forward_mean_mps": 0.7644187903297279,
+              "mean_speed_error_mps": -0.23558120967027207,
+              "instantaneous_speed_mae_mps": 0.2604211994046908,
+              "fraction_within_0_15_mps": 0.5162162162162162,
+              "completed_jumps": 28,
+              "jumps_per_minute": 34.05405405405405,
+              "mean_jump_stride_m": 0.9225912328277316,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 46.81666666666666,
+              "forward_mean_mps": 0.8129133159096749,
+              "mean_speed_error_mps": -0.18708668409032514,
+              "instantaneous_speed_mae_mps": 0.2015842127036734,
+              "fraction_within_0_15_mps": 0.6981132075471698,
+              "completed_jumps": 22,
+              "jumps_per_minute": 28.195087219651125,
+              "mean_jump_stride_m": 1.126972179521214,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "cross_slope": {
+              "simulated_seconds": 63.85,
+              "forward_mean_mps": 0.8276209973405333,
+              "mean_speed_error_mps": -0.1723790026594667,
+              "instantaneous_speed_mae_mps": 0.23284181581949998,
+              "fraction_within_0_15_mps": 0.5512920908379013,
+              "completed_jumps": 34,
+              "jumps_per_minute": 31.949882537196554,
+              "mean_jump_stride_m": 1.053178385776632,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            }
+          }
+        },
+        "15": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8292427122134598,
+            "mean_speed_error_mps": -0.1707572877865402,
+            "instantaneous_speed_mae_mps": 0.2130816297142033,
+            "fraction_within_0_15_mps": 0.6763541666666667,
+            "completed_jumps": 84,
+            "jumps_per_minute": 31.5,
+            "mean_jump_stride_m": 1.0674635051261812,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 18
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 53.46666666666667,
+              "forward_mean_mps": 0.8214606207504965,
+              "mean_speed_error_mps": -0.17853937924950347,
+              "instantaneous_speed_mae_mps": 0.22582710774229825,
+              "fraction_within_0_15_mps": 0.6726932668329177,
+              "completed_jumps": 29,
+              "jumps_per_minute": 32.54364089775561,
+              "mean_jump_stride_m": 0.9762626763047844,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "downhill": {
+              "simulated_seconds": 44.78333333333333,
+              "forward_mean_mps": 0.8409031275625668,
+              "mean_speed_error_mps": -0.1590968724374332,
+              "instantaneous_speed_mae_mps": 0.16789866865437836,
+              "fraction_within_0_15_mps": 0.7860066989207294,
+              "completed_jumps": 22,
+              "jumps_per_minute": 29.475251209527354,
+              "mean_jump_stride_m": 1.1784126975319602,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "cross_slope": {
+              "simulated_seconds": 61.75,
+              "forward_mean_mps": 0.8275243352553318,
+              "mean_speed_error_mps": -0.17247566474466824,
+              "instantaneous_speed_mae_mps": 0.2348141864898095,
+              "fraction_within_0_15_mps": 0.6,
+              "completed_jumps": 33,
+              "jumps_per_minute": 32.064777327935225,
+              "mean_jump_stride_m": 1.0736435597593135,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            }
+          }
+        },
+        "25": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8162635211468796,
+            "mean_speed_error_mps": -0.1837364788531204,
+            "instantaneous_speed_mae_mps": 0.20767549650798073,
+            "fraction_within_0_15_mps": 0.6469791666666667,
+            "completed_jumps": 81,
+            "jumps_per_minute": 30.375,
+            "mean_jump_stride_m": 1.0744975209236145,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 19
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 5.483333333333333,
+              "forward_mean_mps": 0.8425493775792618,
+              "mean_speed_error_mps": -0.15745062242073815,
+              "instantaneous_speed_mae_mps": 0.18657740269395548,
+              "fraction_within_0_15_mps": 0.6413373860182371,
+              "completed_jumps": 3,
+              "jumps_per_minute": 32.82674772036474,
+              "mean_jump_stride_m": 1.0740633805592854,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            },
+            "uphill": {
+              "simulated_seconds": 60.96666666666667,
+              "forward_mean_mps": 0.8132630293578488,
+              "mean_speed_error_mps": -0.18673697064215122,
+              "instantaneous_speed_mae_mps": 0.22724005757706367,
+              "fraction_within_0_15_mps": 0.5934937124111537,
+              "completed_jumps": 33,
+              "jumps_per_minute": 32.476763258611264,
+              "mean_jump_stride_m": 0.9968731475598884,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            },
+            "downhill": {
+              "simulated_seconds": 41.266666666666666,
+              "forward_mean_mps": 0.8216374428191848,
+              "mean_speed_error_mps": -0.17836255718081517,
+              "instantaneous_speed_mae_mps": 0.18750596935241057,
+              "fraction_within_0_15_mps": 0.7193053311793215,
+              "completed_jumps": 20,
+              "jumps_per_minute": 29.079159935379646,
+              "mean_jump_stride_m": 1.166222584247589,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 52.28333333333333,
+              "forward_mean_mps": 0.8127639744900079,
+              "mean_speed_error_mps": -0.18723602550999208,
+              "instantaneous_speed_mae_mps": 0.20299390827441385,
+              "fraction_within_0_15_mps": 0.6528530443098501,
+              "completed_jumps": 25,
+              "jumps_per_minute": 28.689831048772714,
+              "mean_jump_stride_m": 1.1036337399482727,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            }
+          }
+        },
+        "45": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8176533892854877,
+            "mean_speed_error_mps": -0.1823466107145123,
+            "instantaneous_speed_mae_mps": 0.2165004026710676,
+            "fraction_within_0_15_mps": 0.6260416666666667,
+            "completed_jumps": 85,
+            "jumps_per_minute": 31.875,
+            "mean_jump_stride_m": 1.0794846128014957,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 20
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 5.75,
+              "forward_mean_mps": 0.8362337501653794,
+              "mean_speed_error_mps": -0.16376624983462063,
+              "instantaneous_speed_mae_mps": 0.19254705741933203,
+              "fraction_within_0_15_mps": 0.6202898550724638,
+              "completed_jumps": 3,
+              "jumps_per_minute": 31.304347826086957,
+              "mean_jump_stride_m": 1.1131746967633565,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            },
+            "uphill": {
+              "simulated_seconds": 30.183333333333334,
+              "forward_mean_mps": 0.7837914565342444,
+              "mean_speed_error_mps": -0.21620854346575558,
+              "instantaneous_speed_mae_mps": 0.2686912524149339,
+              "fraction_within_0_15_mps": 0.5477636664826063,
+              "completed_jumps": 15,
+              "jumps_per_minute": 29.817780231916068,
+              "mean_jump_stride_m": 1.0333584030469258,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "downhill": {
+              "simulated_seconds": 28.483333333333334,
+              "forward_mean_mps": 0.7956889027166899,
+              "mean_speed_error_mps": -0.2043110972833101,
+              "instantaneous_speed_mae_mps": 0.21525181952253994,
+              "fraction_within_0_15_mps": 0.5605617320070216,
+              "completed_jumps": 15,
+              "jumps_per_minute": 31.597425394967818,
+              "mean_jump_stride_m": 1.119973107179006,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 3
+            },
+            "cross_slope": {
+              "simulated_seconds": 95.58333333333333,
+              "forward_mean_mps": 0.8337738850579401,
+              "mean_speed_error_mps": -0.16622611494205985,
+              "instantaneous_speed_mae_mps": 0.20183259165564316,
+              "fraction_within_0_15_mps": 0.6706190061028771,
+              "completed_jumps": 52,
+              "jumps_per_minute": 32.641673931996515,
+              "mean_jump_stride_m": 1.0791672181624632,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 11
+            }
+          }
+        },
+        "52": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8426276267877597,
+            "mean_speed_error_mps": -0.1573723732122403,
+            "instantaneous_speed_mae_mps": 0.18583991668016875,
+            "fraction_within_0_15_mps": 0.6757291666666667,
+            "completed_jumps": 83,
+            "jumps_per_minute": 31.125,
+            "mean_jump_stride_m": 1.1204715342406768,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 17
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 31.75,
+              "forward_mean_mps": 0.8420830582608615,
+              "mean_speed_error_mps": -0.1579169417391385,
+              "instantaneous_speed_mae_mps": 0.20330789252784867,
+              "fraction_within_0_15_mps": 0.6446194225721785,
+              "completed_jumps": 16,
+              "jumps_per_minute": 30.236220472440944,
+              "mean_jump_stride_m": 1.080206073820591,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "downhill": {
+              "simulated_seconds": 51.983333333333334,
+              "forward_mean_mps": 0.842479325709431,
+              "mean_speed_error_mps": -0.15752067429056904,
+              "instantaneous_speed_mae_mps": 0.18577364092537182,
+              "fraction_within_0_15_mps": 0.6502084001282462,
+              "completed_jumps": 26,
+              "jumps_per_minute": 30.009618467457518,
+              "mean_jump_stride_m": 1.1506909017379467,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "cross_slope": {
+              "simulated_seconds": 76.26666666666667,
+              "forward_mean_mps": 0.8429554139615028,
+              "mean_speed_error_mps": -0.15704458603849725,
+              "instantaneous_speed_mae_mps": 0.1786131291122888,
+              "fraction_within_0_15_mps": 0.7060751748251748,
+              "completed_jumps": 41,
+              "jumps_per_minute": 32.25524475524475,
+              "mean_jump_stride_m": 1.1170213833087828,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            }
+          }
+        },
+        "63": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.8316549451031164,
+            "mean_speed_error_mps": -0.16834505489688356,
+            "instantaneous_speed_mae_mps": 0.19264716751644753,
+            "fraction_within_0_15_mps": 0.645625,
+            "completed_jumps": 80,
+            "jumps_per_minute": 30.0,
+            "mean_jump_stride_m": 1.122293221950531,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 20
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 154.36666666666667,
+              "forward_mean_mps": 0.8311415458134085,
+              "mean_speed_error_mps": -0.1688584541865915,
+              "instantaneous_speed_mae_mps": 0.19244555942066743,
+              "fraction_within_0_15_mps": 0.6465126322608508,
+              "completed_jumps": 77,
+              "jumps_per_minute": 29.928741092636578,
+              "mean_jump_stride_m": 1.1236753773379635,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 20
+            },
+            "uphill": {
+              "simulated_seconds": 0.0
+            },
+            "downhill": {
+              "simulated_seconds": 0.0
+            },
+            "cross_slope": {
+              "simulated_seconds": 5.633333333333333,
+              "forward_mean_mps": 0.8457233007873627,
+              "mean_speed_error_mps": -0.1542766992126373,
+              "instantaneous_speed_mae_mps": 0.1981717065197468,
+              "fraction_within_0_15_mps": 0.621301775147929,
+              "completed_jumps": 3,
+              "jumps_per_minute": 31.952662721893493,
+              "mean_jump_stride_m": 1.0868179003397624,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 0
+            }
+          }
+        }
+      },
+      "exoskeleton": {
+        "mechanism": "hooke_slide_ball_v3",
+        "control": "scheduled_force",
+        "force_limit_per_strut_n": 80.0,
+        "peak_force_per_env_n": [
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            28.874351501464844,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            53.09406661987305,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            66.48848724365234,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            64.3671875,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            67.65611267089844,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            33.219058990478516,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ]
+        ],
+        "strut_positive_work_per_env_j": [
+          [
+            1.1047207117080688,
+            50.58633804321289
+          ],
+          [
+            5.77586030960083,
+            42.32020950317383
+          ],
+          [
+            1.1129975318908691,
+            54.31047439575195
+          ],
+          [
+            0.4181426167488098,
+            34.46665954589844
+          ],
+          [
+            3.6535539627075195,
+            23.564489364624023
+          ],
+          [
+            2.154909133911133,
+            52.582725524902344
+          ],
+          [
+            0.4927201271057129,
+            28.6672306060791
+          ],
+          [
+            2.272364854812622,
+            28.33833885192871
+          ],
+          [
+            2.7956080436706543,
+            58.23674774169922
+          ],
+          [
+            0.9591914415359497,
+            46.584049224853516
+          ],
+          [
+            0.7344087958335876,
+            54.97663116455078
+          ],
+          [
+            0.057774461805820465,
+            38.13346481323242
+          ],
+          [
+            0.5170974135398865,
+            57.80046844482422
+          ],
+          [
+            1.6985515356063843,
+            43.73316192626953
+          ],
+          [
+            1.4861171245574951,
+            44.21360397338867
+          ],
+          [
+            0.6301562190055847,
+            35.91194534301758
+          ],
+          [
+            2.8872931003570557,
+            49.21491622924805
+          ],
+          [
+            1.5336406230926514,
+            46.86048126220703
+          ],
+          [
+            1.5693187713623047,
+            57.15769958496094
+          ],
+          [
+            0.0954274982213974,
+            49.90032958984375
+          ],
+          [
+            1.007689118385315,
+            56.977760314941406
+          ],
+          [
+            1.1010571718215942,
+            52.026954650878906
+          ],
+          [
+            1.6352711915969849,
+            44.96480941772461
+          ],
+          [
+            1.5385750532150269,
+            44.79819107055664
+          ],
+          [
+            0.919264554977417,
+            43.00285720825195
+          ],
+          [
+            0.003848887514322996,
+            47.58018493652344
+          ],
+          [
+            1.745018720626831,
+            54.20433807373047
+          ],
+          [
+            0.6079671382904053,
+            41.14826965332031
+          ],
+          [
+            1.038506269454956,
+            47.0908088684082
+          ],
+          [
+            0.5756869912147522,
+            42.92869567871094
+          ],
+          [
+            0.6462663412094116,
+            57.896183013916016
+          ],
+          [
+            1.8185011148452759,
+            49.85417938232422
+          ],
+          [
+            0.9232497811317444,
+            50.49077224731445
+          ],
+          [
+            0.6431361436843872,
+            48.086822509765625
+          ],
+          [
+            0.769841730594635,
+            51.74470520019531
+          ],
+          [
+            0.6099733114242554,
+            43.89696502685547
+          ],
+          [
+            0.6985472440719604,
+            51.57319259643555
+          ],
+          [
+            0.13563969731330872,
+            39.819053649902344
+          ],
+          [
+            1.3158302307128906,
+            52.40334701538086
+          ],
+          [
+            0.189638152718544,
+            48.23710250854492
+          ],
+          [
+            0.028285427019000053,
+            50.4655647277832
+          ],
+          [
+            1.1775665283203125,
+            48.497886657714844
+          ],
+          [
+            1.2757668495178223,
+            44.2684440612793
+          ],
+          [
+            0.7742948532104492,
+            43.90920639038086
+          ],
+          [
+            0.7767844200134277,
+            50.6328125
+          ],
+          [
+            0.552909791469574,
+            47.788002014160156
+          ],
+          [
+            0.820705771446228,
+            50.64125442504883
+          ],
+          [
+            0.5097638964653015,
+            52.41231155395508
+          ]
+        ],
+        "human_joint_positive_work_per_env_j": [
+          2708.598876953125,
+          3146.967529296875,
+          2709.66162109375,
+          2706.230224609375,
+          2568.018310546875,
+          2949.602783203125,
+          2593.392822265625,
+          2694.43359375,
+          3117.8935546875,
+          2847.006103515625,
+          3032.29248046875,
+          2844.776611328125,
+          3028.560546875,
+          2828.51904296875,
+          2906.195556640625,
+          2741.2822265625,
+          3298.310546875,
+          2982.06201171875,
+          3212.21533203125,
+          2934.010498046875,
+          3176.587646484375,
+          2965.947021484375,
+          3020.59130859375,
+          2744.87255859375,
+          2642.423583984375,
+          2906.9189453125,
+          3074.4541015625,
+          2865.25927734375,
+          2934.120361328125,
+          2989.9541015625,
+          3080.25146484375,
+          2921.29345703125,
+          2999.041259765625,
+          3061.826904296875,
+          3145.72412109375,
+          2802.278564453125,
+          3032.181396484375,
+          2696.16162109375,
+          2986.711181640625,
+          2731.5185546875,
+          3069.02587890625,
+          3127.6591796875,
+          2996.462646484375,
+          2842.7373046875,
+          3174.650634765625,
+          2996.701416015625,
+          3110.02001953125,
+          3230.0400390625
+        ],
+        "human_joint_absolute_work_per_env_j": [
+          4279.33544921875,
+          5621.6259765625,
+          4706.2109375,
+          4667.30859375,
+          4630.6279296875,
+          5585.0654296875,
+          4287.8623046875,
+          5140.9140625,
+          5535.76220703125,
+          4819.11474609375,
+          5517.5732421875,
+          5209.26513671875,
+          5058.181640625,
+          4695.88720703125,
+          5596.33984375,
+          4941.740234375,
+          5967.65673828125,
+          5474.43310546875,
+          5218.90869140625,
+          5118.4501953125,
+          5745.36279296875,
+          5589.02001953125,
+          5335.3212890625,
+          4443.5849609375,
+          4444.69140625,
+          4982.08349609375,
+          5348.12353515625,
+          5212.44921875,
+          5128.5107421875,
+          5429.455078125,
+          5662.56201171875,
+          5402.1044921875,
+          5214.84716796875,
+          5444.705078125,
+          5637.41796875,
+          4980.626953125,
+          5529.9453125,
+          4720.9833984375,
+          5400.138671875,
+          4800.9921875,
+          5457.6845703125,
+          5390.33544921875,
+          5300.48046875,
+          5161.43994140625,
+          5688.0078125,
+          5332.5302734375,
+          5467.7431640625,
+          5622.53271484375
+        ],
+        "strut_supported_work_per_env_j": [
+          50.2874641418457,
+          43.853878021240234,
+          54.18697738647461,
+          33.14814376831055,
+          25.671527862548828,
+          52.76982498168945,
+          27.697736740112305,
+          28.259870529174805,
+          58.764732360839844,
+          45.877235412597656,
+          53.71017837524414,
+          36.0183219909668,
+          57.060791015625,
+          43.66600036621094,
+          43.66937255859375,
+          35.19260025024414,
+          47.87298583984375,
+          46.169498443603516,
+          57.32128143310547,
+          47.91609573364258,
+          56.159969329833984,
+          51.986328125,
+          44.56864547729492,
+          44.89910125732422,
+          42.27330780029297,
+          45.948753356933594,
+          54.55174255371094,
+          40.33787536621094,
+          46.45376968383789,
+          41.41160202026367,
+          56.90702438354492,
+          50.36977005004883,
+          48.98750686645508,
+          47.07175827026367,
+          50.90666961669922,
+          43.28007888793945,
+          51.06350326538086,
+          39.10466766357422,
+          51.73879623413086,
+          47.13121032714844,
+          49.28200149536133,
+          48.07349395751953,
+          43.39275360107422,
+          43.80916213989258,
+          50.45669174194336,
+          46.92820358276367,
+          49.64667892456055,
+          51.18667984008789
+        ],
+        "strut_share_of_positive_work_per_env": [
+          0.01872667670249939,
+          0.01505324337631464,
+          0.02004403807222843,
+          0.012726501561701298,
+          0.010487694293260574,
+          0.018219517543911934,
+          0.011118918657302856,
+          0.011233103461563587,
+          0.019199049100279808,
+          0.01642509177327156,
+          0.01804112084209919,
+          0.01324719563126564,
+          0.018892085179686546,
+          0.01580810546875,
+          0.015481485053896904,
+          0.013154936954379082,
+          0.01555098220705986,
+          0.015969254076480865,
+          0.017954159528017044,
+          0.016754575073719025,
+          0.017926771193742752,
+          0.017597448080778122,
+          0.015193079598248005,
+          0.016600964590907097,
+          0.016350137069821358,
+          0.016105597838759422,
+          0.0178728885948658,
+          0.014363953843712807,
+          0.0161385927349329,
+          0.014341512694954872,
+          0.01865125633776188,
+          0.0173808503895998,
+          0.01685453951358795,
+          0.015665991231799126,
+          0.01641983352601528,
+          0.01563410460948944,
+          0.016946842893958092,
+          0.014602703042328358,
+          0.017668280750513077,
+          0.017420034855604172,
+          0.016186418011784554,
+          0.015634315088391304,
+          0.01497176568955183,
+          0.015475230291485786,
+          0.01593572087585926,
+          0.015875283628702164,
+          0.016277797520160675,
+          0.016120221465826035
+        ],
+        "human_leg_torque_rms_per_env_nm": [
+          25.67951202392578,
+          29.536514282226562,
+          27.855100631713867,
+          27.519397735595703,
+          27.66280174255371,
+          30.043983459472656,
+          26.13867950439453,
+          28.414979934692383,
+          29.514007568359375,
+          28.1331729888916,
+          29.730438232421875,
+          28.554380416870117,
+          28.77130889892578,
+          26.92359161376953,
+          30.299556732177734,
+          28.326330184936523,
+          30.722171783447266,
+          29.809659957885742,
+          28.721742630004883,
+          28.885520935058594,
+          30.295522689819336,
+          30.351778030395508,
+          29.019628524780273,
+          26.438785552978516,
+          26.92670440673828,
+          27.986684799194336,
+          29.476593017578125,
+          28.82581901550293,
+          28.90320587158203,
+          29.620269775390625,
+          30.664688110351562,
+          29.416593551635742,
+          29.480661392211914,
+          29.182754516601562,
+          29.560333251953125,
+          28.508377075195312,
+          29.907236099243164,
+          27.60533905029297,
+          29.544626235961914,
+          28.204832077026367,
+          30.191909790039062,
+          29.230621337890625,
+          29.1605224609375,
+          28.730499267578125,
+          30.578685760498047,
+          29.176721572875977,
+          29.29328155517578,
+          30.315223693847656
+        ],
+        "human_leg_torque_peak_per_env_nm": [
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0
+        ],
+        "mechanical_work_sample_hz": 60
+      }
+    },
+    {
+      "target_speed_mps": 1.5,
+      "initial_slope_counts": {
+        "level": 9,
+        "uphill": 13,
+        "downhill": 9,
+        "cross_slope": 17
+      },
+      "initial_slope_magnitude_range_deg": [
+        0.899736225605011,
+        11.339797973632812
+      ],
+      "overall": {
+        "simulated_seconds": 960.0,
+        "forward_mean_mps": 0.9942323205430214,
+        "mean_speed_error_mps": -0.5057676794569786,
+        "instantaneous_speed_mae_mps": 0.5160886884445587,
+        "fraction_within_0_15_mps": 0.2906076388888889,
+        "completed_jumps": 505,
+        "jumps_per_minute": 31.5625,
+        "mean_jump_stride_m": 1.207399689029939,
+        "failures": 3,
+        "falls": 3,
+        "falls_per_minute": 0.1875,
+        "timeouts": 144
+      },
+      "by_slope": {
+        "level": {
+          "simulated_seconds": 158.65,
+          "forward_mean_mps": 0.9849041572651414,
+          "mean_speed_error_mps": -0.5150958427348586,
+          "instantaneous_speed_mae_mps": 0.5236950094646823,
+          "fraction_within_0_15_mps": 0.2920474839794096,
+          "completed_jumps": 81,
+          "jumps_per_minute": 30.63346990230066,
+          "mean_jump_stride_m": 1.1996142588279866,
+          "failures": 1,
+          "falls": 1,
+          "falls_per_minute": 0.3781909864481563,
+          "timeouts": 24
+        },
+        "uphill": {
+          "simulated_seconds": 199.4,
+          "forward_mean_mps": 0.9416746997585697,
+          "mean_speed_error_mps": -0.5583253002414303,
+          "instantaneous_speed_mae_mps": 0.5659036983064311,
+          "fraction_within_0_15_mps": 0.18304914744232698,
+          "completed_jumps": 115,
+          "jumps_per_minute": 34.603811434302905,
+          "mean_jump_stride_m": 1.0782288328461025,
+          "failures": 1,
+          "falls": 1,
+          "falls_per_minute": 0.3009027081243731,
+          "timeouts": 26
+        },
+        "downhill": {
+          "simulated_seconds": 193.9,
+          "forward_mean_mps": 1.0988002585098016,
+          "mean_speed_error_mps": -0.40119974149019844,
+          "instantaneous_speed_mae_mps": 0.41574149917090075,
+          "fraction_within_0_15_mps": 0.47971462953412414,
+          "completed_jumps": 95,
+          "jumps_per_minute": 29.396596183599794,
+          "mean_jump_stride_m": 1.4474099535691112,
+          "failures": 0,
+          "falls": 0,
+          "falls_per_minute": 0.0,
+          "timeouts": 32
+        },
+        "cross_slope": {
+          "simulated_seconds": 408.05,
+          "forward_mean_mps": 0.9738529050711345,
+          "mean_speed_error_mps": -0.5261470949288655,
+          "instantaneous_speed_mae_mps": 0.5364721321496496,
+          "fraction_within_0_15_mps": 0.25274680390475024,
+          "completed_jumps": 214,
+          "jumps_per_minute": 31.46673201813503,
+          "mean_jump_stride_m": 1.1732141431246963,
+          "failures": 1,
+          "falls": 1,
+          "falls_per_minute": 0.1470408038230609,
+          "timeouts": 62
+        }
+      },
+      "by_terrain": {
+        "2": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.9598237823759291,
+            "mean_speed_error_mps": -0.5401762176240709,
+            "instantaneous_speed_mae_mps": 0.5501958480110918,
+            "fraction_within_0_15_mps": 0.2375,
+            "completed_jumps": 87,
+            "jumps_per_minute": 32.625,
+            "mean_jump_stride_m": 1.1394016078148765,
+            "failures": 1,
+            "falls": 1,
+            "falls_per_minute": 0.375,
+            "timeouts": 23
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 48.233333333333334,
+              "forward_mean_mps": 0.8505883103211876,
+              "mean_speed_error_mps": -0.6494116896788124,
+              "instantaneous_speed_mae_mps": 0.6583554237929244,
+              "fraction_within_0_15_mps": 0.11990324809951625,
+              "completed_jumps": 28,
+              "jumps_per_minute": 34.83068417415342,
+              "mean_jump_stride_m": 0.9479603831257138,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "downhill": {
+              "simulated_seconds": 21.516666666666666,
+              "forward_mean_mps": 1.0864741407062095,
+              "mean_speed_error_mps": -0.4135258592937905,
+              "instantaneous_speed_mae_mps": 0.4300410666004015,
+              "fraction_within_0_15_mps": 0.5112316034082107,
+              "completed_jumps": 9,
+              "jumps_per_minute": 25.096824167312164,
+              "mean_jump_stride_m": 1.5725125206841364,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 90.25,
+              "forward_mean_mps": 0.9880087950300436,
+              "mean_speed_error_mps": -0.5119912049699564,
+              "instantaneous_speed_mae_mps": 0.521037216522371,
+              "fraction_within_0_15_mps": 0.23508771929824562,
+              "completed_jumps": 50,
+              "jumps_per_minute": 33.2409972299169,
+              "mean_jump_stride_m": 1.1686487293243408,
+              "failures": 1,
+              "falls": 1,
+              "falls_per_minute": 0.6648199445983379,
+              "timeouts": 13
+            }
+          }
+        },
+        "15": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 1.0411082419251785,
+            "mean_speed_error_mps": -0.4588917580748215,
+            "instantaneous_speed_mae_mps": 0.47368559209950745,
+            "fraction_within_0_15_mps": 0.3619791666666667,
+            "completed_jumps": 87,
+            "jumps_per_minute": 32.625,
+            "mean_jump_stride_m": 1.2661770815136788,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 24
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 38.36666666666667,
+              "forward_mean_mps": 1.024034379470978,
+              "mean_speed_error_mps": -0.4759656205290219,
+              "instantaneous_speed_mae_mps": 0.48343876432579386,
+              "fraction_within_0_15_mps": 0.2562988705473501,
+              "completed_jumps": 24,
+              "jumps_per_minute": 37.532580364900085,
+              "mean_jump_stride_m": 1.1376131723324459,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 5
+            },
+            "downhill": {
+              "simulated_seconds": 59.25,
+              "forward_mean_mps": 1.1648956527995493,
+              "mean_speed_error_mps": -0.3351043472004507,
+              "instantaneous_speed_mae_mps": 0.3570939869198878,
+              "fraction_within_0_15_mps": 0.5935302390998594,
+              "completed_jumps": 30,
+              "jumps_per_minute": 30.379746835443036,
+              "mean_jump_stride_m": 1.537196675936381,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 10
+            },
+            "cross_slope": {
+              "simulated_seconds": 62.38333333333333,
+              "forward_mean_mps": 0.9340389888424054,
+              "mean_speed_error_mps": -0.5659610111575946,
+              "instantaneous_speed_mae_mps": 0.5784227959329663,
+              "fraction_within_0_15_mps": 0.2070531659096981,
+              "completed_jumps": 33,
+              "jumps_per_minute": 31.739246593641465,
+              "mean_jump_stride_m": 1.1132966568975737,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 9
+            }
+          }
+        },
+        "25": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.9900708165813313,
+            "mean_speed_error_mps": -0.5099291834186687,
+            "instantaneous_speed_mae_mps": 0.518344585861712,
+            "fraction_within_0_15_mps": 0.2680208333333333,
+            "completed_jumps": 82,
+            "jumps_per_minute": 30.75,
+            "mean_jump_stride_m": 1.1901214442602017,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 23
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 4.566666666666666,
+              "forward_mean_mps": 0.9968380140944514,
+              "mean_speed_error_mps": -0.5031619859055486,
+              "instantaneous_speed_mae_mps": 0.5103690122518358,
+              "fraction_within_0_15_mps": 0.27007299270072993,
+              "completed_jumps": 2,
+              "jumps_per_minute": 26.277372262773724,
+              "mean_jump_stride_m": 0.99863600730896,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            },
+            "uphill": {
+              "simulated_seconds": 48.05,
+              "forward_mean_mps": 0.9468567208435414,
+              "mean_speed_error_mps": -0.5531432791564586,
+              "instantaneous_speed_mae_mps": 0.5587215861281367,
+              "fraction_within_0_15_mps": 0.13250086715227194,
+              "completed_jumps": 28,
+              "jumps_per_minute": 34.96357960457857,
+              "mean_jump_stride_m": 1.0538943431207113,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 7
+            },
+            "downhill": {
+              "simulated_seconds": 35.5,
+              "forward_mean_mps": 1.0913312729437012,
+              "mean_speed_error_mps": -0.40866872705629875,
+              "instantaneous_speed_mae_mps": 0.4172970612025252,
+              "fraction_within_0_15_mps": 0.5234741784037559,
+              "completed_jumps": 17,
+              "jumps_per_minute": 28.732394366197184,
+              "mean_jump_stride_m": 1.452480484457577,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 4
+            },
+            "cross_slope": {
+              "simulated_seconds": 71.88333333333333,
+              "forward_mean_mps": 0.9685190553574978,
+              "mean_speed_error_mps": -0.5314809446425022,
+              "instantaneous_speed_mae_mps": 0.5417643964170265,
+              "fraction_within_0_15_mps": 0.23232089033155576,
+              "completed_jumps": 35,
+              "jumps_per_minute": 29.21400417342917,
+              "mean_jump_stride_m": 1.182613616330283,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 11
+            }
+          }
+        },
+        "45": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.9877258537602757,
+            "mean_speed_error_mps": -0.5122741462397243,
+            "instantaneous_speed_mae_mps": 0.5236332201884297,
+            "fraction_within_0_15_mps": 0.2946875,
+            "completed_jumps": 85,
+            "jumps_per_minute": 31.875,
+            "mean_jump_stride_m": 1.2342488653519574,
+            "failures": 1,
+            "falls": 1,
+            "falls_per_minute": 0.375,
+            "timeouts": 27
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 20.433333333333334,
+              "forward_mean_mps": 0.9239272024136566,
+              "mean_speed_error_mps": -0.5760727975863434,
+              "instantaneous_speed_mae_mps": 0.5848996339994065,
+              "fraction_within_0_15_mps": 0.233278955954323,
+              "completed_jumps": 11,
+              "jumps_per_minute": 32.30016313213703,
+              "mean_jump_stride_m": 1.19268029386347,
+              "failures": 1,
+              "falls": 1,
+              "falls_per_minute": 2.936378466557912,
+              "timeouts": 2
+            },
+            "downhill": {
+              "simulated_seconds": 39.03333333333333,
+              "forward_mean_mps": 1.0412397769456403,
+              "mean_speed_error_mps": -0.4587602230543597,
+              "instantaneous_speed_mae_mps": 0.4717062629174922,
+              "fraction_within_0_15_mps": 0.39026473099914605,
+              "completed_jumps": 20,
+              "jumps_per_minute": 30.742954739538856,
+              "mean_jump_stride_m": 1.3602448403835297,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 8
+            },
+            "cross_slope": {
+              "simulated_seconds": 100.53333333333333,
+              "forward_mean_mps": 0.9799154324159174,
+              "mean_speed_error_mps": -0.5200845675840826,
+              "instantaneous_speed_mae_mps": 0.5313421576214997,
+              "fraction_within_0_15_mps": 0.27005968169761274,
+              "completed_jumps": 54,
+              "jumps_per_minute": 32.228116710875334,
+              "mean_jump_stride_m": 1.1960513613842152,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 17
+            }
+          }
+        },
+        "52": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 1.0001200468864113,
+            "mean_speed_error_mps": -0.4998799531135887,
+            "instantaneous_speed_mae_mps": 0.5087386397058703,
+            "fraction_within_0_15_mps": 0.2865625,
+            "completed_jumps": 82,
+            "jumps_per_minute": 30.75,
+            "mean_jump_stride_m": 1.209102418364548,
+            "failures": 0,
+            "falls": 0,
+            "falls_per_minute": 0.0,
+            "timeouts": 23
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 0.0
+            },
+            "uphill": {
+              "simulated_seconds": 44.31666666666666,
+              "forward_mean_mps": 0.9720736065997544,
+              "mean_speed_error_mps": -0.5279263934002456,
+              "instantaneous_speed_mae_mps": 0.5357028696926478,
+              "fraction_within_0_15_mps": 0.22000752162467094,
+              "completed_jumps": 24,
+              "jumps_per_minute": 32.49341857841294,
+              "mean_jump_stride_m": 1.1467576697468758,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "downhill": {
+              "simulated_seconds": 38.6,
+              "forward_mean_mps": 1.0692922613005802,
+              "mean_speed_error_mps": -0.4307077386994198,
+              "instantaneous_speed_mae_mps": 0.43976928012037775,
+              "fraction_within_0_15_mps": 0.3376511226252159,
+              "completed_jumps": 19,
+              "jumps_per_minute": 29.533678756476682,
+              "mean_jump_stride_m": 1.3335982937561839,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 6
+            },
+            "cross_slope": {
+              "simulated_seconds": 77.08333333333333,
+              "forward_mean_mps": 0.981606022267818,
+              "mean_speed_error_mps": -0.518393977732182,
+              "instantaneous_speed_mae_mps": 0.5277732665740128,
+              "fraction_within_0_15_mps": 0.29924324324324325,
+              "completed_jumps": 39,
+              "jumps_per_minute": 30.35675675675676,
+              "mean_jump_stride_m": 1.1868165807846265,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 11
+            }
+          }
+        },
+        "63": {
+          "overall": {
+            "simulated_seconds": 160.0,
+            "forward_mean_mps": 0.9865451817290023,
+            "mean_speed_error_mps": -0.5134548182709977,
+            "instantaneous_speed_mae_mps": 0.5219342448007414,
+            "fraction_within_0_15_mps": 0.29489583333333336,
+            "completed_jumps": 82,
+            "jumps_per_minute": 30.75,
+            "mean_jump_stride_m": 1.204926667053525,
+            "failures": 1,
+            "falls": 1,
+            "falls_per_minute": 0.375,
+            "timeouts": 24
+          },
+          "by_slope": {
+            "level": {
+              "simulated_seconds": 154.08333333333334,
+              "forward_mean_mps": 0.9845504658891294,
+              "mean_speed_error_mps": -0.5154495341108706,
+              "instantaneous_speed_mae_mps": 0.5240899605989515,
+              "fraction_within_0_15_mps": 0.2926987560843699,
+              "completed_jumps": 79,
+              "jumps_per_minute": 30.76257436452136,
+              "mean_jump_stride_m": 1.2047023158284682,
+              "failures": 1,
+              "falls": 1,
+              "falls_per_minute": 0.3893996755002704,
+              "timeouts": 23
+            },
+            "uphill": {
+              "simulated_seconds": 0.0
+            },
+            "downhill": {
+              "simulated_seconds": 0.0
+            },
+            "cross_slope": {
+              "simulated_seconds": 5.916666666666667,
+              "forward_mean_mps": 1.038492077333577,
+              "mean_speed_error_mps": -0.46150792266642293,
+              "instantaneous_speed_mae_mps": 0.46579454746425253,
+              "fraction_within_0_15_mps": 0.352112676056338,
+              "completed_jumps": 3,
+              "jumps_per_minute": 30.422535211267604,
+              "mean_jump_stride_m": 1.2108345826466878,
+              "failures": 0,
+              "falls": 0,
+              "falls_per_minute": 0.0,
+              "timeouts": 1
+            }
+          }
+        }
+      },
+      "exoskeleton": {
+        "mechanism": "hooke_slide_ball_v3",
+        "control": "scheduled_force",
+        "force_limit_per_strut_n": 80.0,
+        "peak_force_per_env_n": [
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            77.57575988769531,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            80.0,
+            80.0
+          ],
+          [
+            59.25926208496094,
+            80.0
+          ]
+        ],
+        "strut_positive_work_per_env_j": [
+          [
+            2.4453039169311523,
+            37.05146789550781
+          ],
+          [
+            7.578299045562744,
+            55.31446075439453
+          ],
+          [
+            2.241381883621216,
+            47.018577575683594
+          ],
+          [
+            8.686970710754395,
+            25.25303840637207
+          ],
+          [
+            2.26914119720459,
+            43.062591552734375
+          ],
+          [
+            4.330824851989746,
+            26.535062789916992
+          ],
+          [
+            1.4865241050720215,
+            30.459774017333984
+          ],
+          [
+            3.252072334289551,
+            20.840803146362305
+          ],
+          [
+            5.391904354095459,
+            41.06163787841797
+          ],
+          [
+            4.673218250274658,
+            55.04269790649414
+          ],
+          [
+            8.362906455993652,
+            26.9436092376709
+          ],
+          [
+            1.1333204507827759,
+            30.684505462646484
+          ],
+          [
+            3.6087212562561035,
+            33.95018768310547
+          ],
+          [
+            1.556746006011963,
+            39.44963455200195
+          ],
+          [
+            7.543272495269775,
+            38.599830627441406
+          ],
+          [
+            6.471813678741455,
+            38.46291732788086
+          ],
+          [
+            3.9719393253326416,
+            39.63961410522461
+          ],
+          [
+            4.201750755310059,
+            35.23902130126953
+          ],
+          [
+            2.989698648452759,
+            44.61219024658203
+          ],
+          [
+            3.0102922916412354,
+            43.65629196166992
+          ],
+          [
+            4.642367362976074,
+            39.30319595336914
+          ],
+          [
+            4.642822265625,
+            40.03272247314453
+          ],
+          [
+            1.3643040657043457,
+            40.447364807128906
+          ],
+          [
+            1.6883114576339722,
+            38.38382339477539
+          ],
+          [
+            6.068935394287109,
+            38.47300720214844
+          ],
+          [
+            4.337690353393555,
+            43.96482849121094
+          ],
+          [
+            2.871398687362671,
+            32.93693923950195
+          ],
+          [
+            5.960134506225586,
+            31.651790618896484
+          ],
+          [
+            5.422420501708984,
+            35.97102737426758
+          ],
+          [
+            5.607756614685059,
+            43.271324157714844
+          ],
+          [
+            5.4696526527404785,
+            44.151248931884766
+          ],
+          [
+            6.0598464012146,
+            43.39724349975586
+          ],
+          [
+            3.083132743835449,
+            46.20777130126953
+          ],
+          [
+            1.6235156059265137,
+            46.88621139526367
+          ],
+          [
+            3.3523287773132324,
+            37.677391052246094
+          ],
+          [
+            4.775519847869873,
+            31.682626724243164
+          ],
+          [
+            5.649053573608398,
+            35.533241271972656
+          ],
+          [
+            3.449295997619629,
+            45.69669723510742
+          ],
+          [
+            4.306088924407959,
+            43.60661315917969
+          ],
+          [
+            2.983883857727051,
+            40.5013542175293
+          ],
+          [
+            2.7718191146850586,
+            42.291954040527344
+          ],
+          [
+            4.11563777923584,
+            39.22340774536133
+          ],
+          [
+            3.373931646347046,
+            45.707664489746094
+          ],
+          [
+            4.291223526000977,
+            39.52662658691406
+          ],
+          [
+            1.4897329807281494,
+            39.799224853515625
+          ],
+          [
+            6.025736331939697,
+            38.83079528808594
+          ],
+          [
+            2.571836471557617,
+            41.70595932006836
+          ],
+          [
+            1.3567572832107544,
+            43.14805221557617
+          ]
+        ],
+        "human_joint_positive_work_per_env_j": [
+          2972.8203125,
+          3355.930908203125,
+          3124.2783203125,
+          2641.395263671875,
+          3185.41552734375,
+          2831.40869140625,
+          2911.947509765625,
+          2669.313232421875,
+          3027.615966796875,
+          3415.28369140625,
+          2709.379150390625,
+          2885.68896484375,
+          2861.841552734375,
+          3054.1640625,
+          3030.587890625,
+          3185.403564453125,
+          3206.237060546875,
+          2889.34619140625,
+          3130.562744140625,
+          3170.494384765625,
+          3024.1728515625,
+          2959.737548828125,
+          3079.86083984375,
+          2841.487548828125,
+          3121.964111328125,
+          3198.91552734375,
+          2905.87939453125,
+          2929.308837890625,
+          2910.219970703125,
+          3287.537841796875,
+          3392.513916015625,
+          3390.2158203125,
+          3099.2197265625,
+          3127.416015625,
+          2951.02734375,
+          3067.660400390625,
+          3072.80126953125,
+          3228.8251953125,
+          2977.855712890625,
+          3032.23974609375,
+          3305.49365234375,
+          3139.0615234375,
+          3128.81396484375,
+          3136.846435546875,
+          2743.798583984375,
+          3135.205810546875,
+          3117.54296875,
+          3141.365234375
+        ],
+        "human_joint_absolute_work_per_env_j": [
+          5045.52587890625,
+          5467.11669921875,
+          4784.66748046875,
+          4977.86865234375,
+          5329.81640625,
+          4994.44580078125,
+          4826.37255859375,
+          4869.2373046875,
+          5250.068359375,
+          5322.89794921875,
+          5017.69384765625,
+          4984.3583984375,
+          4701.40673828125,
+          4781.90283203125,
+          5408.796875,
+          5674.24267578125,
+          5378.39013671875,
+          4840.52099609375,
+          5078.2587890625,
+          5266.775390625,
+          5191.04541015625,
+          5081.646484375,
+          5007.07861328125,
+          4551.43896484375,
+          5203.23974609375,
+          5989.95458984375,
+          4855.89990234375,
+          4856.56201171875,
+          5000.875,
+          5433.71240234375,
+          5604.0869140625,
+          5651.13623046875,
+          5077.0791015625,
+          5082.92431640625,
+          4906.15576171875,
+          5011.599609375,
+          5272.9541015625,
+          5315.22998046875,
+          4900.02685546875,
+          4898.85888671875,
+          5674.13818359375,
+          5186.67529296875,
+          5176.98193359375,
+          5352.7822265625,
+          4536.8759765625,
+          5247.841796875,
+          5117.28955078125,
+          5171.8603515625
+        ],
+        "strut_supported_work_per_env_j": [
+          36.01954650878906,
+          57.35607147216797,
+          47.42681884765625,
+          29.130205154418945,
+          39.16350173950195,
+          25.416547775268555,
+          29.55841064453125,
+          19.874038696289062,
+          42.6201171875,
+          56.4157600402832,
+          31.235172271728516,
+          29.345680236816406,
+          34.80571365356445,
+          38.66720962524414,
+          42.71814727783203,
+          40.2222900390625,
+          39.39615249633789,
+          35.92244338989258,
+          44.525699615478516,
+          43.320823669433594,
+          41.042659759521484,
+          40.76219940185547,
+          39.33985900878906,
+          37.775917053222656,
+          40.18202590942383,
+          44.54630661010742,
+          33.741153717041016,
+          32.42049026489258,
+          38.32413101196289,
+          43.61297607421875,
+          46.18912887573242,
+          42.808528900146484,
+          45.793399810791016,
+          45.98448944091797,
+          37.864646911621094,
+          32.37601089477539,
+          36.3531379699707,
+          46.67856216430664,
+          44.299163818359375,
+          41.16488265991211,
+          40.96621322631836,
+          40.04103088378906,
+          46.54188919067383,
+          41.277767181396484,
+          39.215911865234375,
+          41.569969177246094,
+          41.41767501831055,
+          40.97262954711914
+        ],
+        "strut_share_of_positive_work_per_env": [
+          0.013111758045852184,
+          0.01839602366089821,
+          0.015522093512117863,
+          0.01268626470118761,
+          0.014031345956027508,
+          0.010783691890537739,
+          0.010851715691387653,
+          0.008945133537054062,
+          0.015111414715647697,
+          0.017184438183903694,
+          0.012863592244684696,
+          0.010905827395617962,
+          0.012954026460647583,
+          0.01324850507080555,
+          0.014997445046901703,
+          0.013910223729908466,
+          0.013419564813375473,
+          0.013466590084135532,
+          0.014977793209254742,
+          0.014505517669022083,
+          0.014323295094072819,
+          0.014869973994791508,
+          0.013393995352089405,
+          0.013906405307352543,
+          0.014066589996218681,
+          0.014875046908855438,
+          0.012172718532383442,
+          0.012677091173827648,
+          0.014024007134139538,
+          0.014650171622633934,
+          0.014415735378861427,
+          0.01437842845916748,
+          0.015655307099223137,
+          0.015274200588464737,
+          0.013712880201637745,
+          0.011745087802410126,
+          0.013224955648183823,
+          0.014992807991802692,
+          0.015834886580705643,
+          0.014138206839561462,
+          0.013449635356664658,
+          0.0136183500289917,
+          0.015444685705006123,
+          0.013776320032775402,
+          0.014825012534856796,
+          0.01410555187612772,
+          0.014003890566527843,
+          0.013969436287879944
+        ],
+        "human_leg_torque_rms_per_env_nm": [
+          28.01247787475586,
+          29.22258758544922,
+          26.60959243774414,
+          29.123098373413086,
+          28.36789321899414,
+          28.782482147216797,
+          27.729900360107422,
+          28.625926971435547,
+          28.745258331298828,
+          27.991758346557617,
+          29.23274803161621,
+          28.746898651123047,
+          27.030059814453125,
+          27.070980072021484,
+          29.064241409301758,
+          30.633190155029297,
+          28.742855072021484,
+          27.501150131225586,
+          28.12323760986328,
+          28.635400772094727,
+          28.81676483154297,
+          28.501785278320312,
+          27.68976402282715,
+          26.75894546508789,
+          28.406204223632812,
+          30.653484344482422,
+          27.592985153198242,
+          27.86083984375,
+          27.687715530395508,
+          28.607587814331055,
+          29.872398376464844,
+          29.136829376220703,
+          27.630552291870117,
+          27.70320701599121,
+          28.065874099731445,
+          28.21949577331543,
+          28.7664852142334,
+          28.409503936767578,
+          27.174835205078125,
+          27.7164306640625,
+          29.016050338745117,
+          28.397897720336914,
+          28.34865951538086,
+          28.341053009033203,
+          27.134031295776367,
+          28.38222885131836,
+          28.77152442932129,
+          28.783153533935547
+        ],
+        "human_leg_torque_peak_per_env_nm": [
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0,
+          180.0
+        ],
+        "mechanical_work_sample_hz": 60
+      }
+    }
+  ]
+}

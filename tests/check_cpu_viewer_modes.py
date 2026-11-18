@@ -23,6 +23,21 @@ state={'paused':False};reset=threading.Event();keys=[]
 with launch(worlds.sim.mj_spec,worlds.model,worlds.data[0],args.viewer,args.viz,
             keys.append,state,reset,simulator=worlds.sim) as viewer:
     viewer.sync()
+    # Render real solver contacts through each backend's overlay path.
+    for data in worlds.data:
+        data.qpos[2]-=.08
+        mujoco.mj_forward(worlds.model,data)
+    worlds.read_native()
+    assert sum(d.ncon for d in worlds.data)>0
+    for enabled in (True,False):
+        viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT]=enabled
+        viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE]=enabled
+        viewer.sync()
+        count=(viewer.native.user_scn.ngeom if args.viewer=='classic'
+               else len(viewer.native.extra_geoms))
+        assert (count>0)==enabled
+    worlds.reset()
+    viewer.sync()
     physical=worlds.sim.data.qpos.clone()
     activation=int(viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_ACTIVATION])
     def key(character, expected_world, tracking):
