@@ -1,0 +1,188 @@
+{
+  "label": "exp3_v8_s2b",
+  "checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/outputs/assist_opt_v8/exp3_v8_s2b/model_239.pt",
+  "bands": {
+    "0.5": {
+      "speed": 0.4838332265615463,
+      "jpm": 451.3233635422079,
+      "saving_vs_zero_pct": 54.64107745174091,
+      "saving_vs_v4_pct": 40.9156623518657,
+      "saving_vs_v7_pct": 35.54893898856467,
+      "failures": 0,
+      "jumps": 160,
+      "landing_p95_bw": 3.433791399002075,
+      "leg_torque_rms_nm": 19.419435501098633,
+      "leg_torque_peak_nm": 180.0,
+      "push_left_pct": 40.10391548114816,
+      "land_left_pct": 39.041811926033674,
+      "exo_pos_jpm": 8.790094650137089,
+      "exo_neg_jpm": 9.6653341014387,
+      "exo_share_pct": 8.451851603076134,
+      "peak_rod_f_n": [
+        302.0542297363281,
+        216.25196838378906
+      ],
+      "unloaded_rod_f_n": 1.9583618640899658,
+      "abs_pack_roll_deg": 1.8428868055343628,
+      "abs_waist_roll_deg": 5.941216468811035,
+      "flight_duration_median_s": 0.5333333333333333,
+      "flight_com_rise_median_m": 0.06292946264147758,
+      "landing_jpm": 98.11623630666395,
+      "push_jpm": 266.9099809913293,
+      "human_positive_jpm": 95.21190470983566,
+      "human_negative_abs_jpm": 84.57089686422691,
+      "top_positive_joints_jpm": {
+        "RightAnkle": 29.813062306878344,
+        "LeftAnkle": 19.024844642226196,
+        "RightKnee": 8.183567156000455,
+        "WaistPitch": 6.8152197607959915,
+        "RightHipPitch": 5.781687888525591,
+        "LeftKnee": 4.763299508926319
+      },
+      "by_terrain": {
+        "16": {
+          "cmd": 0.8308,
+          "speed": 0.47429047226905824,
+          "distance": 37.94323778152466,
+          "failures": 0,
+          "jumps": 80,
+          "tag": "exp3_v8_s2b_16_0.8308",
+          "jpm": 471.0059894104602
+        },
+        "55": {
+          "cmd": 0.8481,
+          "speed": 0.49337598085403445,
+          "distance": 39.470078468322754,
+          "failures": 0,
+          "jumps": 80,
+          "tag": "exp3_v8_s2b_55_0.8481",
+          "jpm": 432.4021304850389
+        }
+      }
+    },
+    "1.0": {
+      "speed": 0.8394491642713546,
+      "jpm": 385.71693582944323,
+      "saving_vs_zero_pct": 38.6239063823602,
+      "saving_vs_v4_pct": 22.919244887406876,
+      "saving_vs_v7_pct": 17.53768160212822,
+      "failures": 0,
+      "jumps": 123,
+      "landing_p95_bw": 3.7874045372009277,
+      "leg_torque_rms_nm": 20.64904022216797,
+      "leg_torque_peak_nm": 180.0,
+      "push_left_pct": 37.08707274053744,
+      "land_left_pct": 44.10095100968858,
+      "exo_pos_jpm": 9.379624866646665,
+      "exo_neg_jpm": 7.048626582668912,
+      "exo_share_pct": 10.260394218851538,
+      "peak_rod_f_n": [
+        323.359375,
+        273.63201904296875
+      ],
+      "unloaded_rod_f_n": 4.4395952224731445,
+      "abs_pack_roll_deg": 1.9756989479064941,
+      "abs_waist_roll_deg": 5.402108192443848,
+      "flight_duration_median_s": 0.7833333333333333,
+      "flight_com_rise_median_m": 0.13216853141784668,
+      "landing_jpm": 70.57951151649758,
+      "push_jpm": 247.30802732763792,
+      "human_positive_jpm": 82.03620835166551,
+      "human_negative_abs_jpm": 69.08652675789064,
+      "top_positive_joints_jpm": {
+        "RightAnkle": 28.517060420576616,
+        "LeftAnkle": 24.59470650489566,
+        "RightKnee": 6.788797390712319,
+        "WaistPitch": 4.052173840244042,
+        "LeftKnee": 2.823169026310181,
+        "RightHipPitch": 2.776485892715274
+      },
+      "by_terrain": {
+        "16": {
+          "cmd": 0.9994,
+          "speed": 0.8094434559345245,
+          "distance": 64.75547647476196,
+          "failures": 0,
+          "jumps": 62,
+          "tag": "exp3_v8_s2b_16_0.9994",
+          "jpm": 403.56434243190307
+        },
+        "55": {
+          "cmd": 0.9736,
+          "speed": 0.8694548726081848,
+          "distance": 69.55638980865479,
+          "failures": 0,
+          "jumps": 61,
+          "tag": "exp3_v8_s2b_55_0.9736",
+          "jpm": 369.101390923211
+        }
+      }
+    },
+    "1.5": {
+      "speed": 1.0753891348838807,
+      "jpm": 373.75509410898445,
+      "saving_vs_zero_pct": 35.24389409318923,
+      "saving_vs_v4_pct": 17.718242526251082,
+      "saving_vs_v7_pct": 14.251875903210841,
+      "failures": 0,
+      "jumps": 122,
+      "landing_p95_bw": 3.9882006645202637,
+      "leg_torque_rms_nm": 21.950769424438477,
+      "leg_torque_peak_nm": 180.0,
+      "push_left_pct": 38.21361851893492,
+      "land_left_pct": 46.77239452756644,
+      "exo_pos_jpm": 7.3450317534237595,
+      "exo_neg_jpm": 5.560659648278817,
+      "exo_share_pct": 8.391136025386198,
+      "peak_rod_f_n": [
+        353.54180908203125,
+        297.0006408691406
+      ],
+      "unloaded_rod_f_n": 4.643747329711914,
+      "abs_pack_roll_deg": 2.190619945526123,
+      "abs_waist_roll_deg": 5.633942604064941,
+      "flight_duration_median_s": 0.7666666666666667,
+      "flight_com_rise_median_m": 0.1229521632194519,
+      "landing_jpm": 72.71103364676839,
+      "push_jpm": 233.75428541384449,
+      "human_positive_jpm": 80.18819058026745,
+      "human_negative_abs_jpm": 63.602801167986065,
+      "top_positive_joints_jpm": {
+        "RightAnkle": 26.986624349110112,
+        "LeftAnkle": 26.795499143627328,
+        "RightKnee": 6.931175105987025,
+        "LeftKnee": 4.212872543773267,
+        "WaistPitch": 2.805197538509743,
+        "RightHipPitch": 1.8769204370414905
+      },
+      "by_terrain": {
+        "16": {
+          "cmd": 1.3771,
+          "speed": 1.0614693284034729,
+          "distance": 84.91754627227783,
+          "failures": 0,
+          "jumps": 62,
+          "tag": "exp3_v8_s2b_16_1.3771",
+          "jpm": 379.854177932635
+        },
+        "55": {
+          "cmd": 1.4871,
+          "speed": 1.0893089413642882,
+          "distance": 87.14471530914307,
+          "failures": 0,
+          "jumps": 60,
+          "tag": "exp3_v8_s2b_55_1.4871",
+          "jpm": 367.81188537881593
+        }
+      }
+    }
+  },
+  "stationary_t16": {
+    "cmd": 0.0,
+    "speed": -0.02156412908807397,
+    "distance": -1.7251303270459175,
+    "failures": 0,
+    "jumps": 104,
+    "tag": "exp3_v8_s2b_16_0.0"
+  }
+}

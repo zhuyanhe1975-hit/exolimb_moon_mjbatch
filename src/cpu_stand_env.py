@@ -10,7 +10,8 @@ from cpu_jump_task import (DEFAULT_JUMP_HEIGHT_RANGE, FLOW_JUMP_ACTUATION,
                            FORWARD_FACING_BOOT_ACTUATION, FlowJumpCommands)
 from cpu_simulation import CpuWorlds
 from moon_device_core import META
-from moon_scene import scene_spec
+from moon_scene import (RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
+                        SUIT_ANKLE_ROLL_PROFILE, SUIT_MAJOR_JOINTS_PROFILE, scene_spec)
 from suit_proxy_geometry import LEGACY
 
 
@@ -25,11 +26,14 @@ class CpuStandEnv(VecEnv):
 
     def __init__(self, num_envs, terrain_idx, pushes, physics_backend, workers, seed, *,
                  geometry=LEGACY, inward_heading=False, terrain_indices=None, assist_force=None,
-                 exo_policy_io=None):
+                 exo_policy_io=None, vertical_support=False, stance_transition=False,
+                 suit_ankle_pitch=False, suit_major_joints=False, relax_propulsion=False):
         self.num_envs = num_envs
         self.workers = min(workers, num_envs)
+        self.device = 'cuda' if physics_backend == 'warp' else 'cpu'
         self.cfg = {
-            'backend': 'native_mujoco_cpu', 'physics_backend': physics_backend, 'task': self.task,
+            'backend': 'mujoco_warp_cuda' if physics_backend == 'warp' else 'native_mujoco_cpu',
+            'physics_backend': physics_backend, 'task': self.task,
             'num_envs': num_envs, 'terrain_idx': terrain_idx, 'pushes': pushes, 'seed': seed,
             'physics_workers': self.workers,
             'geometry': geometry,
@@ -38,21 +42,45 @@ class CpuStandEnv(VecEnv):
             self.cfg['terrain_indices'] = list(terrain_indices)
             self.cfg['spawn_sampling'] = 'independent_position_and_36_uniform_headings'
         pd_force = None
+        suit_ankle_roll = False
         if assist_force is not None:
-            from exoskeleton import MECHANISM, POLICY_IO
+            from exoskeleton import ACTION_FORCE_COSTS, ACTION_FORCE_IO, MECHANISM, POLICY_IO
             self.cfg.update(assist_force_n=assist_force, exo_mechanism=MECHANISM)
+            suit_ankle_roll = exo_policy_io == ACTION_FORCE_IO
+            if suit_ankle_roll:
+                self.cfg.update(ankle_roll_profile=SUIT_ANKLE_ROLL_PROFILE,
+                                exo_action_force_costs=ACTION_FORCE_COSTS.copy())
             if exo_policy_io == POLICY_IO:
                 pd_force = assist_force
+        if suit_ankle_pitch:
+            self.cfg['ankle_pitch_profile'] = SUIT_ANKLE_PITCH_PROFILE
+        if suit_major_joints:
+            self.cfg['suit_major_joints_profile'] = SUIT_MAJOR_JOINTS_PROFILE
+        if relax_propulsion:
+            self.cfg['propulsion_profile'] = RELAXED_PROPULSION_PROFILE
         spec = scene_spec(geometry=geometry, sole_probes=self.sole_probes,
                           exoskeleton=assist_force is not None, exo_pd_force=pd_force,
-                          sole_collision=self.sole_collision, sole_edge_probes=self.sole_edge_probes)
-        self.worlds = CpuWorlds(spec, num_envs, terrain_idx, pushes=pushes,
-                               use_mjbatch=physics_backend == 'mjbatch', workers=self.workers,
-                               optimize_cpu=True, inward_heading=inward_heading,
-                               terrain_indices=terrain_indices, spawn_seed=seed,
-                               assist_force=assist_force)
-        self.episode_length_buf = torch.zeros(num_envs, dtype=torch.long)
-        self.weights = torch.tensor(list(META['rewards'].values()))
+                          sole_collision=self.sole_collision, sole_edge_probes=self.sole_edge_probes,
+                          suit_ankle_roll=suit_ankle_roll, suit_ankle_pitch=suit_ankle_pitch,
+                          suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion,
+                          vertical_support=vertical_support, stance_transition=stance_transition)
+        if physics_backend == 'warp':
+            from warp_exo_worlds import WarpExoWorlds
+            self.worlds = WarpExoWorlds(spec, num_envs, terrain_idx, pushes=pushes,
+                                        terrain_indices=terrain_indices, seed=seed,
+                                        assist_force=assist_force)
+            self.cfg['spawn_sampling'] = 'independent_position_and_36_uniform_headings_gpu_with_replacement'
+            self.cfg['warp_cuda_graphs'] = self.worlds.use_cuda_graphs
+            self.cfg['measurement_cuda_graph'] = self.worlds.device.use_measurement_graph
+            self.cfg['batched_terrain_queries'] = self.worlds.device.batch_measurement_terrain
+        else:
+            self.worlds = CpuWorlds(spec, num_envs, terrain_idx, pushes=pushes,
+                                    use_mjbatch=physics_backend == 'mjbatch', workers=self.workers,
+                                    optimize_cpu=True, inward_heading=inward_heading,
+                                    terrain_indices=terrain_indices, spawn_seed=seed,
+                                    assist_force=assist_force)
+        self.episode_length_buf = torch.zeros(num_envs, dtype=torch.long, device=self.device)
+        self.weights = torch.tensor(list(META['rewards'].values()), device=self.device)
         self.pool = None
 
     def __enter__(self):
@@ -154,10 +182,25 @@ class CpuForwardJumpEnv(CpuJumpEnv):
     sole_edge_probes = True
     has_height_command = False
 
-    def __init__(self, *args, speed_range=DEFAULT_SPEED_RANGE, exo_policy_io=None, **kwargs):
-        super().__init__(*args, inward_heading=True, controller_options={'speed_range': speed_range},
-                         exo_policy_io=exo_policy_io, **kwargs)
+    def __init__(self, *args, speed_range=DEFAULT_SPEED_RANGE, exo_policy_io=None, long_hop_period=None,
+                 suit_ankle_pitch=False, slope_adaptive_posture=False,
+                 suit_major_joints=False, relax_propulsion=False, **kwargs):
+        from exoskeleton import ACTION_FORCE_IO, FORCE_CONTROL_REVISIONS
+
+        controller_options = {'speed_range': speed_range,
+                              'compact_arm_swing': exo_policy_io in FORCE_CONTROL_REVISIONS,
+                              'suit_ankle_roll': exo_policy_io == ACTION_FORCE_IO,
+                              'suit_ankle_pitch': suit_ankle_pitch,
+                              'slope_adaptive_posture': slope_adaptive_posture,
+                              'suit_major_joints': suit_major_joints,
+                              'relax_propulsion': relax_propulsion,
+                              'long_hop_period': long_hop_period}
+        super().__init__(*args, inward_heading=True, controller_options=controller_options,
+                         exo_policy_io=exo_policy_io, suit_ankle_pitch=suit_ankle_pitch,
+                         suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion, **kwargs)
         self.cfg['jump_speed_range_mps'] = self.jump_commands.speed_range
+        if slope_adaptive_posture:
+            self.cfg['slope_adaptive_posture'] = True
         if self.worlds.exoskeleton is not None:
             self.worlds.exoskeleton.bind(self.jump_commands, policy_io=exo_policy_io)
         if exo_policy_io is not None:
@@ -185,12 +228,78 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
     task = 'exo_jump'
     objective = 'forward_jump_with_supported_exoskeleton_work_sharing'
 
-    def __init__(self, *args, assist_force, **kwargs):
-        from exoskeleton import EFFICIENCY_REWARD, POLICY_IO
+    def __init__(self, *args, assist_force, stance_center_weight=0., exo_policy_io=None, load_sharing=False,
+                 vertical_support=False, posture_balance=False, stance_transition=False, economical_hops=False,
+                 long_hop_period=None, roll_balance=False, reward_overrides=None, speed_track_boost=0., **kwargs):
+        from exoskeleton import (ACTION_FORCE_EFFICIENCY_REWARD, ACTION_FORCE_IO,
+                                 EFFICIENCY_REWARD, PHASE_FREE_FORCE_REVISIONS, POLICY_IO)
 
-        super().__init__(*args, assist_force=assist_force, exo_policy_io=POLICY_IO, **kwargs)
+        posture_balance = posture_balance or stance_transition
+        economical_hops = economical_hops or long_hop_period is not None
+        vertical_support = vertical_support or posture_balance or economical_hops or roll_balance
+        super().__init__(*args, assist_force=assist_force, exo_policy_io=exo_policy_io or POLICY_IO,
+                         vertical_support=vertical_support, stance_transition=stance_transition,
+                         long_hop_period=long_hop_period, **kwargs)
         self.cfg['exo_efficiency_reward'] = EFFICIENCY_REWARD.copy()
+        if self.cfg['exo_policy_io'] == ACTION_FORCE_IO:
+            self.cfg['exo_efficiency_reward'] = ACTION_FORCE_EFFICIENCY_REWARD.copy()
+        elif self.cfg['exo_policy_io'] in PHASE_FREE_FORCE_REVISIONS:
+            self.cfg['exo_efficiency_reward']['revision'] = 'phase_free_supported_work_v1'
+        if load_sharing or vertical_support:
+            self.worlds.exoskeleton.enable_load_sharing(
+                vertical_support=vertical_support, posture_balance=posture_balance,
+                stance_transition=stance_transition, roll_balance=roll_balance,
+                reward_overrides=reward_overrides)
+            self.cfg['exo_efficiency_reward'] = self.worlds.exoskeleton.reward_cfg.copy()
+            self.cfg['jump_objective'] = 'human_energy_and_bilateral_grounded_assistance'
+        if economical_hops:
+            self.jump_commands.economical_hops = True
+            self.cfg['economical_hops'] = True
+        if roll_balance:
+            self.cfg['roll_balance'] = True
+        if long_hop_period is not None:
+            self.cfg['long_hop_period_s'] = long_hop_period
+        self.stance_center_weight = stance_center_weight
+        if stance_center_weight:
+            self.cfg['stance_center_weight'] = stance_center_weight
+        self.speed_track_boost = speed_track_boost
+        if speed_track_boost:
+            self.cfg['speed_track_boost'] = speed_track_boost
+
+    def stance_center_cost(self):
+        root = self.worlds.sim.data.qpos
+        w, x, y, z = root[:, 3:7].unbind(-1)
+        left = torch.stack((-2 * (w * z + x * y), 1 - 2 * (y.square() + z.square())), dim=-1)
+        left = torch.nn.functional.normalize(left, dim=-1)
+        midpoint = self.jump_commands.sole_probes()[..., :2].mean(dim=(1, 2))
+        offset = ((midpoint - root[:, :2]) * left).sum(-1).abs()
+        # Allow small terrain and balance adjustments around the pelvis midline.
+        return ((offset - .03).clamp_min(0.) / .12).clamp_max(2.).square()
 
     def reward(self, measured):
-        efficiency = self.worlds.exoskeleton.efficiency_rate * self.jump_commands.DT
-        return super().reward(measured) + efficiency * ~measured['wangyu/failed']
+        rate = self.worlds.exoskeleton.efficiency_rate
+        if self.stance_center_weight:
+            rate = rate - self.stance_center_weight * self.stance_center_cost()
+        if self.speed_track_boost:
+            cmd = self.jump_commands
+            com_vel = self.worlds.sim.data.sensordata[:, cmd.com_velocity_xy]
+            forward = (com_vel * cmd.heading).sum(-1)
+            target = cmd.target_speed
+            # Compensate for stance-phase braking dips and startup lag at
+            # high speeds (+0.08 at 1.0, +0.16 at 1.5; exact 0.0 / 0.5) with
+            # sharp smooth-L1 tracking and bounded asymmetric underspeed urgency.
+            moving = (target / .35).clamp(0., 1.)
+            high = 1. + 1.0 * (target - .55).clamp_min(0.)
+            effective_target = target + .16 * ((target - .50) / 1.0).clamp(0., 1.)
+            error = forward - effective_target
+            improve = (effective_target.square() + .006).sqrt() - (error.square() + .006).sqrt()
+            shortfall = (effective_target - forward).clamp_min(0.)
+            overshoot = (forward - (effective_target + .08)).clamp_min(0.)
+            underspeed_pen = shortfall + .45 * shortfall.square()
+            overspeed_pen = 1.2 * overshoot.square()
+            still = (1. - target / .15).clamp(0., 1.)
+            still_pen = 20. * still * forward.square()
+            rate = (rate
+                    + self.speed_track_boost * moving * high * (improve - .70 * underspeed_pen - overspeed_pen)
+                    - still_pen)
+        return super().reward(measured) + rate * self.jump_commands.DT * ~measured['wangyu/failed']

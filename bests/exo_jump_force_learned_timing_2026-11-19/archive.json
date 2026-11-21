@@ -1,0 +1,17 @@
+{
+  "archived_at": "2026-11-19T10:07:12+08:00",
+  "selected_checkpoint": "model_159.pt",
+  "source_training_run": "logs/cpu_exo_train/force_learned_timing_v1",
+  "initialization_checkpoint": "logs/cpu_exo_train/force_action_v1/model_159.pt",
+  "initialization_checkpoint_sha256": "ecbf26747f9455f84f91a2897e8d7e36e05f9c41db0e4b99c562cd611c3a1a5b",
+  "status": "training_result_pending_paired_replay",
+  "statistics": "training_summary.json",
+  "files_sha256": {
+    "README.md": "e0017b5f471b8818d07a04e39298be731c01c6ce09e4c0f7da4d2d5f9cd5a85a",
+    "config.json": "704b61cfab6dcfeee952021c15341e30e2c3057248129b6ccfbaf7b186fde3dc",
+    "model_159.pt": "b2892a556b7baf5fb350987d0f7f9a49b05793905516d7420d08b63187c17cc8",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "training_efficiency.json": "6dad2eec0445744881f2e4ae926108c33e777f38be1f347adc8f8a6f613a31e6",
+    "training_summary.json": "a15e26b44541f818993dc13327e2ffdc6b7edad1ba07c7efa586472ff31277a9"
+  }
+}

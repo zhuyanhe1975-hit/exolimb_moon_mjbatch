@@ -128,6 +128,173 @@ class ExoskeletonTest(unittest.TestCase):
         assist.force_n = 0.
         self.assertEqual(torch.count_nonzero(assist.controls()).item(), 0)
 
+    def test_persistent_posture_cost_and_push_impulse_reset(self):
+        from exoskeleton import ACTION_FORCE_IO
+
+        env = CpuExoJumpEnv(2, 12, False, 'threaded', 1, 42, geometry='fitted',
+                            assist_force=500., exo_policy_io=ACTION_FORCE_IO, posture_balance=True)
+        assist = env.worlds.exoskeleton
+        cmd = env.jump_commands
+        data = env.worlds.sim.data
+        dt = cmd.DT
+        angle = torch.deg2rad(torch.tensor([10., -10.]))
+        quat = data.sensordata[:, cmd.torso_quat]
+        quat.zero_()
+        quat[:, 0] = (angle / 2).cos()
+        quat[:, 1] = (angle / 2).sin()
+        data.qpos[:, assist.waist_roll_qadr] = angle
+        torch.testing.assert_close(assist._persistent_roll_cost(dt), torch.zeros(2))
+        for _ in range(120):
+            cost = assist._persistent_roll_cost(dt)
+        torch.testing.assert_close(cost[0], cost[1])
+        self.assertGreater(cost[0].item(), 0.)
+        assist.reset_controls(torch.tensor([True, False]))
+        self.assertEqual(assist.filtered_roll[0].abs().sum().item(), 0.)
+        self.assertGreater(assist.filtered_roll[1].abs().sum().item(), 0.)
+        data.sensordata[:, assist.load] = torch.tensor([[1., 0.], [0., 1.]]) * env.worlds.device.weight
+        cmd.stage.fill_(cmd.EXTEND)
+        assist._bilateral_assist_cost(torch.zeros_like(assist.peak_force_n), dt)
+        torch.testing.assert_close(assist.push_boot_impulse, torch.tensor([[dt, 0.], [0., dt]]))
+        cmd.stage.fill_(cmd.FLIGHT)
+        assist._bilateral_assist_cost(torch.zeros_like(assist.peak_force_n), dt)
+        self.assertEqual(assist.push_boot_impulse.abs().sum().item(), 0.)
+
+    def test_stance_transition_uses_world_vertical_regions_and_free_force_actions(self):
+        from exoskeleton import ACTION_FORCE_IO
+
+        env = CpuExoJumpEnv(2, 12, False, 'threaded', 1, 42, geometry='fitted',
+                            assist_force=500., exo_policy_io=ACTION_FORCE_IO, stance_transition=True)
+        worlds = env.worlds
+        assist = worlds.exoskeleton
+        model = worlds.model
+        for data in worlds.data:
+            data.qpos[2] -= .04
+            data.qvel[0] = .6
+            mujoco.mj_forward(model, data)
+        worlds.read_native()
+        expected = np.zeros((2, 2, 2))
+        ground = model.geom('terrain').id
+        probes = env.jump_commands.sole_probes().numpy()
+        for w, data in enumerate(worlds.data):
+            for side, name in enumerate(('left', 'right')):
+                sole = model.geom(f'robot/{name}_sole').id
+                heel, toe = probes[w, side]
+                axis = (toe - heel) * .5
+                for i, contact in enumerate(data.contact):
+                    if set(contact.geom) != {ground, sole}:
+                        continue
+                    region = np.dot(contact.pos - (heel + toe) * .5, axis) / np.dot(axis, axis)
+                    if abs(region) <= .33:
+                        continue
+                    wrench = np.zeros(6)
+                    mujoco.mj_contactForce(model, data, i, wrench)
+                    sign = 1 if contact.geom[1] == sole else -1
+                    expected[w, side, int(region > 0)] += sign * (contact.frame.reshape(3, 3).T @ wrench[:3])[2]
+        self.assertGreater(expected.max(), 1.)
+        np.testing.assert_allclose(assist._regional_upward_loads().numpy(),
+                                   expected / worlds.device.weight, rtol=1e-5, atol=1e-5)
+        sim = worlds.sim.data
+        sim.sensordata[:, assist.load] = worlds.device.weight
+        vz = env.jump_commands.com_velocity_xy.stop
+        sim.sensordata[:, vz] = -.3
+        from unittest.mock import patch
+        region_loads = torch.tensor([[[.15, .15], [.15, .15]], [[.30, 0.], [0., .30]]])
+        with patch.object(assist, '_regional_upward_loads', return_value=region_loads):
+            torch.testing.assert_close(assist._stance_transition_rate(), torch.tensor([22., 0.]))
+            sim.sensordata[:, vz] = 0.
+            torch.testing.assert_close(assist._stance_transition_rate(), torch.zeros(2))
+        sim.sensordata[:, vz] = .3
+        sim.actuator_velocity[:, assist.actuators] = torch.tensor([[.2, -.2], [-.2, .2]])
+        torch.testing.assert_close(assist._stance_transition_rate(), torch.tensor([6.5, 6.5]))
+        sim.sensordata[:, assist.load] = 0.
+        torch.testing.assert_close(assist._stance_transition_rate(), torch.zeros(2))
+        torch.testing.assert_close(assist.controls(torch.ones((2,2))), torch.full((2,2), 500.))
+
+    def test_vertical_boot_feedback_and_touchdown_window(self):
+        from exoskeleton import ACTION_FORCE_IO
+
+        env = CpuExoJumpEnv(2, 12, False, 'threaded', 1, 42, geometry='fitted', assist_force=500.,
+                            exo_policy_io=ACTION_FORCE_IO, vertical_support=True)
+        worlds = env.worlds
+        model = worlds.model
+        native = worlds.data[0]
+        native.qpos[2] -= .04
+        native.qvel[0] = .6
+        mujoco.mj_forward(model, native)
+        worlds.read_native()
+        assist = worlds.exoskeleton
+        ground = model.geom('terrain').id
+        expected = np.zeros((2, 3))
+        for side, name in enumerate(('left', 'right')):
+            boot = model.geom(f'robot/{name}_sole').id
+            for index, contact in enumerate(native.contact):
+                if set(contact.geom) != {ground, boot}:
+                    continue
+                wrench = np.zeros(6)
+                mujoco.mj_contactForce(model, native, index, wrench)
+                sign = 1 if contact.geom[1] == boot else -1
+                expected[side] += sign * (contact.frame.reshape(3, 3).T @ wrench[:3])
+        self.assertGreater(np.max(expected[:, 2]), 1.)
+        self.assertGreater(np.linalg.norm(expected[:, :2]), 1.)
+        sensors = worlds.sim.data.sensordata
+        np.testing.assert_allclose(sensors[0, assist.reaction_columns], expected, atol=1e-3, rtol=1e-5)
+        np.testing.assert_allclose(sensors[0, assist.load], expected[:, 2].clip(min=0), atol=1e-3)
+        # The two worlds receive the same synthetic contact. Reset only the first
+        # world in the middle of the 50 ms window.
+        env.jump_commands.stage.fill_(env.jump_commands.COMPRESS)
+        ground_mask = torch.zeros_like(assist.peak_force_n, dtype=torch.bool)
+        dt = env.jump_commands.DT
+        for _ in range(2):
+            assist._touchdown_cost(ground_mask, dt)
+        ground_mask[:, 0] = True
+        sensors[:, assist.reaction_columns[0][2]] = 4 * worlds.device.weight
+        assist._touchdown_cost(ground_mask, dt)
+        assist.reset_controls(torch.tensor([True, False]))
+        assist._touchdown_cost(ground_mask, dt)
+        cost = assist._touchdown_cost(ground_mask, dt)
+        self.assertEqual(assist.completed_touchdowns.tolist(), [[0, 0], [1, 0]])
+        self.assertAlmostEqual(float(assist.completed_touchdown_impulse_ns[1, 0]),
+                               .2 * worlds.device.weight, places=4)
+        torch.testing.assert_close(cost * dt, torch.tensor([0., .2]))
+
+    def test_sharing_charges_cumulative_impulse_and_allows_staggered_contact(self):
+        from exoskeleton import ACTION_FORCE_IO
+
+        env = CpuExoJumpEnv(2, 12, False, 'threaded', 1, 42, geometry='fitted',
+                            assist_force=500., exo_policy_io=ACTION_FORCE_IO, load_sharing=True)
+        assist = env.worlds.exoskeleton
+        data = env.worlds.sim.data
+        cmd = env.jump_commands
+        dt = cmd.DT
+        weight = env.worlds.device.weight
+        # The worlds are left/right reflections with identical absolute strut work.
+        loads = torch.tensor([[1., 0.], [0., 1.]])
+        force = 100.
+        data.actuator_force[:, assist.actuators] = force
+        cmd.stage.fill_(cmd.COMPRESS)
+        def sample(load):
+            data.sensordata[:, assist.load] = load * weight
+            return assist._bilateral_assist_cost(torch.ones_like(load), dt)
+
+        first = sample(loads)
+        self.assertGreater(float(first[0]), 0.)
+        torch.testing.assert_close(first[0], first[1])
+        torch.testing.assert_close(sample(loads.flip(-1)), -first)
+        torch.testing.assert_close(assist.phase_impulse_ns[:, 0], torch.full_like(loads, force * dt))
+        cmd.stage.fill_(cmd.EXTEND)
+        torch.testing.assert_close(sample(loads), first)
+        assist.reset_controls(torch.tensor([True, False]))
+        self.assertEqual(float(assist.phase_balance[0]), 0.)
+        self.assertGreater(float(assist.phase_balance[1]), 0.)
+        torch.testing.assert_close(assist.phase_impulse_ns[:, 1], loads * force * dt)
+        # A stationary overloaded boot incurs an impact cost even with equal forces.
+        both = torch.ones_like(loads)
+        cmd.stage.fill_(cmd.FLIGHT)
+        data.sensordata[:, cmd.com_velocity_xy.stop] = 1.
+        torch.testing.assert_close(sample(both * 8.), torch.full_like(first, 4.))
+        torch.testing.assert_close(sample(both * 0.), torch.zeros_like(first))
+        torch.testing.assert_close(assist.controls(both), both * 500.)
+
     def test_human_action_layout_ignores_the_added_mechanism_joints(self):
         args = (2, 12, False, 'mjbatch', 2, 42)
         torch.manual_seed(42)
@@ -275,11 +442,12 @@ class ExoskeletonTest(unittest.TestCase):
         new_obs = TensorDict({'policy': torch.cat((old_obs['policy'], torch.randn(3, 10)), dim=-1)},
                              batch_size=[3])
         for actor in (True, False):
-            kwargs = dict(hidden_dims=(128, 128), activation='elu', obs_normalization=True,
-                          distribution_cfg=config.copy() if actor else None)
+            kwargs = dict(hidden_dims=(128, 128), activation='elu', obs_normalization=True)
             size = 24 if actor else 1
-            old = MLPModel(old_obs, {'policy': ['policy']}, 'policy', size, **kwargs)
-            new = MLPModel(new_obs, {'policy': ['policy']}, 'policy', size + (STRUT_ACTIONS if actor else 0), **kwargs)
+            old = MLPModel(old_obs, {'policy': ['policy']}, 'policy', size,
+                           distribution_cfg=config.copy() if actor else None, **kwargs)
+            new = MLPModel(new_obs, {'policy': ['policy']}, 'policy', size + (STRUT_ACTIONS if actor else 0),
+                           distribution_cfg=config.copy() if actor else None, **kwargs)
             command = -.68 if actor else None
             new.load_state_dict(exo_initial_state(old.state_dict(), new.state_dict(), initial_command=command))
             result = new(new_obs)
@@ -313,6 +481,129 @@ class ExoskeletonTest(unittest.TestCase):
         self.assertEqual(report['human_joint_positive_work_per_env_j'], [0.] * 6)
         self.assertGreater(report['human_joint_absolute_work_per_env_j'][0], 0.)
         self.assertEqual(report['human_leg_torque_peak_per_env_nm'][5], 30.)
+
+    def test_high_assist_reward_overrides_scale_cot_unloaded_and_work_share(self):
+        from exoskeleton import ACTION_FORCE_IO
+        overrides = {
+            'human_metabolic_proxy_power': 6.5,
+            'human_mean_squared_torque': 3.0,
+            'peak_leg_squared_torque': 3.0,
+            'unloaded_strut_force_linear': 1.5,
+            'cot_energy_scale': True,
+            'assist_work_share_weight': 10.0,
+        }
+        env = CpuExoJumpEnv(
+            4, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=ACTION_FORCE_IO, load_sharing=True, vertical_support=True,
+            posture_balance=True, economical_hops=True, reward_overrides=overrides,
+            speed_track_boost=8.0,
+        )
+        assist, cmd = env.worlds.exoskeleton, env.jump_commands
+        data = env.worlds.sim.data
+        self.assertEqual(env.cfg['exo_efficiency_reward']['human_metabolic_proxy_power'], 6.5)
+        self.assertEqual(env.cfg['speed_track_boost'], 8.0)
+        cmd.stage[:] = cmd.EXTEND
+        cmd.target_speed[:] = torch.tensor([1.0, 1.0, 0.5, 1.5])
+        data.sensordata[:, assist.load] = env.worlds.device.weight
+        data.sensordata[1, assist.load] = 0.
+        data.sensordata[:, cmd.com_velocity_xy.stop] = .40
+        data.actuator_force[:, assist.actuators] = 100.
+        data.actuator_velocity[:, assist.actuators] = .30
+        data.actuator_force[2:, assist.actuators] = 0.
+        data.actuator_velocity[2:, assist.actuators] = 0.
+        data.actuator_force[:, assist.human_actuators] = 20.
+        data.actuator_velocity[:, assist.human_actuators] = .25
+        assist.observe(cmd.DT)
+        self.assertGreater(float(assist.efficiency_rate[0]), float(assist.efficiency_rate[1]))
+        self.assertGreater(float(assist.efficiency_rate[3]), float(assist.efficiency_rate[2]))
+
+    def test_suit_ankle_pitch_profile_limits_and_bellows_dynamics(self):
+        from math import radians
+        from exoskeleton import ACTION_FORCE_IO
+        from moon_scene import (SUIT_ANKLE_PITCH_DAMPING, SUIT_ANKLE_PITCH_LIMITS,
+                                SUIT_ANKLE_PITCH_PROFILE, SUIT_ANKLE_PITCH_STIFFNESS)
+
+        env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=ACTION_FORCE_IO, load_sharing=True, vertical_support=True,
+            suit_ankle_pitch=True,
+        )
+        self.assertEqual(env.cfg['ankle_pitch_profile'], SUIT_ANKLE_PITCH_PROFILE)
+        model = env.worlds.model
+        device = env.worlds.device
+        for side in ('Left', 'Right'):
+            joint = model.joint(f'robot/{side}Ankle')
+            np.testing.assert_allclose(joint.range, SUIT_ANKLE_PITCH_LIMITS, atol=1e-6)
+            self.assertAlmostEqual(float(model.dof_damping[int(joint.dofadr[0])]), SUIT_ANKLE_PITCH_DAMPING)
+            self.assertAlmostEqual(float(model.jnt_stiffness[joint.id]), SUIT_ANKLE_PITCH_STIFFNESS)
+            self.assertAlmostEqual(float(model.qpos_spring[int(joint.qposadr[0])]), 0.)
+            idx = device.action_index(f'robot/{side}Ankle')
+            self.assertAlmostEqual(float(device.action_lo[idx]), -radians(18.), places=6)
+            self.assertAlmostEqual(float(device.action_hi[idx]), radians(15.), places=6)
+            self.assertAlmostEqual(float(device.action_scale[idx]), .35, places=6)
+            self.assertAlmostEqual(float(env.jump_commands.prior[idx] * device.action_scale[idx]), -.14, places=6)
+
+    def test_slope_adaptive_posture_shifts_lean_and_unlocks_waist_pitch(self):
+        from exoskeleton import ACTION_FORCE_IO
+        env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=ACTION_FORCE_IO, load_sharing=True, vertical_support=True,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+        )
+        self.assertTrue(env.cfg['slope_adaptive_posture'])
+        device, cmd = env.worlds.device, env.jump_commands
+        waist = device.action_index('robot/WaistPitch')
+        self.assertAlmostEqual(float(device.action_scale[waist]), .35, places=6)
+        self.assertGreater(float(device.action_hi[waist]), .60)
+        # Verify uphill slope produces positive forward torso shift and downhill produces negative shift
+        cmd.target_speed[:] = 1.0
+        with patch.object(cmd, 'terrain_slope', return_value=torch.tensor([.20, -.20])):
+            shift = cmd.slope_torso_shift()
+            self.assertGreater(float(shift[0]), .30)
+            self.assertLess(float(shift[1]), -.15)
+            # An upright torso (0 deg) has negative relative pitch on uphill (needs forward lean)
+            # and positive relative pitch on downhill
+            upright = torch.tensor([[1., 0., 0., 0.], [1., 0., 0., 0.]])
+            rel = cmd.posture_pitch(upright)
+            self.assertLess(float(rel[0]), -.30)
+            self.assertGreater(float(rel[1]), .15)
+            # Stationary target uses a gentler (0.65x) slope shift to preserve static balance
+            cmd.target_speed[:] = 0.0
+            static_shift = cmd.slope_torso_shift()
+            torch.testing.assert_close(static_shift, .65 * shift)
+
+    def test_suit_major_joints_and_relaxed_propulsion_profiles(self):
+        from math import radians
+        from exoskeleton import ACTION_FORCE_IO
+        from moon_scene import RELAXED_PROPULSION_PROFILE, SUIT_MAJOR_JOINTS_PROFILE
+
+        env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=ACTION_FORCE_IO, load_sharing=True, vertical_support=True,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+            suit_major_joints=True, relax_propulsion=True,
+        )
+        self.assertEqual(env.cfg['suit_major_joints_profile'], SUIT_MAJOR_JOINTS_PROFILE)
+        self.assertEqual(env.cfg['propulsion_profile'], RELAXED_PROPULSION_PROFILE)
+        model, device = env.worlds.model, env.worlds.device
+        # Waist & HipYaw pressurized EVA damping, stiffness, and tightened ranges
+        wy = model.joint('robot/WaistYaw')
+        self.assertAlmostEqual(float(model.dof_damping[wy.dofadr[0]]), 16., places=5)
+        self.assertAlmostEqual(float(model.jnt_stiffness[wy.id]), 35., places=5)
+        np.testing.assert_allclose(model.jnt_range[wy.id], [-radians(15.), radians(15.)], atol=1e-6)
+        wp = model.joint('robot/WaistPitch')
+        self.assertAlmostEqual(float(model.dof_damping[wp.dofadr[0]]), 12., places=5)
+        self.assertAlmostEqual(float(model.jnt_stiffness[wp.id]), 12., places=5)
+        # Relaxed leg propulsion PD brake (kd 25->12), higher peak torque (260 Nm), and unlocked HipPitch/Knee bounds
+        lk = model.actuator('robot/LeftKnee')
+        self.assertAlmostEqual(float(model.actuator_gainprm[lk.id, 0]), 380., places=5)
+        self.assertAlmostEqual(float(model.actuator_biasprm[lk.id, 2]), -12., places=5)
+        np.testing.assert_allclose(model.actuator_forcerange[lk.id], [-260., 260.], atol=1e-6)
+        hip_idx = device.action_index('robot/LeftHipPitch')
+        knee_idx = device.action_index('robot/LeftKnee')
+        self.assertAlmostEqual(float(device.action_hi[hip_idx]), radians(30.), places=5)
+        self.assertAlmostEqual(float(device.action_lo[knee_idx]), -.18, places=5)
+        self.assertAlmostEqual(float(device.action_hi[knee_idx]), 1.22, places=5)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,36 @@
+{
+  "evaluation_status": "training_only",
+  "paired_replay_completed": false,
+  "training": {
+    "backend": "mujoco_warp_cuda",
+    "long_hop_period_s": 1.7,
+    "roll_balance": true,
+    "worlds": 8192,
+    "updates": 160,
+    "steps_per_update": 32,
+    "total_transitions": 41943040,
+    "control_hz": 60,
+    "elapsed_seconds": 159,
+    "terrain_indices": [
+      12,
+      3,
+      24,
+      47
+    ],
+    "seed": 42
+  },
+  "training_statistics": {
+    "initialization_run": {
+      "mean_human_metabolic_proxy_w": 477.58229058701545,
+      "mean_human_leg_torque_rms_nm": 24.400207141879946
+    },
+    "fine_tuning_run": {
+      "mean_human_metabolic_proxy_w": 470.48467442952096,
+      "mean_human_leg_torque_rms_nm": 23.878403421724215
+    },
+    "change_pct": {
+      "mean_human_metabolic_proxy_w": -1.4861556421555178,
+      "mean_human_leg_torque_rms_nm": -2.1385216818922803
+    }
+  }
+}

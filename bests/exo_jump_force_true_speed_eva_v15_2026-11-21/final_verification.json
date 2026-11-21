@@ -1,0 +1,112 @@
+{
+  "checkpoint": "logs/cpu_exo_train/true_speed_eva_v15_20261121/model_300.pt",
+  "source_stage": "outputs/assist_true_speed_v15/stage2/model_300.pt",
+  "init_lineage": [
+    "logs/cpu_exo_train/natural_eva_v14_20261121/model_449.pt",
+    "outputs/assist_true_speed_v15/stage1/model_300.pt",
+    "outputs/assist_true_speed_v15/stage2/model_300.pt"
+  ],
+  "held_out_terrains": [
+    16,
+    55
+  ],
+  "unseen_terrains": [
+    8,
+    29,
+    38,
+    61
+  ],
+  "held_out_t16_t55_avg_500N_edge_start": {
+    "0.0": {
+      "mean_10s_mps": 0.002,
+      "cruise_s3_7_mps": 0.006,
+      "fails": 0,
+      "course_resets": 0,
+      "open_knee_p95_deg": 39.0,
+      "waist_yaw_p95_deg": 10.9,
+      "waist_yaw_vel_p95_dps": 19
+    },
+    "0.5": {
+      "mean_10s_mps": 0.503,
+      "cruise_s3_7_mps": 0.547,
+      "fails": 0,
+      "course_resets": 0,
+      "hop_m": 0.31,
+      "hum_pos_jm": 137.6,
+      "exo_pos_jm": 2.5,
+      "open_knee_p95_deg": 42.3,
+      "waist_yaw_p95_deg": 12.8,
+      "waist_yaw_vel_p95_dps": 23,
+      "corr_slope_torso": 0.77,
+      "uphill_comp_sole_gap_cm": 3.5
+    },
+    "1.0": {
+      "mean_10s_mps": 0.938,
+      "cruise_s3_7_mps": 1.062,
+      "fails": 0,
+      "course_resets": 0,
+      "hop_m": 0.6,
+      "hum_pos_jm": 107.3,
+      "exo_pos_jm": 4.6,
+      "open_knee_p95_deg": 42.9,
+      "waist_yaw_p95_deg": 13.7,
+      "waist_yaw_vel_p95_dps": 34,
+      "corr_slope_torso": 0.64,
+      "uphill_comp_sole_gap_cm": 4.9
+    },
+    "1.5": {
+      "mean_10s_mps": 1.231,
+      "cruise_s3_7_mps": 1.533,
+      "fails": 0,
+      "course_resets": 11,
+      "hop_m": 0.67,
+      "hum_pos_jm": 141.8,
+      "exo_pos_jm": 9.4,
+      "open_knee_p95_deg": 43.6,
+      "waist_yaw_p95_deg": 13.7,
+      "waist_yaw_vel_p95_dps": 60,
+      "corr_slope_torso": 0.29,
+      "uphill_comp_sole_gap_cm": 6.8
+    }
+  },
+  "held_out_t16_t55_avg_0N_ablation": {
+    "0.5": {
+      "mean_10s_mps": 0.501,
+      "cruise_s3_7_mps": 0.549,
+      "fails": 0,
+      "hum_pos_jm": 141.7,
+      "uphill_comp_sole_gap_cm": 3.7
+    },
+    "1.0": {
+      "mean_10s_mps": 0.933,
+      "cruise_s3_7_mps": 1.055,
+      "fails": 1,
+      "hum_pos_jm": 128.1,
+      "uphill_comp_sole_gap_cm": 6.0
+    },
+    "1.5": {
+      "mean_10s_mps": 1.197,
+      "cruise_s3_7_mps": 1.448,
+      "fails": 5,
+      "hum_pos_jm": 186.0,
+      "uphill_comp_sole_gap_cm": 15.5
+    }
+  },
+  "unseen_4_terrains_128_runs": {
+    "total_fails": 0,
+    "runs": 128,
+    "mean_10s_mps": {
+      "0.0": -0.002,
+      "0.5": 0.502,
+      "1.0": 0.938,
+      "1.5": 1.226
+    },
+    "cruise_s3_7_mps": {
+      "0.0": 0.002,
+      "0.5": 0.55,
+      "1.0": 1.061,
+      "1.5": 1.548
+    }
+  },
+  "note_16m_boundary_at_1p5mps": "On 16x16m patches (effective runway ~10.4m from edge_start), cruising at 1.53-1.56 m/s reaches the far boundary around t=7.2-8.2s (5-6/8 envs reset back to v=0 via course_finished()), reducing raw 10s mean_forward_speed by ~0.25-0.30 m/s even with zero lag in steady-state cruise."
+}

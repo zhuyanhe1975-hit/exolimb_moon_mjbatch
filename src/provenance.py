@@ -3,6 +3,16 @@ import hashlib,json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ASSET=ROOT/'assets/playground'
+
+def training_env_config(run_dir):
+    try:
+        env = json.loads((run_dir / 'config.json').read_text())['env']
+        if isinstance(env, dict) and env.get('backend') in ('native_mujoco_cpu', 'mujoco_warp_cuda'):
+            return env
+    except (OSError, ValueError, TypeError, KeyError):
+        pass
+    return {}
+
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def verify_assets():
     manifest=json.loads((ASSET/'manifest.json').read_text())

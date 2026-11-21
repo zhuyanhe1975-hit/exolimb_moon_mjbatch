@@ -1,0 +1,815 @@
+{
+  "model_sha256": "57952f9b9ed7156257c0e02e88feaa168de0462b943c66998d071a409d748b80",
+  "conditions": {
+    "default_12_same_command": {
+      "v8": {
+        "speed": 0.8359741866588593,
+        "jpm": 380.58528156155967,
+        "failures": 0,
+        "jumps": 64,
+        "land_p95_bw": 3.840078830718994,
+        "leg_torque_rms_nm": 20.652587890625,
+        "pack_abs_roll_deg": 2.142680650928937,
+        "unloaded_mean_force_n": 4.5062713623046875,
+        "peak_force_n": [
+          267.3063659667969,
+          211.5868377685547
+        ],
+        "rod_positive_jpm": 7.878330463167047,
+        "rod_absorbed_jpm": 7.183704661307006,
+        "rod_share_positive_pct": 8.91556120676786,
+        "phases": {
+          "landing": {
+            "human_jpm": 76.89600080744447,
+            "impulse_n_s_per_m": [
+              3.659614171593976,
+              5.3610586374104825
+            ],
+            "left_impulse_pct": 40.56919310875503,
+            "rod_positive_work_jpm": [
+              0.08455598746565096,
+              0.4337859033784697
+            ],
+            "rod_absorbed_work_jpm": [
+              1.724382063708476,
+              2.2016216339971346
+            ]
+          },
+          "push": {
+            "human_jpm": 235.21231559347603,
+            "impulse_n_s_per_m": [
+              6.886690731062015,
+              12.55189712659784
+            ],
+            "left_impulse_pct": 35.42793736607923,
+            "rod_positive_work_jpm": [
+              0.5046174511092837,
+              3.7503532426816624
+            ],
+            "rod_absorbed_work_jpm": [
+              1.970685462158723,
+              0.6291141305825808
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0,
+            "speed": 0.8359741866588593,
+            "distance": 66.87793493270874,
+            "failures": 0,
+            "jumps": 64,
+            "tag": "v8_12_1.0",
+            "jpm": 380.58528156155967
+          }
+        }
+      },
+      "off": {
+        "speed": 0.760771906375885,
+        "jpm": 483.4622924983035,
+        "failures": 0,
+        "jumps": 70,
+        "land_p95_bw": 3.6654279232025146,
+        "leg_torque_rms_nm": 21.786191940307617,
+        "pack_abs_roll_deg": 1.4978280812403837,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 99.46883395841913,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 300.23506232098913,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0,
+            "speed": 0.760771906375885,
+            "distance": 60.8617525100708,
+            "failures": 0,
+            "jumps": 70,
+            "tag": "off_12_1.0",
+            "jpm": 483.4622924983035
+          }
+        }
+      },
+      "zero": {
+        "speed": 0.8234466016292572,
+        "jpm": 657.0016275106556,
+        "failures": 0,
+        "jumps": 47,
+        "land_p95_bw": 4.81456257779289,
+        "leg_torque_rms_nm": 26.786724090576172,
+        "pack_abs_roll_deg": 2.6877901725168476,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 126.91604616427563,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 420.3664763428832,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0,
+            "speed": 0.8234466016292572,
+            "distance": 65.87572813034058,
+            "failures": 0,
+            "jumps": 47,
+            "tag": "zero_12_1.0",
+            "jpm": 657.0016275106556
+          }
+        }
+      },
+      "max_speed_gap_mps": 0.07520228028297427
+    },
+    "held_out_16_55_same_command": {
+      "v8": {
+        "speed": 0.8546998828649521,
+        "jpm": 381.7707864016574,
+        "failures": 0,
+        "jumps": 125,
+        "land_p95_bw": 3.8212852478027344,
+        "leg_torque_rms_nm": 20.720979690551758,
+        "pack_abs_roll_deg": 2.023111312989916,
+        "unloaded_mean_force_n": 4.504128456115723,
+        "peak_force_n": [
+          329.767822265625,
+          279.5555114746094
+        ],
+        "rod_positive_jpm": 9.270001858902965,
+        "rod_absorbed_jpm": 6.8594141862454725,
+        "rod_share_positive_pct": 10.266298510053993,
+        "phases": {
+          "landing": {
+            "human_jpm": 69.4787196948094,
+            "impulse_n_s_per_m": [
+              3.933117415181659,
+              4.903388217326124
+            ],
+            "left_impulse_pct": 44.50987277948973,
+            "rod_positive_work_jpm": [
+              0.11715892553548427,
+              0.7212072680323908
+            ],
+            "rod_absorbed_work_jpm": [
+              1.6049008268287055,
+              1.835021385111724
+            ]
+          },
+          "push": {
+            "human_jpm": 245.068942409091,
+            "impulse_n_s_per_m": [
+              7.617124672843744,
+              13.015621560585778
+            ],
+            "left_impulse_pct": 36.917648221264656,
+            "rod_positive_work_jpm": [
+              0.6587308408661268,
+              4.083241774989386
+            ],
+            "rod_absorbed_work_jpm": [
+              2.085285447282401,
+              0.7178651859456088
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.8190225064754486,
+            "distance": 65.52180051803589,
+            "failures": 0,
+            "jumps": 64,
+            "tag": "v8_16_1.0",
+            "jpm": 398.1931010524467
+          },
+          "55": {
+            "cmd": 1.0,
+            "speed": 0.8903772592544555,
+            "distance": 71.23018074035645,
+            "failures": 0,
+            "jumps": 61,
+            "tag": "v8_55_1.0",
+            "jpm": 366.66455455710167
+          }
+        }
+      },
+      "off": {
+        "speed": 0.773343512415886,
+        "jpm": 502.9844708618944,
+        "failures": 0,
+        "jumps": 140,
+        "land_p95_bw": 3.4054434299468994,
+        "leg_torque_rms_nm": 21.855934143066406,
+        "pack_abs_roll_deg": 1.6609679948913807,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 93.1551280100224,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 318.76307097272235,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.7148830592632294,
+            "distance": 57.19064474105835,
+            "failures": 0,
+            "jumps": 74,
+            "tag": "off_16_1.0",
+            "jpm": 523.2177760617911
+          },
+          "55": {
+            "cmd": 1.0,
+            "speed": 0.8318039655685425,
+            "distance": 66.5443172454834,
+            "failures": 0,
+            "jumps": 66,
+            "tag": "off_55_1.0",
+            "jpm": 485.59522084741263
+          }
+        }
+      },
+      "zero": {
+        "speed": 0.8367810726165772,
+        "jpm": 628.4481678361268,
+        "failures": 0,
+        "jumps": 95,
+        "land_p95_bw": 4.780061214413536,
+        "leg_torque_rms_nm": 26.552780151367188,
+        "pack_abs_roll_deg": 2.8272495267791298,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 113.23717960520356,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 408.5279192267754,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.8199726819992066,
+            "distance": 65.59781455993652,
+            "failures": 0,
+            "jumps": 48,
+            "tag": "zero_16_1.0",
+            "jpm": 648.918762690397
+          },
+          "55": {
+            "cmd": 1.0,
+            "speed": 0.8535894632339478,
+            "distance": 68.28715705871582,
+            "failures": 0,
+            "jumps": 47,
+            "tag": "zero_55_1.0",
+            "jpm": 608.7837632391189
+          }
+        }
+      },
+      "max_speed_gap_mps": 0.10413944721221924
+    },
+    "default_12_matched": {
+      "v8": {
+        "speed": 0.8359741866588593,
+        "jpm": 380.58528156155967,
+        "failures": 0,
+        "jumps": 64,
+        "land_p95_bw": 3.840078830718994,
+        "leg_torque_rms_nm": 20.652587890625,
+        "pack_abs_roll_deg": 2.142680650928937,
+        "unloaded_mean_force_n": 4.5062713623046875,
+        "peak_force_n": [
+          267.3063659667969,
+          211.5868377685547
+        ],
+        "rod_positive_jpm": 7.878330463167047,
+        "rod_absorbed_jpm": 7.183704661307006,
+        "rod_share_positive_pct": 8.91556120676786,
+        "phases": {
+          "landing": {
+            "human_jpm": 76.89600080744447,
+            "impulse_n_s_per_m": [
+              3.659614171593976,
+              5.3610586374104825
+            ],
+            "left_impulse_pct": 40.56919310875503,
+            "rod_positive_work_jpm": [
+              0.08455598746565096,
+              0.4337859033784697
+            ],
+            "rod_absorbed_work_jpm": [
+              1.724382063708476,
+              2.2016216339971346
+            ]
+          },
+          "push": {
+            "human_jpm": 235.21231559347603,
+            "impulse_n_s_per_m": [
+              6.886690731062015,
+              12.55189712659784
+            ],
+            "left_impulse_pct": 35.42793736607923,
+            "rod_positive_work_jpm": [
+              0.5046174511092837,
+              3.7503532426816624
+            ],
+            "rod_absorbed_work_jpm": [
+              1.970685462158723,
+              0.6291141305825808
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0,
+            "speed": 0.8359741866588593,
+            "distance": 66.87793493270874,
+            "failures": 0,
+            "jumps": 64,
+            "tag": "v8_12_1.0",
+            "jpm": 380.58528156155967
+          }
+        }
+      },
+      "off": {
+        "speed": 0.8364993631839752,
+        "jpm": 492.83075690070956,
+        "failures": 0,
+        "jumps": 68,
+        "land_p95_bw": 3.7088396549224854,
+        "leg_torque_rms_nm": 22.455137252807617,
+        "pack_abs_roll_deg": 1.674774826223329,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 98.85196441513304,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 306.50472014636034,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0301,
+            "speed": 0.8364993631839752,
+            "distance": 66.91994905471802,
+            "failures": 0,
+            "jumps": 68,
+            "tag": "off_12_1.0301",
+            "jpm": 492.8307569007095
+          }
+        }
+      },
+      "zero": {
+        "speed": 0.8330636203289032,
+        "jpm": 649.1779790514927,
+        "failures": 0,
+        "jumps": 49,
+        "land_p95_bw": 4.847709349456819,
+        "leg_torque_rms_nm": 26.868587493896484,
+        "pack_abs_roll_deg": 2.66748874763448,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 130.50902921062558,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 400.7206851847995,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "12": {
+            "cmd": 1.0118,
+            "speed": 0.8330636203289032,
+            "distance": 66.64508962631226,
+            "failures": 0,
+            "jumps": 49,
+            "tag": "zero_12_1.0118",
+            "jpm": 649.1779790514928
+          }
+        }
+      },
+      "max_speed_gap_mps": 0.0029105663299560103
+    },
+    "held_out_16_55_matched": {
+      "v8": {
+        "speed": 0.8546998828649521,
+        "jpm": 381.7707864016574,
+        "failures": 0,
+        "jumps": 125,
+        "land_p95_bw": 3.8212852478027344,
+        "leg_torque_rms_nm": 20.720979690551758,
+        "pack_abs_roll_deg": 2.023111312989916,
+        "unloaded_mean_force_n": 4.504128456115723,
+        "peak_force_n": [
+          329.767822265625,
+          279.5555114746094
+        ],
+        "rod_positive_jpm": 9.270001858902965,
+        "rod_absorbed_jpm": 6.8594141862454725,
+        "rod_share_positive_pct": 10.266298510053993,
+        "phases": {
+          "landing": {
+            "human_jpm": 69.4787196948094,
+            "impulse_n_s_per_m": [
+              3.933117415181659,
+              4.903388217326124
+            ],
+            "left_impulse_pct": 44.50987277948973,
+            "rod_positive_work_jpm": [
+              0.11715892553548427,
+              0.7212072680323908
+            ],
+            "rod_absorbed_work_jpm": [
+              1.6049008268287055,
+              1.835021385111724
+            ]
+          },
+          "push": {
+            "human_jpm": 245.068942409091,
+            "impulse_n_s_per_m": [
+              7.617124672843744,
+              13.015621560585778
+            ],
+            "left_impulse_pct": 36.917648221264656,
+            "rod_positive_work_jpm": [
+              0.6587308408661268,
+              4.083241774989386
+            ],
+            "rod_absorbed_work_jpm": [
+              2.085285447282401,
+              0.7178651859456088
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.8190225064754486,
+            "distance": 65.52180051803589,
+            "failures": 0,
+            "jumps": 64,
+            "tag": "v8_16_1.0",
+            "jpm": 398.1931010524467
+          },
+          "55": {
+            "cmd": 1.0,
+            "speed": 0.8903772592544555,
+            "distance": 71.23018074035645,
+            "failures": 0,
+            "jumps": 61,
+            "tag": "v8_55_1.0",
+            "jpm": 366.66455455710167
+          }
+        }
+      },
+      "off": {
+        "speed": 0.8516628473997117,
+        "jpm": 484.4745840261544,
+        "failures": 0,
+        "jumps": 136,
+        "land_p95_bw": 3.505134344100952,
+        "leg_torque_rms_nm": 22.207399368286133,
+        "pack_abs_roll_deg": 1.814330999019365,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 93.4084796013672,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 302.22502354484425,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0187,
+            "speed": 0.8114599049091339,
+            "distance": 64.91679239273071,
+            "failures": 0,
+            "jumps": 71,
+            "tag": "off_16_1.0187",
+            "jpm": 499.86236458661983
+          },
+          "55": {
+            "cmd": 1.0408,
+            "speed": 0.8918657898902893,
+            "distance": 71.34926319122314,
+            "failures": 0,
+            "jumps": 65,
+            "tag": "off_55_1.0408",
+            "jpm": 470.4740840721267
+          }
+        }
+      },
+      "zero": {
+        "speed": 0.8545972228050231,
+        "jpm": 625.9366358362918,
+        "failures": 0,
+        "jumps": 95,
+        "land_p95_bw": 4.773409189530254,
+        "leg_torque_rms_nm": 26.67282485961914,
+        "pack_abs_roll_deg": 2.879365150029718,
+        "unloaded_mean_force_n": 0.0,
+        "peak_force_n": [
+          0.0,
+          0.0
+        ],
+        "rod_positive_jpm": 0.0,
+        "rod_absorbed_jpm": 0.0,
+        "rod_share_positive_pct": 0.0,
+        "phases": {
+          "landing": {
+            "human_jpm": 116.11682367303688,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          },
+          "push": {
+            "human_jpm": 402.7127702536453,
+            "impulse_n_s_per_m": [
+              0.0,
+              0.0
+            ],
+            "left_impulse_pct": null,
+            "rod_positive_work_jpm": [
+              0.0,
+              0.0
+            ],
+            "rod_absorbed_work_jpm": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "by_terrain": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.8199726819992066,
+            "distance": 65.59781455993652,
+            "failures": 0,
+            "jumps": 48,
+            "tag": "zero_16_1.0",
+            "jpm": 648.918762690397
+          },
+          "55": {
+            "cmd": 1.0548,
+            "speed": 0.8892217636108398,
+            "distance": 71.13774108886719,
+            "failures": 0,
+            "jumps": 47,
+            "tag": "zero_55_1.0548",
+            "jpm": 604.7442663219825
+          }
+        }
+      },
+      "max_speed_gap_mps": 0.0075626015663147195
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "archived_at": "2026-11-19T14:04:05+08:00",
+  "selected_checkpoint": "model_159.pt",
+  "source_training_run": "outputs/assist_long_hop_roll/train",
+  "initialization_checkpoint": "logs/cpu_exo_train/2026-11-19_13-45-04_386049/model_159.pt",
+  "initialization_checkpoint_sha256": "ca53233bddc282caa3f33a9be112e7a70ed99abfc6aa827f912265221e50344b",
+  "reward_revision": "human_energy_and_vertical_support_v4",
+  "reward_options": {
+    "long_hop_period_s": 1.7,
+    "roll_balance": true
+  },
+  "status": "archived_training_only",
+  "statistics": "summary.json",
+  "source_files": {
+    "model_159.pt": "outputs/assist_long_hop_roll/train/model_159.pt",
+    "config.json": "outputs/assist_long_hop_roll/train/config.json",
+    "terrain_manifest.json": "outputs/assist_long_hop_roll/train/terrain_manifest.json",
+    "training_efficiency.json": "outputs/assist_long_hop_roll/train/training_efficiency.json",
+    "training.log": "outputs/assist_long_hop_roll/train.log",
+    "events.out.tfevents.1795067902.robo-mint.1195587.0": "outputs/assist_long_hop_roll/train/events.out.tfevents.1795067902.robo-mint.1195587.0"
+  },
+  "files_sha256": {
+    "README.md": "be963dfd6f877468f239e995b2149006d7d4b9be991b0c9ef0ea853d72b3ac08",
+    "config.json": "c5d677f21ff0ac60f3ef9b784d60bf69ec746b45c6dbd48a88dde8f904eb7baf",
+    "events.out.tfevents.1795067902.robo-mint.1195587.0": "52ddf05488e3615d3ebd222be5a553bfee420d6172c2d369d87f62811bdd3139",
+    "model_159.pt": "45ffbd6b2100e10ca5b647468f07b5ee85717e0daa65232ba362a01ea9bad66a",
+    "summary.json": "9025e4ea2ca15833dc9942903adbc1de59e986b7c5e53bf4647d94ebbe26566a",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "training.log": "751eafd89cd9a8d71ea5f5c367f7ef80008d18ed4ca63b4a50bc2d4703c2f288",
+    "training_efficiency.json": "6131092397351291bafeaa19be50ccef418452ddda40744f24239259762062a3"
+  }
+}

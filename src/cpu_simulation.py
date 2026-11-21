@@ -5,13 +5,13 @@ import mujoco
 import numpy as np
 import torch
 from moon_device_core import MoonDeviceCore
-from moon_scene import SOLE_TERRAIN_CONTACTS
+from moon_scene import SOLE_TERRAIN_CONTACTS, vertical_load_columns
 
 
 class CpuWorlds:
     def __init__(self, spec, count, terrain_idx, *, pushes=False,
                  use_mjbatch=False, workers=1, optimize_cpu=False, inward_heading=False,
-                 terrain_indices=None, spawn_seed=42, assist_force=None):
+                 terrain_indices=None, spawn_seed=42, assist_force=None, edge_start=False):
         self.model = spec.compile()
         load_sensor = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR,
                                         'contacts/robot/left_sole_terrain_load')
@@ -23,6 +23,7 @@ class CpuWorlds:
                 source = int(self.model.sensor(f'contacts/robot/{side}_sole_terrain_load').adr[0])
                 self._sole_terrain_columns.extend(range(source, source + 4 * SOLE_TERRAIN_CONTACTS))
                 self._sole_load_columns.append(int(self.model.sensor(f'robot/balance_{side}_load').adr[0]))
+        self._vertical_columns = vertical_load_columns(self.model)
         template = mujoco.MjData(self.model)
         self.data = None if use_mjbatch else [template] + [
             mujoco.MjData(self.model) for _ in range(count - 1)]
@@ -42,7 +43,7 @@ class CpuWorlds:
         self.sim.native_data = self.data
         self.device = MoonDeviceCore(pushes=pushes, shared_terrain=True, resample_terrain=False,
                                      terrain_idx=terrain_idx, optimize_cpu=optimize_cpu,
-                                     inward_heading=inward_heading)
+                                     inward_heading=inward_heading, edge_start=edge_start)
         self.device.initialize(self.sim)
         self.exoskeleton = None
         if assist_force is not None:
@@ -82,7 +83,10 @@ class CpuWorlds:
                 for name in ('qpos','qvel','sensordata','actuator_force','actuator_velocity','mocap_pos','mocap_quat'):
                     getattr(self.sim.data,name)[i].copy_(torch.from_numpy(getattr(data,name)))
                 self.sim.data.time[i] = data.time
-        if self._sole_terrain_columns is not None:
+        if self._vertical_columns is not None:
+            sensors = self.sim.data.sensordata
+            sensors[:, self._sole_load_columns] = sensors[:, self._vertical_columns].clamp_min(0.)
+        elif self._sole_terrain_columns is not None:
             sensors = self.sim.data.sensordata
             contacts = sensors[:, self._sole_terrain_columns].reshape(self.count, 2, SOLE_TERRAIN_CONTACTS, 4)
             loads = (contacts[..., 1].abs() * (contacts[..., 0] > 0)).sum(-1)

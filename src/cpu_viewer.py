@@ -2,7 +2,7 @@
 from contextlib import nullcontext
 from types import SimpleNamespace
 from queue import SimpleQueue
-import os,time
+import os,sys,time
 import mujoco
 
 
@@ -40,7 +40,7 @@ class CpuDisplay:
             from skin_picking import install as install_skin_picking
             install_skin_picking()
             from studio_native import install
-            install(ui_bridge='native')
+            install(ui_bridge='local' if sys.platform.startswith('linux') else 'native')
             from mujoco.studio import native_viewer, viewer_protocol, launch_thread
             from mujoco.studio.app import App,inputs
             from studio_input import configure_mac_input,StudioFocus,mac_control_or_command
@@ -50,7 +50,6 @@ class CpuDisplay:
                 def handle_mouse_events(app):
                     from mujoco.studio.dear_imgui import dear_imgui as imgui
                     io=imgui.GetIO()
-                    import sys
                     using_modifier=io.KeyCtrl or (sys.platform=='darwin' and io.KeySuper)
                     with mac_control_or_command(imgui):
                         return inputs.handle_mouse_events(app.model,app.data,app.viewer.camera,

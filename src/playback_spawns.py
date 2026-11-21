@@ -18,7 +18,7 @@ def _safe_placements(xy, yaw, foot, padding, height_meta, grid):
     return np.isfinite(gaps).all(-1) & (gaps.min(-1) >= .0145) & (gaps.max(-1) <= .20)
 
 
-def distributed_spawns(bank,patch,sole_points,cover,count,occupied,seed,*,inward_heading=False):
+def distributed_spawns(bank,patch,sole_points,cover,count,occupied,seed,*,inward_heading=False,edge_start=False):
     rng=np.random.default_rng(seed)
     # Keep spawn and the allowed 1m drift clear of the terrain boundary.
     half=float(bank.get('half_extent_m',HALF))
@@ -29,8 +29,11 @@ def distributed_spawns(bank,patch,sole_points,cover,count,occupied,seed,*,inward
     xy=np.stack((xx,yy),-1).reshape(-1,2)
     xy+=rng.uniform(-.04,.04,xy.shape)
     xy=np.clip(xy,-limit,limit)
+    if edge_start:
+        # Use the outer band of safe starts, facing across the terrain center.
+        xy = xy[np.abs(xy).max(axis=1) >= limit - .5]
     yaw=rng.uniform(-np.pi,np.pi,len(xy))
-    if inward_heading:
+    if inward_heading or edge_start:
         yaw=np.where(np.linalg.norm(xy,axis=1)>.5,np.arctan2(-xy[:,1],-xy[:,0]),yaw)
     foot=np.asarray(sole_points)
     grid=bank['normalized'][patch]

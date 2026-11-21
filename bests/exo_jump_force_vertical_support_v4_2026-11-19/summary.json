@@ -1,0 +1,521 @@
+{
+  "training": {
+    "checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/outputs/assist_review_v4/train/model_159.pt",
+    "sha256": "5a0ee8437a77ed8d93b88957a28ad7884266da062551d53a6ca4115c7d8320f0",
+    "total_transitions": 41943040,
+    "starting_checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/outputs/assist_trained_pair_20261119_102950/train_500N/model_159.pt"
+  },
+  "protocol": {
+    "worlds_per_patch": 8,
+    "seconds": 10,
+    "control_hz": 60,
+    "terrains": [
+      16,
+      55
+    ],
+    "seeds": [
+      81,
+      82
+    ],
+    "selection": "final policies; calibration uses only speed",
+    "energy": "sum of human positive joint work / 0.25 + absolute negative work / 1.2, per meter of forward displacement",
+    "phase_support": "upward net same-side boot reaction > 0.06 lunar body weights",
+    "landing": "loaded compression or loaded descending flight; touchdown impulse separately uses v4 onset definition and positive net force for 3 samples",
+    "percentiles": "pooled landing control frames for vertical force and completed individual boot touchdown windows for impulse",
+    "zero": "independently trained 0 N policy"
+  },
+  "conditions": {
+    "0.5": {
+      "zero": {
+        "speed": 0.48289353400468826,
+        "jpm": 995.0045925814768,
+        "leg_rms_nm": 26.005078333300474,
+        "failures": 0,
+        "jumps": 96,
+        "landing_vertical_peak_bw": 7.718011004530786,
+        "landing_vertical_p95_bw": 4.833024483985869,
+        "touchdown_windows": 245,
+        "touchdown_impulse_mean_bw_s": 0.14163381319188725,
+        "touchdown_impulse_p95_bw_s": 0.20924646684801002,
+        "max_penetration_mm": 12.487407717731173,
+        "terrains": {
+          "16": {
+            "cmd": 0.4515,
+            "speed": 0.46860176622867583,
+            "jpm": 1034.332692191507,
+            "max_penetration_mm": 11.685203423819969
+          },
+          "55": {
+            "cmd": 0.4624,
+            "speed": 0.4971853017807007,
+            "jpm": 957.9374933054684,
+            "max_penetration_mm": 12.487407717731173
+          }
+        },
+        "landing": {
+          "jpm": 216.82200972513596,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        },
+        "push": {
+          "jpm": 617.9671400393972,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        }
+      },
+      "v3": {
+        "speed": 0.481923845410347,
+        "jpm": 777.3370978748746,
+        "leg_rms_nm": 24.307643689754194,
+        "failures": 0,
+        "jumps": 103,
+        "landing_vertical_peak_bw": 7.716865872982149,
+        "landing_vertical_p95_bw": 4.578711218082654,
+        "touchdown_windows": 260,
+        "touchdown_impulse_mean_bw_s": 0.12906151691644357,
+        "touchdown_impulse_p95_bw_s": 0.19508715474338184,
+        "max_penetration_mm": 14.249404811285933,
+        "terrains": {
+          "16": {
+            "cmd": 0.5451,
+            "speed": 0.46864076852798464,
+            "jpm": 807.9023119100112,
+            "max_penetration_mm": 12.530791424110769
+          },
+          "55": {
+            "cmd": 0.5574,
+            "speed": 0.49520692229270935,
+            "jpm": 748.4116027922717,
+            "max_penetration_mm": 14.249404811285933
+          }
+        },
+        "landing": {
+          "jpm": 174.39010189814167,
+          "strut_work_jpm": [
+            8.663754996681021,
+            2.983749799914936
+          ],
+          "left_work_pct": 74.38292705587078,
+          "strut_impulse_nsm": [
+            15.475260346643786,
+            7.7165915857734015
+          ],
+          "left_impulse_pct": 66.72714361811151
+        },
+        "push": {
+          "jpm": 465.07406310804555,
+          "strut_work_jpm": [
+            1.3965150372117037,
+            13.704590972122165
+          ],
+          "left_work_pct": 9.247766596357442,
+          "strut_impulse_nsm": [
+            5.752035263606824,
+            25.192135323545138
+          ],
+          "left_impulse_pct": 18.588429272669124
+        }
+      },
+      "v4": {
+        "speed": 0.48254773318767546,
+        "jpm": 763.8629475664023,
+        "leg_rms_nm": 23.81078582761425,
+        "failures": 0,
+        "jumps": 100,
+        "landing_vertical_peak_bw": 6.465592834571872,
+        "landing_vertical_p95_bw": 4.572050676789529,
+        "touchdown_windows": 250,
+        "touchdown_impulse_mean_bw_s": 0.12991588490176242,
+        "touchdown_impulse_p95_bw_s": 0.1906030678057045,
+        "max_penetration_mm": 14.516265921737977,
+        "terrains": {
+          "16": {
+            "cmd": 0.4952,
+            "speed": 0.4734841525554657,
+            "jpm": 792.7033602984037,
+            "max_penetration_mm": 14.516265921737977
+          },
+          "55": {
+            "cmd": 0.5123,
+            "speed": 0.49161131381988527,
+            "jpm": 736.0859660407806,
+            "max_penetration_mm": 13.288314763511138
+          }
+        },
+        "landing": {
+          "jpm": 166.91383277714732,
+          "strut_work_jpm": [
+            5.806924939873486,
+            3.2899455562043114
+          ],
+          "left_work_pct": 63.83431469511626,
+          "strut_impulse_nsm": [
+            10.755618678985273,
+            8.036396429475609
+          ],
+          "left_impulse_pct": 57.2350469968635
+        },
+        "push": {
+          "jpm": 457.76298165091634,
+          "strut_work_jpm": [
+            1.8751601953442039,
+            16.331894334334606
+          ],
+          "left_work_pct": 10.299085952027868,
+          "strut_impulse_nsm": [
+            7.349087651340395,
+            27.970496447057133
+          ],
+          "left_impulse_pct": 20.807401442968374
+        },
+        "energy_saving_vs_zero_pct": 23.230208859176415,
+        "energy_saving_vs_v3_pct": 1.7333728629842393
+      },
+      "max_speed_gap": 0.00557398796081543
+    },
+    "1.0": {
+      "zero": {
+        "speed": 0.8367810726165772,
+        "jpm": 628.4481670948509,
+        "leg_rms_nm": 26.552778551935482,
+        "failures": 0,
+        "jumps": 95,
+        "landing_vertical_peak_bw": 7.806808810386237,
+        "landing_vertical_p95_bw": 4.780061214413536,
+        "touchdown_windows": 247,
+        "touchdown_impulse_mean_bw_s": 0.13317274216090813,
+        "touchdown_impulse_p95_bw_s": 0.20544710744595532,
+        "max_penetration_mm": 15.989231020583965,
+        "terrains": {
+          "16": {
+            "cmd": 1.0,
+            "speed": 0.8199726819992066,
+            "jpm": 648.9187638167443,
+            "max_penetration_mm": 15.989231020583965
+          },
+          "55": {
+            "cmd": 1.0,
+            "speed": 0.8535894632339478,
+            "jpm": 608.7837607037721,
+            "max_penetration_mm": 13.90799579252189
+          }
+        },
+        "landing": {
+          "jpm": 113.23717940290788,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        },
+        "push": {
+          "jpm": 408.5279187519029,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        }
+      },
+      "v3": {
+        "speed": 0.8330145418643952,
+        "jpm": 539.5226488709552,
+        "leg_rms_nm": 24.889581594969737,
+        "failures": 0,
+        "jumps": 95,
+        "landing_vertical_peak_bw": 7.526727522641212,
+        "landing_vertical_p95_bw": 4.9689472212308825,
+        "touchdown_windows": 249,
+        "touchdown_impulse_mean_bw_s": 0.1397477761480449,
+        "touchdown_impulse_p95_bw_s": 0.22988931606061566,
+        "max_penetration_mm": 16.521396287551305,
+        "terrains": {
+          "16": {
+            "cmd": 0.9389,
+            "speed": 0.8163924932479858,
+            "jpm": 561.145916859819,
+            "max_penetration_mm": 16.521396287551305
+          },
+          "55": {
+            "cmd": 0.9185,
+            "speed": 0.8496365904808044,
+            "jpm": 518.7454438124865,
+            "max_penetration_mm": 13.7647122029772
+          }
+        },
+        "landing": {
+          "jpm": 101.08770306973612,
+          "strut_work_jpm": [
+            5.527051865673333,
+            2.0059025038457157
+          ],
+          "left_work_pct": 73.37163607465493,
+          "strut_impulse_nsm": [
+            7.800311987780034,
+            3.738460948227706
+          ],
+          "left_impulse_pct": 67.60087949593397
+        },
+        "push": {
+          "jpm": 362.38065849828246,
+          "strut_work_jpm": [
+            1.5070490912790206,
+            8.332214239097707
+          ],
+          "left_work_pct": 15.3166862261559,
+          "strut_impulse_nsm": [
+            3.1757306842129807,
+            15.57099714900386
+          ],
+          "left_impulse_pct": 16.940186641990852
+        }
+      },
+      "v4": {
+        "speed": 0.8346634030342102,
+        "jpm": 500.4062750430048,
+        "leg_rms_nm": 24.28264819112257,
+        "failures": 0,
+        "jumps": 97,
+        "landing_vertical_peak_bw": 7.483297371857301,
+        "landing_vertical_p95_bw": 4.8910999327580305,
+        "touchdown_windows": 252,
+        "touchdown_impulse_mean_bw_s": 0.1320885258117862,
+        "touchdown_impulse_p95_bw_s": 0.20946822629705925,
+        "max_penetration_mm": 15.568490664137151,
+        "terrains": {
+          "16": {
+            "cmd": 0.9126,
+            "speed": 0.818051564693451,
+            "jpm": 523.5998303239961,
+            "max_penetration_mm": 15.568490664137151
+          },
+          "55": {
+            "cmd": 0.9185,
+            "speed": 0.8512752413749695,
+            "jpm": 478.11792074084866,
+            "max_penetration_mm": 15.2391085961102
+          }
+        },
+        "landing": {
+          "jpm": 102.49020185608447,
+          "strut_work_jpm": [
+            3.5614479975662734,
+            1.9727123416800536
+          ],
+          "left_work_pct": 64.35389976524047,
+          "strut_impulse_nsm": [
+            5.287550025071897,
+            4.129298458594889
+          ],
+          "left_impulse_pct": 56.14988957550903
+        },
+        "push": {
+          "jpm": 319.1617652856745,
+          "strut_work_jpm": [
+            1.343595967492184,
+            8.74198621363835
+          ],
+          "left_work_pct": 13.321947542165333,
+          "strut_impulse_nsm": [
+            2.983396706243972,
+            16.008741279567143
+          ],
+          "left_impulse_pct": 15.708587987686514
+        },
+        "energy_saving_vs_zero_pct": 20.374296363015866,
+        "energy_saving_vs_v3_pct": 7.2501819728621575
+      },
+      "max_speed_gap": 0.003952872753143377
+    },
+    "1.5": {
+      "zero": {
+        "speed": 1.0791963696479798,
+        "jpm": 577.1735182008741,
+        "leg_rms_nm": 27.646918667663602,
+        "failures": 0,
+        "jumps": 97,
+        "landing_vertical_peak_bw": 7.6100206498101075,
+        "landing_vertical_p95_bw": 4.813163102732492,
+        "touchdown_windows": 283,
+        "touchdown_impulse_mean_bw_s": 0.10916576767364972,
+        "touchdown_impulse_p95_bw_s": 0.21043394106926766,
+        "max_penetration_mm": 22.116520162677777,
+        "terrains": {
+          "16": {
+            "cmd": 1.5,
+            "speed": 1.0608636021614075,
+            "jpm": 583.989545916005,
+            "max_penetration_mm": 16.471302209883042
+          },
+          "55": {
+            "cmd": 1.5,
+            "speed": 1.097529137134552,
+            "jpm": 570.585195877893,
+            "max_penetration_mm": 22.116520162677777
+          }
+        },
+        "landing": {
+          "jpm": 123.4359204366667,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        },
+        "push": {
+          "jpm": 347.0511283212308,
+          "strut_work_jpm": [
+            0.0,
+            0.0
+          ],
+          "left_work_pct": null,
+          "strut_impulse_nsm": [
+            0.0,
+            0.0
+          ],
+          "left_impulse_pct": null
+        }
+      },
+      "v3": {
+        "speed": 1.070143461227417,
+        "jpm": 487.144671291497,
+        "leg_rms_nm": 25.3655723760157,
+        "failures": 0,
+        "jumps": 94,
+        "landing_vertical_peak_bw": 7.769105879019948,
+        "landing_vertical_p95_bw": 4.9961361861551286,
+        "touchdown_windows": 256,
+        "touchdown_impulse_mean_bw_s": 0.1257700810685794,
+        "touchdown_impulse_p95_bw_s": 0.22289595037336984,
+        "max_penetration_mm": 40.676440595360205,
+        "terrains": {
+          "16": {
+            "cmd": 1.3297,
+            "speed": 1.0546813011169434,
+            "jpm": 485.68074521622844,
+            "max_penetration_mm": 14.962460604292504
+          },
+          "55": {
+            "cmd": 1.3028,
+            "speed": 1.0856056213378906,
+            "jpm": 488.5668962942567,
+            "max_penetration_mm": 40.676440595360205
+          }
+        },
+        "landing": {
+          "jpm": 90.38061503088147,
+          "strut_work_jpm": [
+            4.162712968743984,
+            1.7916504677479703
+          ],
+          "left_work_pct": 69.91029373908135,
+          "strut_impulse_nsm": [
+            5.313328166212897,
+            3.4998582582693976
+          ],
+          "left_impulse_pct": 60.28838958237529
+        },
+        "push": {
+          "jpm": 324.18660184927114,
+          "strut_work_jpm": [
+            1.240152619512457,
+            6.438640112988619
+          ],
+          "left_work_pct": 16.150359343121952,
+          "strut_impulse_nsm": [
+            2.2183668727894004,
+            11.132689195427345
+          ],
+          "left_impulse_pct": 16.6156659177726
+        }
+      },
+      "v4": {
+        "speed": 1.0750431418418884,
+        "jpm": 454.2381014091396,
+        "leg_rms_nm": 24.353487351740945,
+        "failures": 0,
+        "jumps": 91,
+        "landing_vertical_peak_bw": 6.926133227532462,
+        "landing_vertical_p95_bw": 4.658425553936717,
+        "touchdown_windows": 262,
+        "touchdown_impulse_mean_bw_s": 0.11316132213493915,
+        "touchdown_impulse_p95_bw_s": 0.21197737895829522,
+        "max_penetration_mm": 19.40183262999152,
+        "terrains": {
+          "16": {
+            "cmd": 1.3094,
+            "speed": 1.0584724307060243,
+            "jpm": 458.3802667272869,
+            "max_penetration_mm": 19.40183262999152
+          },
+          "55": {
+            "cmd": 1.3128,
+            "speed": 1.0916138529777526,
+            "jpm": 450.221692327553,
+            "max_penetration_mm": 16.678796316022776
+          }
+        },
+        "landing": {
+          "jpm": 82.65973844905106,
+          "strut_work_jpm": [
+            2.7209043006099227,
+            1.4341723619885953
+          ],
+          "left_work_pct": 65.48385316453616,
+          "strut_impulse_nsm": [
+            3.6633025931826704,
+            2.883967290720273
+          ],
+          "left_impulse_pct": 55.95160514444703
+        },
+        "push": {
+          "jpm": 309.83138392494527,
+          "strut_work_jpm": [
+            1.2786461894625694,
+            7.248301145292634
+          ],
+          "left_work_pct": 14.995356946218052,
+          "strut_impulse_nsm": [
+            2.2945291108306756,
+            12.196071781663623
+          ],
+          "left_impulse_pct": 15.834602911596122
+        },
+        "energy_saving_vs_zero_pct": 21.299559476488184,
+        "energy_saving_vs_v3_pct": 6.754989189375083
+      },
+      "max_speed_gap": 0.011923515796661288
+    }
+  }
+}

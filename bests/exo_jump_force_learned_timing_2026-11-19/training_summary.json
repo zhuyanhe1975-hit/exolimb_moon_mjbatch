@@ -1,0 +1,27 @@
+{
+  "checkpoint": "logs/cpu_exo_train/force_learned_timing_v1/model_159.pt",
+  "init_checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/logs/cpu_exo_train/force_action_v1/model_159.pt",
+  "iterations": 160,
+  "worlds": 8192,
+  "control_steps": 41943040,
+  "training_loop_seconds": 140.56471991539001,
+  "median_iteration_sec": 0.8729832172393799,
+  "median_control_steps_per_second": 300285.0,
+  "last_episode_reward": 108.2142562866211,
+  "training_rollout_metrics": {
+    "left_positive_w": 6.960899802390486,
+    "right_positive_w": 15.096436744497623,
+    "left_share_pct": 31.55820643890272,
+    "support_power_w": 11.79614790994674,
+    "human_abs_w": 225.97186648193747,
+    "human_leg_rms_nm": 26.423420463921502
+  },
+  "previous_action_force_training_rollout_metrics": {
+    "left_positive_w": 9.63892460151692,
+    "right_positive_w": 15.901905733742751,
+    "left_share_pct": 37.73927658181956,
+    "support_power_w": 10.78146505318,
+    "human_abs_w": 235.03584461007267,
+    "human_leg_rms_nm": 26.258304896065965
+  }
+}

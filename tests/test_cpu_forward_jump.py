@@ -23,7 +23,7 @@ from cpu_forward_jump import (AbsorbingHopForwardJumpCommands, BilateralSoleLand
                               SpeedTrackingForwardJumpCommands, StanceFlowTakeoffCommands,
                               StanceStrideTakeoffCommands,
                               SupportedTakeoffCommands, TerrainAlignedLandingCommands,
-                              forward_initial_state)
+                              forward_initial_state, long_hop_event_weight)
 from cpu_jump_task import REWARD_COLUMNS
 from cpu_simulation import CpuWorlds
 from moon_scene import scene_spec
@@ -102,6 +102,29 @@ class ForwardJumpTaskTest(unittest.TestCase):
         self.assertEqual(float(reward[2]), 0.)
         commands.completed.zero_()
         torch.testing.assert_close(commands.stride_reward(), torch.zeros(3))
+
+    def test_long_hop_weight_requires_both_time_and_forward_distance(self):
+        seconds = torch.tensor([.85, 1.7, 1.7, 3.4, 1.7, .10, 1.7])
+        meters = torch.tensor([.85, 1.7, .85, 3.4, -.2, 0., 3.4])
+        speed = torch.tensor([1., 1., 1., 1., 1., 0., 2.])
+        weights = long_hop_event_weight(seconds, meters, speed, 1.7)
+        torch.testing.assert_close(weights, torch.tensor([.25, 1., .25, 1., 0., 1., 1.]))
+        self.assertGreater(weights[1].item(), 2 * weights[0].item())
+
+    def test_economical_hops_pay_equal_quality_once_per_completed_flight(self):
+        worlds = CpuWorlds(scene_spec(), 3, 12)
+        cmd = LongStrideForwardJumpCommands(worlds, fixed_speed=1.)
+        cmd.flight_speed_steps[:] = torch.tensor([18., 54., 54.])
+        cmd.flight_speed_sum.copy_(cmd.flight_speed_steps)
+        cmd.completed[:] = torch.tensor([True, True, False])
+        cmd.hop_distance.fill_(.75)
+        original = cmd.stride_reward()
+        torch.testing.assert_close(original[1], 3 * original[0])
+        cmd.economical_hops = True
+        credit = cmd.stride_reward()
+        torch.testing.assert_close(credit[0], credit[1])
+        self.assertGreater(credit[0].item(), 0.)
+        self.assertEqual(credit[2].item(), 0.)
 
     def test_stride_uses_first_touchdown_position_after_confirmed_takeoff(self):
         worlds = CpuWorlds(scene_spec(), 2, 12)
@@ -540,6 +563,19 @@ class ForwardJumpTaskTest(unittest.TestCase):
         post = neutral + scale * adjusted[0, ids]
         self.assertTrue(((post - target).abs() < (pre - target).abs()).all())
         self.assertEqual(int(torch.count_nonzero(delta)), 2)
+
+        # With level heel-to-toe clearance, both signs of lateral tilt still
+        # need correction on approach. The ascending world remains unchanged.
+        level_pitch = torch.full_like(gaps, .04)
+        tilted_edges = torch.tensor([[[.01, .08], [.08, .01]]]).expand(2, -1, -1)
+        with patch.object(commands, 'sole_clearances', return_value=level_pitch), patch.object(
+                commands, 'sole_edge_clearances', return_value=tilted_edges):
+            base = PhaseMirroredLandingCommands.__call__(commands, raw)
+            adjusted = commands(raw)
+        correction = adjusted - base
+        self.assertLess(float(correction[0, commands.plane_actions[0, 1]]), 0.)
+        self.assertGreater(float(correction[0, commands.plane_actions[1, 1]]), 0.)
+        self.assertEqual(int(torch.count_nonzero(correction)), 2)
 
     def test_boot_yaw_preserves_toe_out_and_measures_rotation_relative_to_torso(self):
         spec = scene_spec(geometry='fitted', sole_collision=True, sole_edge_probes=True)

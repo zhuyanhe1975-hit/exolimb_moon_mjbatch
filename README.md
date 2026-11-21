@@ -14,7 +14,37 @@
 
 ## macOS / 原生 MuJoCo CPU 回放
 
-`./run.sh` 默认在 CPU 上回放导入策略。`./run_cpu.sh` 从 `logs/cpu_train/` 自动选最近保存的训练检查点，并读取对应训练地形。没有本地训练检查点时回退到导入策略。两个脚本都接受 `--checkpoint` 指定其他策略，`--terrain-idx` 可覆盖训练地形。旧 CUDA/Playground 入口为 `./run_playground.sh`。CPU 回放使用原生 MuJoCo 4.0.1 动力学和 CPU PyTorch 推理。
+`./run.sh` 无参数时回放导入的站立策略。`./run_cpu.sh` 默认从 `logs/cpu_train/` 选择最近保存的训练检查点。两个入口都支持 `--best [任务]` 选择固定归档、`--latest-training` 选择本地训练结果和 `--checkpoint` 指定文件。回放默认读取检查点记录的训练地形，可用 `--terrain-idx` 覆盖。CPU 回放使用原生 MuJoCo 4.0.1 动力学和 CPU PyTorch 推理，CUDA/Playground 入口为 `./run_playground.sh`。
+
+| 归档任务 | 检查点 |
+| --- | --- |
+| `exo_jump`（裸 `--best` 默认） | `bests/exo_jump_position_pd500_2026-11-19/model_199.pt` |
+| `forward_jump` | `bests/forward_jump_boot_yaw_2026-11-18/model_104.pt` |
+| `jump` | `bests/jump_flow_rebound_2026-11-18/model_149.pt` |
+
+```bash
+./run.sh --list-bests
+./run.sh --best --viewer studio --viz skin --jump-speed 1.0
+./run.sh --best forward_jump --jump-speed 1.5
+./run.sh --best jump --jump-height 0.15
+./run.sh --latest-training --task exo_jump
+```
+
+`--best --task jump` 等价于 `--best jump`。归档缺失时直接报错。`--best`、`--latest-training` 和 `--checkpoint` 每次只选一种。
+
+### Linux / RTX 5090
+
+本机已有 `~/dev-envs/robotics-playground-py312` 时可直接复用。CPU 回放优先使用 `CPU_PYTHON` 或项目内的 `.venv-cpu`，Linux 上两者均未配置时使用现有 Playground 解释器。
+
+```bash
+# 首次使用 Linux Studio 时，用现有 MuJoCo 4.0.1 SDK 编译项目内 UI 扩展
+~/dev-envs/robotics-playground-py312/bin/python scripts/build_native_ui.py
+
+./run.sh --best --viewer studio --viz skin --jump-speed 1.0
+./run.sh --backend playground --device cuda:0 --viewer studio --viz skin
+```
+
+第一条回放命令使用 Mac 归档的外骨骼策略，物理和推理都在 CPU 上。第二条使用 RTX 5090 的 CUDA/Warp 站立任务，自动选择对应的 Playground 检查点。指定 Python 可分别使用 `CPU_PYTHON` 和 `PLAYGROUND_PYTHON`。
 
 ```bash
 uv venv --python 3.12 .venv-cpu
@@ -117,6 +147,43 @@ Studio skin拾取修复：项目内 `skin_picking.py` 使用原生更新的蒙�
 
 PD 外骨骼的训练和回放都收小肩部的目标摆幅。上臂略向身体内侧收，肘部保留策略给出的平衡动作。
 
+外骨骼策略可用 `--init-checkpoint` 和 `--stance-center-weight` 做双脚居中微调。居中代价测量双脚中点到骨盆矢状面的水平横向距离，留出 3 cm 容差。微调使用固定学习率 `1e-4`，保留速度、落地和支杆做功等奖励。该选项默认关闭。
+
+`--exo-control force` 使用 MuJoCo 原生滑杆力执行器，策略直接请求左右杆推力。承重、蹬伸、行程与杆速门控继续生效。由位置 PD 检查点初始化时，保留人体输出，清除旧支杆目标指令的输入权重与归一化统计，并将两路支杆输出初始化为各 80 N 的门控前请求（受配置上限限制）。检查点记录执行器模式，回放据此构建模型。
+
+`--exo-control force-policy` 移除支杆对全身蹬伸相位和起止时间包络的依赖。策略每个控制步决定左右推力，同侧承重、行程、缩杆释放和推力上限仍生效。有效正功按同侧承重及质心上升计分，可在任意全身相位获得。由上一版原生力控检查点初始化时，直接继承网络和归一化参数。用 `run_exo_force.sh CHECKPOINT` 回放。
+
+`train_exo_force.sh` 默认选择 `--exo-control force-action`。每侧 action 经 `[-1, 1]` 裁剪后线性映射到 `[0, assist_force]`，直接控制原生滑杆执行器。人体代理消耗采用逐关节正功除以 0.25、负功绝对值除以 1.2 后求和，同时计入人体力矩、无承重时的支杆推力和超出接触支撑余量的踝侧倾力矩。支杆正负功用于诊断。双踝侧倾机械限位为 ±8°。
+
+落地缓冲和承重蹬地分别在阶段结束时比较两侧承重期间的平均支杆推力。只有两侧各累计承重至少 30 ms 才计入均衡代价，推力分配在约 40:60 以内时不扣分。阶段均衡影响奖励，推力仍由 action 直接决定。训练报告按阶段和左右杆分别记录承重期间的绝对机械功。
+
+力控训练可加 `--load-sharing` 试用 v3 奖励。它分别累计缓冲期和蹬地期同侧着地时的支杆冲量，并按单脚载荷累计有效承重时间（每脚计到一倍月面体重为止）。每步按左右累计差额的变化计分，允许两脚先后接力。单靴与地形接触点的法向力标量和超过六倍月面体重时收取连续超载代价。评估竖直缓冲效果时，需把各接触点含摩擦的反力转到世界坐标，逐脚求和后取竖直分量。人体代谢代理采用更高权重并保留高功耗样本的完整代价。由直接力控策略初始化时，两路支杆输出层参数各向两侧平均值移动一半，随后独立学习。报告增加左右杆分阶段的冲量，单位为 N·s。
+
+`--vertical-support` 启用 v4 力控训练。模型用原生 MuJoCo 地形到单靴的净力传感器汇总接触法向力和摩擦力。训练与回放都将向上的世界坐标竖直分量送入足底载荷观测和承重代价。每脚连续卸载至少两个控制步后，在下降落地或缓冲期重新承重时开启 50 ms 窗口。单脚竖直载荷超过 4.5 倍月面体重、或窗口内向上冲量累计超过 0.15 倍月面体重·秒时计入软代价。报告分别给出完整窗口次数、向上冲量总和、向上与水平合力峰值、前 12 个接触点水平法向分量绝对值之和的峰值，以及最大靴底接触穿入。传感和计分采样频率为 60 Hz。回放依据检查点奖励版本选择载荷定义。
+
+`--posture-balance` 启用 v5，沿用 v4 的竖直支撑反馈。它用 1.5 秒时间常数平滑背包和腰关节的有符号侧倾角。当持续偏角超过 1.5°（背包）或 4°（腰），并且当前倾斜仍强化同方向偏差时，训练计入姿态代价。蹬地期额外比较两靴累计向上冲量与两杆同侧承重时的累计冲量，允许两脚先后承重。由 v4 初始化时直接继承左右杆的独立输出头。策略继续按 action 请求 0–500 N 推力。
+
+`--stance-transition` 启用 v6，继承 v5 的姿态和人体功耗目标。制动期按重心下降速度及同脚后跟、前掌中较小的竖直反力计分。通过地形接触的法向和两条切向还原各点的世界竖直力，使用每脚按力排序的前 12 个接触点。重心回升时，按同侧足底承重与杆伸长速度的重叠计分，并兼顾表现较弱的一侧。支杆推力仍由策略的两个独立 action 决定。训练示例：
+
+```bash
+./train_exo_force.sh --stance-transition --init-checkpoint outputs/assist_posture_v5/train/model_159.pt
+```
+
+`--economical-hops` 在 v4 竖直力控奖励上比较跳跃经济性。通过有效落地判定后，每跳的质量奖励按固定系数 1 结算，并取消腾空阶段逐帧的固定加分。两组沿用同一套速度、步幅、抬升、姿态、关节出力与落地约束。用 `--keep-strut-heads` 从同一个 v4 继续训练时，两组均可原样继承左右杆输出头。实验以相同实际速度下累计人体估算能耗除以累计前进距离（J/m）比较，同时报告失败复位及落地载荷。
+
+`--long-hop-period 1.7` 可在 v7 上继续训练低频长跳。每个有效落地事件同时检查与上一次有效落地之间的时间和前进距离。前进距离参考值为速度指令乘以目标周期，两项完成比例取较小值并平方，达到目标后不再增加。首跳用腾空时长和腾空前进距离。接近零速时逐渐取消该权重。目标周期是可调的奖励参考，实际跳频、跳距和节能率以同速回放为准。 长跳出现持续侧倾时，可加 `--roll-balance`，单独启用 v5 的背包和腰部侧倾代价。
+
+```bash
+./train_exo_force.sh --long-hop-period 1.7 \
+  --init-checkpoint outputs/assist_energy_v7/candidate/model_159.pt
+```
+
+
+
+`./train_exo_stance_center.sh` 使用 1024 个 MuJoCo Warp CUDA 环境。物理、观测、奖励、策略采样、GAE 和 PPO 更新均在 CUDA 上。启动时在主机编译 MuJoCo 模型并筛选安全出生点，之后在 CUDA 上独立采样位置和朝向。脚本沿用原归档的 169 维观测、26 维动作与两阶段参数。CUDA 和原生 CPU 后端的接触求解与随机序列可能产生不同轨迹。用 `--checkpoint` 指定导出的模型可做原生 CPU Studio 回放。
+
+Warp 默认复用物理步进、传感器刷新和复位的 CUDA Graph，观测也使用固定形状图和合并的地形查询。用 `MOON_WARP_GRAPH=0` 可回退到逐次提交，观测图和地形查询也随之回退到各自默认关闭。可用 `MOON_MEASUREMENT_GRAPH` 和 `MOON_BATCHED_TERRAIN` 单独覆盖观测开关。
+
 ```bash
 ./run_exo_jump.sh
 ./run_exo_jump.sh --assist-force 0
@@ -136,7 +203,7 @@ PD 外骨骼的训练和回放都收小肩部的目标摆幅。上臂略向身�
 
 共享环境已安装在 `~/dev-envs/robotics-playground-py312`，使用本机 `~/Github/mujoco_playground` 与 vendored REAF-sim 可编辑源码。Torch2.12/CUDA13/TorchVision及其依赖通过硬链接复用，缺失普通依赖优先从清华镜像安装；MuJoCo4开发版来自仓库指定的官方源。原 MJLab/Isaac 环境未修改。
 
-`run.sh` 和 `train.sh` 已默认使用此解释器，无需设置环境变量。也可 `source ~/dev-envs/robotics-playground-py312/bin/activate`。版本、约束和检查记录见 `~/dev-envs/robotics-playground-py312.{freeze,constraints}.txt` 与 `~/dev-envs/diagnostics/playground/`。
+`run_playground.sh` 和 `train.sh` 默认使用此解释器。也可 `source ~/dev-envs/robotics-playground-py312/bin/activate`。版本、约束和检查记录见 `~/dev-envs/robotics-playground-py312.{freeze,constraints}.txt` 与 `~/dev-envs/diagnostics/playground/`。
 
 ```bash
 ./train.sh --overrides='{"max_iterations":300}'

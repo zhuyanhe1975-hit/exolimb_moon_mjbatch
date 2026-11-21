@@ -103,8 +103,9 @@ class ContactJumpCommands(JumpCommands):
         self.knee_qpos = [int(worlds.model.joint(f'robot/{side}Knee').qposadr[0])
                           for side in ('Left', 'Right')]
         count = worlds.count
-        self.stage = torch.full((count,), self.WAIT, dtype=torch.long)
-        self.age = torch.zeros(count)
+        device = worlds.sim.data.qpos.device
+        self.stage = torch.full((count,), self.WAIT, dtype=torch.long, device=device)
+        self.age = torch.zeros(count, device=device)
         self.ground_frames = torch.zeros_like(self.stage)
         self.air_frames = torch.zeros_like(self.stage)
 
@@ -194,7 +195,7 @@ class CompliantJumpCommands(ContactJumpCommands):
         self.landing_window = torch.zeros_like(self.stage, dtype=torch.bool)
         self.leg_actuators = lower_leg_actuators(worlds.model)
         limits = torch.as_tensor(worlds.model.actuator_forcerange[self.leg_actuators],
-                                 dtype=self.age.dtype)
+                                 dtype=self.age.dtype, device=self.age.device)
         self.force_limits = limits.abs().amax(dim=-1)
         gravity = -float(worlds.model.opt.gravity[2])
         self.speed_scale = gravity * FLIGHT_SECS / 2
@@ -267,7 +268,7 @@ class AdaptiveJumpCommands(CompliantJumpCommands):
             raise ValueError(f'目标跳高须在 {low:g}–{high:g} 米之间')
         super().__init__(worlds)
         self.fixed_height = fixed_height
-        self.generator = torch.Generator().manual_seed(torch.initial_seed())
+        self.generator = torch.Generator(device=self.age.device).manual_seed(torch.initial_seed())
         self.target_height = torch.empty_like(self.age)
         self.push_request = torch.zeros_like(self.age)
         self.push_duration = torch.full_like(self.age, EXTENSION_SECS)
@@ -288,7 +289,7 @@ class AdaptiveJumpCommands(CompliantJumpCommands):
             self.target_height[slice(None) if mask is None else mask] = self.fixed_height
             return
         low, high = self.height_range
-        targets = low + (high - low) * torch.rand(self.worlds.count, generator=self.generator)
+        targets = low + (high - low) * torch.rand(self.worlds.count, generator=self.generator, device=self.age.device)
         if mask is None:
             self.target_height.copy_(targets)
         else:

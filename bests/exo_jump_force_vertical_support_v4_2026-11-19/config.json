@@ -1,0 +1,112 @@
+{
+  "env": {
+    "backend": "mujoco_warp_cuda",
+    "physics_backend": "warp",
+    "task": "exo_jump",
+    "num_envs": 8192,
+    "terrain_idx": 12,
+    "pushes": true,
+    "seed": 42,
+    "physics_workers": 16,
+    "geometry": "fitted",
+    "terrain_indices": [
+      12,
+      3,
+      24,
+      47
+    ],
+    "spawn_sampling": "independent_position_and_36_uniform_headings_gpu_with_replacement",
+    "assist_force_n": 500.0,
+    "exo_mechanism": "hooke_slide_ball_v3",
+    "ankle_roll_profile": "suit_roll_8deg_damped_v1",
+    "exo_action_force_costs": {
+      "revision": "unloaded_force_and_ankle_moment_v1",
+      "unloaded_strut_force": 2.0,
+      "unsupported_ankle_moment": 3.0
+    },
+    "warp_cuda_graphs": true,
+    "measurement_cuda_graph": true,
+    "batched_terrain_queries": true,
+    "jump_actuation": "forward_boot_yaw_free_height_v32",
+    "jump_objective": "human_energy_and_bilateral_grounded_assistance",
+    "jump_speed_range_mps": [
+      0.0,
+      1.5
+    ],
+    "exo_policy_io": "action_force_v1",
+    "exo_efficiency_reward": {
+      "positive_work_cost": 4.0,
+      "negative_work_cost": 0.8333333333333334,
+      "human_mean_squared_torque": 1.5,
+      "peak_leg_squared_torque": 1.5,
+      "revision": "human_energy_and_vertical_support_v4",
+      "human_metabolic_proxy_power": 2.4,
+      "strut_impulse_balance": 6.0,
+      "boot_support_balance": 4.0,
+      "bilateral_force_share_deadband": 0.2,
+      "single_foot_overload_bw": 4.5,
+      "single_foot_overload_weight": 2.0,
+      "touchdown_window_s": 0.05,
+      "touchdown_impulse_bw_s": 0.15,
+      "touchdown_impulse_weight": 4.0
+    },
+    "stance_center_weight": 22.0,
+    "strut_head_warm_start_mix": 0.5,
+    "update_device": "cuda",
+    "init_checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/outputs/assist_trained_pair_20261119_102950/train_500N/model_159.pt"
+  },
+  "runner": {
+    "num_steps_per_env": 32,
+    "save_interval": 25,
+    "logger": "tensorboard",
+    "obs_groups": {
+      "actor": [
+        "policy"
+      ],
+      "critic": [
+        "critic"
+      ]
+    },
+    "actor": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "rsl_rl.modules.GaussianDistribution",
+        "init_std": 0.25,
+        "std_type": "scalar"
+      }
+    },
+    "critic": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true
+    },
+    "algorithm": {
+      "class_name": "rsl_rl.algorithms.PPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.0001,
+      "schedule": "fixed",
+      "gamma": 0.995,
+      "lam": 0.95,
+      "entropy_coef": 0.001,
+      "desired_kl": 0.01,
+      "clip_param": 0.2,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "normalize_advantage_per_mini_batch": false
+    }
+  },
+  "iterations": 160,
+  "torch_threads": 2
+}

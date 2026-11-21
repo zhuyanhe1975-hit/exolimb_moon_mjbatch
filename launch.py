@@ -12,12 +12,12 @@ def main():
     p=argparse.ArgumentParser(
         description='月面策略回放：默认16×16米地形、Studio 原生 OpenGL + skin，1 个世界，关闭扰动。',
         allow_abbrev=False, formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""示例（run.sh 已自动添加 play）：
-  ./run.sh
-  ./run.sh --checkpoint=/absolute/path/model_300.pt --num-envs=8
-  ./run.sh --viewer=classic --viz=physx --terrain-idx 12 --num-envs 4
-  ./run.sh --env-overrides='{"resample_terrain":true}'
-  ./run.sh --zero-actions
+        epilog="""示例（run_playground.sh 已自动添加 play）：
+  ./run.sh --backend playground --device cuda:0
+  ./run_playground.sh --checkpoint=/absolute/path/model_300.pt --num-envs=8
+  ./run_playground.sh --viewer=classic --viz=physx --terrain-idx 12 --num-envs 4
+  ./run_playground.sh --env-overrides='{"resample_terrain":true}'
+  ./run_playground.sh --zero-actions
 
 运行中按 [ / ] 切换上一块/下一块16米地形（1–64循环），并重置全部人物。
 
@@ -66,6 +66,10 @@ def main():
         rest.append('--nworld='+str(args.num_envs))
     if args.mode=='check':
         runpy.run_path(str(ROOT/'scripts/static_check.py'),run_name='__main__');return
+    if args.mode=='play' and getattr(args, 'resume_path', None):
+        from provenance import training_env_config
+        if training_env_config(Path(args.resume_path).resolve().parent):
+            p.error('该检查点来自独立训练任务。请用 ./run.sh --backend cpu --checkpoint PATH 回放')
     try:
         import moon_task
         moon_task.register()

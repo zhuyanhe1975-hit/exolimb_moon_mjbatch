@@ -2,6 +2,7 @@
 import argparse
 from contextlib import nullcontext
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -11,19 +12,17 @@ from zipfile import is_zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
+from provenance import training_env_config
+
 EXO_CHECKPOINT = ROOT / 'bests/exo_jump_position_pd500_2026-11-19/model_199.pt'
 EXO_BASE_CHECKPOINT = ROOT / 'bests/forward_jump_boot_yaw_2026-11-18/model_104.pt'
+BEST_CHECKPOINTS = {
+    'exo_jump': EXO_CHECKPOINT,
+    'forward_jump': EXO_BASE_CHECKPOINT,
+    'jump': ROOT / 'bests/jump_flow_rebound_2026-11-18/model_149.pt',
+}
+DEFAULT_BEST_TASK = 'exo_jump'
 IMPORTED_CHECKPOINT = ROOT / 'logs/2026-11-15_import_mjlab_v15_groundsync1/model_200.pt'
-
-
-def training_env_config(run_dir):
-    try:
-        env = json.loads((run_dir / 'config.json').read_text())['env']
-        if isinstance(env, dict) and env.get('backend') == 'native_mujoco_cpu':
-            return env
-    except (OSError, ValueError, TypeError, KeyError):
-        pass
-    return {}
 
 
 def training_terrain(run_dir):
@@ -54,13 +53,18 @@ def latest_training_checkpoint(log_dir, task=None):
     return None
 
 
-def main():
+def parse_args(argv=None):
+    entry = os.environ.get('MOON_RUN_ENTRY', 'run.sh')
+    latest_default = entry == 'run_cpu.sh'
     parser = argparse.ArgumentParser(
-        prog='./run.sh', allow_abbrev=False,
+        prog=f'./{entry}', allow_abbrev=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='月面策略 CPU 回放：classic/Studio 原生窗口、物理代理或航天服蒙皮、共享月面多人，无随机扰动。',
         epilog="""示例：
   ./run.sh
+  ./run.sh --list-bests
+  ./run.sh --best --viewer studio --viz skin --jump-speed 1.0
+  ./run.sh --best jump --jump-height 0.15
   ./run.sh --viewer studio --viz skin --num-envs 8
   ./run.sh --terrain-idx 24
   ./run.sh --checkpoint /absolute/path/model_200.pt
@@ -71,19 +75,28 @@ def main():
 施力：双击选中身体，Control+右键拖动施加力，Control+左键拖动施加转矩。
 物理120Hz / 策略60Hz；窗口按1×实时播放；无窗口模式全速运行。
 支持 classic/studio 与 physx/skin，自身动力学和策略均在CPU上；各人独立仿真，不相互碰撞。
-环境变量：CPU_PYTHON 指定 Python，默认项目内 .venv-cpu/bin/python。
+run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp 站立回放）。
+环境变量：CPU_PYTHON 指定 Python。Linux 在没有 .venv-cpu 时复用本机的 Playground 环境。
 """)
+    parser.add_argument('--episode-seconds', type=int, default=10, help='单回合仿真时限（秒）')
     parser.add_argument('--headless', action='store_true', help='不打开窗口；必须设置 --seconds')
     parser.add_argument('--seconds', type=float, default=0, help='运行的仿真秒数；默认0表示持续运行到窗口关闭')
     parser.add_argument('--terrain-idx', '--terrain_idx', type=int, choices=range(1, 65), metavar='1–64',
                         help='16米地形编号，默认采用检查点的训练地形或第12块')
     parser.add_argument('--seed', type=int, default=42, help='随机种子，默认42')
-    parser.add_argument('--checkpoint', '--resume-path', '--resume_path', type=Path,
-                        help='策略检查点，可覆盖启动脚本的默认值')
-    parser.add_argument('--latest-training', action='store_true',
-                        help='自动选择本地最新训练检查点（run_cpu.sh 默认）')
+    default_policy = '最新本地训练检查点' if latest_default else '导入的站立策略'
+    policy = parser.add_mutually_exclusive_group()
+    policy.add_argument('--checkpoint', '--resume-path', '--resume_path', type=Path,
+                        help=f'指定策略检查点；无任务或策略选择参数时默认使用{default_policy}')
+    policy.add_argument('--best', nargs='?', const='default', metavar='TASK',
+                        choices=('default', *BEST_CHECKPOINTS),
+                        help='使用归档策略。可选 jump、forward_jump、exo_jump；省略任务时采用 --task 或 exo_jump')
+    policy.add_argument('--latest-training', action='store_true',
+                        help='自动选择最新本地训练检查点，可用 --task 筛选')
+    policy.add_argument('--list-bests', action='store_true',
+                        help='列出当前归档及对应检查点，然后退出')
     parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump'),
-                        help='按任务筛选最新的本地训练检查点')
+                        help='按任务筛选检查点，也可与 --best 一起指定归档任务')
     height_args = parser.add_mutually_exclusive_group()
     height_args.add_argument('--jump-height', type=float, metavar='M',
                              help='设定高度指令型跳跃策略的目标跳高（米），例如 0.15')
@@ -92,6 +105,7 @@ def main():
                         help='设定前进跳跃的目标速度（米/秒），例如 1.0')
     parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
                         help='外骨骼每根支杆的助力上限（0–500 N，默认采用检查点记录的值）')
+    parser.add_argument('--require-force-control', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--geometry', choices=('legacy', 'fitted'),
                         help='物理几何版本，默认采用检查点的训练配置')
     parser.add_argument('--terrain-transfer', '--terrain_transfer', action='store_true', help='显式允许检查点向当前地形迁移')
@@ -101,7 +115,20 @@ def main():
     compatible.add_argument('--viewer', choices=('classic','studio'), default='classic', help='窗口类型，默认classic')
     compatible.add_argument('--viz', choices=('physx','skin'), default='physx', help='物理代理几何或航天服蒙皮，默认physx')
     compatible.add_argument('--num-envs', '--num_envs', '--nworld', type=int, default=1, help='独立环境/人数，默认1；多人共享同一块地形')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.list_bests:
+        for task, path in BEST_CHECKPOINTS.items():
+            default = '（默认）' if task == DEFAULT_BEST_TASK else ''
+            missing = '' if path.is_file() else '（文件缺失）'
+            print(f'{task}{default}  {path.relative_to(ROOT)}{missing}')
+        parser.exit()
+    if args.best is not None:
+        if args.best != 'default' and args.task not in (None, args.best):
+            parser.error(f'--best {args.best} 与 --task {args.task} 不一致')
+        args.task = args.task or (DEFAULT_BEST_TASK if args.best == 'default' else args.best)
+        if args.task not in BEST_CHECKPOINTS:
+            parser.error(f'任务 {args.task} 没有归档检查点，可用 --list-bests 查看')
+        args.checkpoint = BEST_CHECKPOINTS[args.task]
     forward_tasks = ('forward_jump', 'exo_jump')
     if args.assist_force is not None:
         if args.task not in (None, 'exo_jump'):
@@ -123,13 +150,15 @@ def main():
     if args.num_envs <= 0:
         parser.error('--num-envs 必须是正整数')
     import math
+    if args.episode_seconds < 1:
+        parser.error('--episode-seconds 必须为正整数')
     if not math.isfinite(args.seconds) or args.seconds < 0:
         parser.error('--seconds 必须是有限的非负数')
     if args.headless and args.seconds <= 0:
         parser.error('--headless 必须配合 --seconds > 0')
     if args.seconds > 0 and round(args.seconds * 60) < 1:
         parser.error('--seconds 至少需要一个控制步（约0.0167秒）')
-    if args.checkpoint is None and (args.latest_training or args.task):
+    if args.checkpoint is None and (args.latest_training or latest_default or args.task):
         log_root = 'cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'
         args.checkpoint = latest_training_checkpoint(ROOT / 'logs' / log_root, task=args.task)
         if args.checkpoint is None and args.task == 'exo_jump':
@@ -146,6 +175,12 @@ def main():
         args.terrain_idx = training_terrain(args.checkpoint.parent) or 12
     if not args.checkpoint.is_file():
         parser.error(f'检查点不存在：{args.checkpoint}')
+    return parser, args, fixed_height
+
+
+def main():
+    parser, args, fixed_height = parse_args()
+    forward_tasks = ('forward_jump', 'exo_jump')
     import mujoco
     import torch
     from tensordict import TensorDict
@@ -156,7 +191,8 @@ def main():
                                SOLE_EDGE_PROBE_ACTUATIONS, SOLE_PLANE_LANDING_ACTUATION,
                                SOLE_PROBE_ACTUATIONS)
     from cpu_simulation import CpuWorlds
-    from moon_scene import scene_spec
+    from moon_scene import (RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
+                            SUIT_MAJOR_JOINTS_PROFILE, scene_spec)
     from provenance import verify_checkpoint
     from suit_proxy_geometry import LEGACY, PROFILES
     torch.set_num_threads(1)
@@ -178,18 +214,46 @@ def main():
     assist_force = None
     exo_policy_io = None
     exo_pd_force = None
+    stance_transition = False
+    posture_balance = False
+    roll_balance = False
+    vertical_support = False
+    suit_ankle_roll = False
+    ankle_pitch_profile = infos.get('ankle_pitch_profile', env_config.get('ankle_pitch_profile'))
+    if ankle_pitch_profile not in (None, SUIT_ANKLE_PITCH_PROFILE):
+        parser.error(f'未知检查点脚踝俯仰配置：{ankle_pitch_profile}')
+    suit_ankle_pitch = ankle_pitch_profile == SUIT_ANKLE_PITCH_PROFILE
+    major_profile = infos.get('suit_major_joints_profile', env_config.get('suit_major_joints_profile'))
+    if major_profile not in (None, SUIT_MAJOR_JOINTS_PROFILE):
+        parser.error(f'未知检查点大关节航天服配置：{major_profile}')
+    suit_major_joints = major_profile == SUIT_MAJOR_JOINTS_PROFILE
+    prop_profile = infos.get('propulsion_profile', env_config.get('propulsion_profile'))
+    if prop_profile not in (None, RELAXED_PROPULSION_PROFILE):
+        parser.error(f'未知检查点驱动放宽配置：{prop_profile}')
+    relax_propulsion = prop_profile == RELAXED_PROPULSION_PROFILE
+    if args.require_force_control and task != 'exo_jump':
+        parser.error('请指定原生力控外骨骼检查点')
     if task == 'exo_jump':
         if actuation != FORWARD_FACING_BOOT_ACTUATION:
             parser.error('外骨骼回放需要 v32 前进跳跃策略或由它续训的外骨骼策略')
-        from exoskeleton import DEFAULT_FORCE_N, POLICY_IO, validate_assist_force, validate_policy_io
+        from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, FORCE_CONTROL_REVISIONS, LOAD_SHARING_REWARD,
+                                 POLICY_IO, POSTURE_SUPPORT_REWARD, STANCE_TRANSITION_REWARD, VERTICAL_SUPPORT_REWARD, validate_assist_force, validate_policy_io)
+        reward_revision = infos.get('exo_efficiency_reward', env_config.get('exo_efficiency_reward', {})).get('revision')
+        stance_transition = reward_revision == STANCE_TRANSITION_REWARD['revision']
+        posture_balance = stance_transition or reward_revision == POSTURE_SUPPORT_REWARD['revision']
+        roll_balance = infos.get('roll_balance', env_config.get('roll_balance', False))
+        vertical_support = posture_balance or roll_balance or reward_revision == VERTICAL_SUPPORT_REWARD['revision']
         default_force = infos.get('assist_force_n', DEFAULT_FORCE_N)
         try:
             assist_force = validate_assist_force(
                 default_force if args.assist_force is None else args.assist_force)
             exo_policy_io = validate_policy_io(infos.get('exo_policy_io', env_config.get('exo_policy_io')))
             exo_pd_force = assist_force if exo_policy_io == POLICY_IO else None
+            suit_ankle_roll = exo_policy_io == ACTION_FORCE_IO
         except ValueError as exc:
             parser.error(str(exc))
+        if args.require_force_control and exo_policy_io not in FORCE_CONTROL_REVISIONS:
+            parser.error('请指定原生力控外骨骼检查点')
     height_range = None
     if task != 'stand':
         from cpu_jump_task import (DEFAULT_JUMP_HEIGHT_RANGE, FREE_HEIGHT_FORWARD_ACTUATIONS,
@@ -231,9 +295,12 @@ def main():
     physics_spec = scene_spec(geometry=geometry, sole_probes=actuation in SOLE_PROBE_ACTUATIONS,
                               exoskeleton=assist_force is not None, exo_pd_force=exo_pd_force,
                               sole_collision=actuation in SOLE_COLLISION_ACTUATIONS,
-                              sole_edge_probes=actuation in SOLE_EDGE_PROBE_ACTUATIONS)
+                              sole_edge_probes=actuation in SOLE_EDGE_PROBE_ACTUATIONS,
+                              suit_ankle_roll=suit_ankle_roll, suit_ankle_pitch=suit_ankle_pitch,
+                              suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion,
+                              vertical_support=vertical_support, stance_transition=stance_transition)
     worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx,
-                       inward_heading=task in forward_tasks, assist_force=assist_force)
+                       edge_start=args.require_force_control, inward_heading=task in forward_tasks, assist_force=assist_force)
     model, data, sim, device = worlds.model, worlds.data[0], worlds.sim, worlds.device
     print(f'[Startup] CPU environments ready in {time.monotonic()-startup_started:.2f}s',flush=True)
     jump_counter = None
@@ -306,12 +373,27 @@ def main():
                     SOLE_PLANE_LANDING_ACTUATION: SolePlaneMirroredLandingCommands,
                     FORWARD_FACING_BOOT_ACTUATION: ForwardFacingBootCommands,
                 }[actuation]
+                controller_options = {'compact_arm_swing': True, 'suit_ankle_roll': suit_ankle_roll} if (
+                    task == 'exo_jump' and exo_policy_io in FORCE_CONTROL_REVISIONS) else {}
+                if suit_ankle_pitch:
+                    controller_options['suit_ankle_pitch'] = True
+                if suit_major_joints:
+                    controller_options['suit_major_joints'] = True
+                if relax_propulsion:
+                    controller_options['relax_propulsion'] = True
+                if infos.get('slope_adaptive_posture', env_config.get('slope_adaptive_posture', False)):
+                    controller_options['slope_adaptive_posture'] = True
+                period = infos.get('long_hop_period_s', env_config.get('long_hop_period_s'))
+                if period is not None:
+                    controller_options['long_hop_period'] = period
                 forward_jump = controller(
-                    worlds, speed_range=speed_range, fixed_speed=args.jump_speed)
+                    worlds, speed_range=speed_range, fixed_speed=args.jump_speed, **controller_options)
             else:
                 forward_jump = ForwardJumpCommands(
                     worlds, speed_range=speed_range, fixed_speed=args.jump_speed,
                     height_range=height_range, fixed_height=fixed_height)
+            if infos.get('economical_hops', env_config.get('economical_hops', False)):
+                forward_jump.economical_hops = True
             adaptive_jump = event_jump = jump_commands = forward_jump
             track_hop_distance = isinstance(forward_jump, LongStrideForwardJumpCommands)
             track_support = isinstance(forward_jump, SupportedTakeoffCommands)
@@ -333,6 +415,9 @@ def main():
     assist = worlds.exoskeleton
     if assist is not None:
         assist.bind(forward_jump, policy_io=exo_policy_io)
+        if vertical_support or reward_revision == LOAD_SHARING_REWARD['revision']:
+            assist.enable_load_sharing(vertical_support=vertical_support, posture_balance=posture_balance,
+                                      stance_transition=stance_transition, roll_balance=roll_balance)
         mode = exo_policy_io or 'scheduled force'
         print(f'[CPU] Exoskeleton {mode}: up to {assist_force:g} N per strut', flush=True)
 
@@ -437,7 +522,7 @@ def main():
                         event_jump.advance(measured)
                     steps += 1; episode_steps += 1
                     failed = measured['wangyu/failed']
-                    timeout = episode_steps >= 600
+                    timeout = episode_steps >= args.episode_seconds * 60
                     if forward_jump is not None:
                         timeout |= forward_jump.course_finished()
                         distance = ((sim.data.qpos[:, :2] - before_xy) * forward_jump.heading).sum(-1)

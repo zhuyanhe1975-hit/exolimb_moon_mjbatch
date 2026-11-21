@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import torch
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'src'))
-from local_lunar_terrain import LocalSurface
+from local_lunar_terrain import HALF, LocalSurface
 from measurement_terrain import measurement_terrain
 
 
@@ -15,6 +15,8 @@ def test_batched_queries_match_separate_sensor_and_qpos_roots():
         ground.grid=torch.tensor(bank['normalized'],dtype=torch.float32)
         ground.zmin=torch.tensor(bank['zmin'],dtype=torch.float32)
         ground.height_range=torch.tensor(bank['height_range'],dtype=torch.float32)
+    ground.half=HALF
+    ground.step=2*ground.half/(ground.grid.shape[1]-1)
     n=129;generator=torch.Generator().manual_seed(1002)
     ground.patch_ids=torch.randint(64,(n,),generator=generator)
     coordinates=torch.linspace(-.5,.5,5)

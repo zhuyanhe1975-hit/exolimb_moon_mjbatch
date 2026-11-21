@@ -1,0 +1,12 @@
+{
+  "selected_checkpoint": "model_300.pt",
+  "source_training_run": "logs/cpu_exo_train/true_speed_eva_v15_20261121",
+  "replay_command": "./run_exo_force.sh bests/exo_jump_force_true_speed_eva_v15_2026-11-21/model_300.pt",
+  "sha256": {
+    "config.json": "cb51641fd5f8cb078634d30f4125af385067697599f8ca12e948af9d215fdce4",
+    "final_verification.json": "f8caa76d910eba0d4ea110b136fc147f29c69d5f564a916981b352fa69e6992e",
+    "model_300.pt": "d906ccd5856e9f80f7df74dd3cfa3b1eeb4512707c73dae81f7540d5270c790b",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "training_efficiency.json": "6195ee1dca905d1e30344c504776ad582696ca3bc34990f521d4ca7fd77f4f8f"
+  }
+}

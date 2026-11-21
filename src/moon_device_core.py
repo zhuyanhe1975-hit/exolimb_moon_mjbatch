@@ -15,10 +15,11 @@ ASSET=Path(__file__).resolve().parents[1]/'assets/playground'
 META=json.loads((ASSET/'metadata.json').read_text())
 
 class MoonDeviceCore:
-    def __init__(self,name='wangyu',pushes=True,push_force=30.,push_torque=0.,resample_terrain=True,shared_terrain=False,terrain_size=16,terrain_idx=None,*,optimize_cpu=False,inward_heading=False):
+    def __init__(self,name='wangyu',pushes=True,push_force=30.,push_torque=0.,resample_terrain=True,shared_terrain=False,terrain_size=16,terrain_idx=None,*,optimize_cpu=False,inward_heading=False,edge_start=False):
         self._name=name;self.pushes=pushes
         self.optimize_cpu=optimize_cpu
         self.inward_heading=inward_heading
+        self.edge_start=edge_start
         self.push_force=float(push_force);self.push_torque=float(push_torque)
         self.resample_terrain=resample_terrain
         if terrain_idx is not None and (type(terrain_idx) is not int or not 1<=terrain_idx<=64 or terrain_size!=16):
@@ -28,6 +29,7 @@ class MoonDeviceCore:
         self.shared_terrain=shared_terrain
         self._shared_patch=None
         self.spawn_sampler=None
+        self.device_spawns=None
     def select_terrain(self,index):
         """Pin the next full playback reset to a user-facing 1-based bank index."""
         if self.terrain_size!=16 or type(index) is not int or not 1<=index<=64:
@@ -51,7 +53,8 @@ class MoonDeviceCore:
         self.vadr = t(m.jnt_dofadr[human], torch.long)
         actuator_targets = m.actuator_trnid[:, 0]
         joints = (m.actuator_trntype == mujoco.mjtTrn.mjTRN_JOINT) & np.isin(actuator_targets, human)
-        self.human_actuators = slice(None) if joints.all() else t(np.flatnonzero(joints), torch.long)
+        self.human_actuator_ids = np.flatnonzero(joints)
+        self.human_actuators = slice(None) if joints.all() else t(self.human_actuator_ids, torch.long)
         self.aorder = t([self.action_index(m.joint(j).name) for j in actuator_targets[joints]], torch.long)
         self.limits = t(m.jnt_range[human])
         self.root = m.body('robot/Pelvis').id
@@ -79,6 +82,7 @@ class MoonDeviceCore:
         self.wait=torch.zeros(self.n,device=self.dev);self.remaining=self.wait.clone();self.wrench=torch.zeros(self.n,6,device=self.dev)
         self._measurement_graph=None
         self._measurement_storage=None
+        self.batch_measurement_terrain=False
         self.use_measurement_graph=self.dev.type=='cuda' and os.environ.get('MOON_MEASUREMENT_GRAPH','0')=='1'
     def action_index(self, joint_name):
         return self._action_indices[joint_name]
@@ -91,7 +95,9 @@ class MoonDeviceCore:
         # Masked reset preserves the state of worlds that are still running.
         g=self.ground
         sampler = self.spawn_sampler
-        if sampler is not None:
+        if self.device_spawns is not None:
+            chosen = self.device_spawns.patches
+        elif sampler is not None:
             chosen = torch.as_tensor(sampler.patches, device=self.dev)
         else:
             chosen=g.spawnable_ids[torch.randint(len(g.spawnable_ids),(self.n,),device=self.dev)]
@@ -107,7 +113,10 @@ class MoonDeviceCore:
         simulator.model.geom_dataid[:,g.geom_id]=g.native_ids[p]
         simulator.model.geom_pos[:,g.geom_id,2]=g.zmin[p]
         padding = g.clearance_padding[p]
-        if sampler is not None:
+        if self.device_spawns is not None:
+            xy, yaw, padding = self.device_spawns.sample()
+            distributed = True
+        elif sampler is not None:
             ids = mask.nonzero(as_tuple=True)[0]
             placements, headings, margins = sampler.sample(ids.cpu().numpy())
             xy = torch.zeros((self.n, 2), device=self.dev)
@@ -122,7 +131,7 @@ class MoonDeviceCore:
             yaw=(2*torch.rand(self.n,device=self.dev)-1)*torch.pi
             if self.inward_heading:
                 yaw=torch.where(xy.norm(dim=1)>.5,torch.atan2(-xy[:,1],-xy[:,0]),yaw)
-            distributed=(self.shared_terrain and self.n>1) or self.terrain_size==100
+            distributed=self.edge_start or (self.shared_terrain and self.n>1) or self.terrain_size==100
             if distributed:
                 from playback_spawns import distributed_spawns
                 ids=mask.nonzero(as_tuple=True)[0]
@@ -134,7 +143,7 @@ class MoonDeviceCore:
                         self._playback_sole_cover,len(ids),
                         simulator.data.qpos[~mask,:2].cpu().numpy(),
                         int(torch.randint(2**31-1,(1,),device=self.dev).item()),
-                        inward_heading=self.inward_heading)
+                        inward_heading=self.inward_heading,edge_start=self.edge_start)
                     xy[ids]=torch.as_tensor(placements,device=self.dev,dtype=xy.dtype)
                     yaw[ids]=torch.as_tensor(headings,device=self.dev,dtype=yaw.dtype)
                     padding=padding.clone()
@@ -143,7 +152,7 @@ class MoonDeviceCore:
         # Preserve full-batch random draws and their order, but evaluate the
         # 208-point sole covering bound only for worlds that actually reset.
         # Full resets keep the fixed-size path and need no nonzero() sync.
-        sparse=env_mask is not None and (sampler is not None or self.optimize_cpu or os.environ.get('MOON_SPARSE_RESET','0')=='1')
+        sparse=env_mask is not None and (self.device_spawns is not None or sampler is not None or self.optimize_cpu or os.environ.get('MOON_SPARSE_RESET','0')=='1')
         ids=mask.nonzero(as_tuple=True)[0] if sparse else None
         active_xy=xy if ids is None else xy[ids]
         active_c=c if ids is None else c[ids];active_s=s if ids is None else s[ids]
@@ -218,7 +227,7 @@ class MoonDeviceCore:
         delta=qpos[:,:3]-target
         drift=inverse_rotate(self.heading[rows],delta)[:,:2]
         raw=torch.cat((qpos[:,self.qadr]-self.q0[self.qadr],qvel[:,self.vadr],self.action[rows],self.previous[rows],native,drift),-1)
-        if env_ids is not None or self.optimize_cpu or os.environ.get('MOON_BATCHED_TERRAIN','0')=='1':
+        if env_ids is not None or self.optimize_cpu or self.batch_measurement_terrain or os.environ.get('MOON_BATCHED_TERRAIN','0')=='1':
             heights,scan,root_height=measurement_terrain(g,native[:,:7],native[:,29:31],native[:,36:38],qpos[:,:2],env_ids=env_ids)
         else:
             xy=torch.stack((native[:,:2],native[:,29:31],native[:,36:38]),1)
