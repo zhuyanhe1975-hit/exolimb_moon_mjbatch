@@ -1,0 +1,12 @@
+{
+  "selected_checkpoint": "model_350.pt",
+  "source_training_run": "logs/cpu_exo_train/wangyu_hut_ball_aft_v19_20261122",
+  "replay_command": "./run_exo_force.sh bests/exo_jump_force_wangyu_hut_ball_aft_v19_2026-11-22/model_350.pt",
+  "sha256": {
+    "model_350.pt": "0b44da68c502653b87113975ac2f84cb2fa980daa2f8df519a65ffbe2423b1d8",
+    "config.json": "c6959431bb69d523a9308f2350b5e33006fb6fcf999feca229edfbb326c101e2",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "final_verification.json": "efc8293a346d9c4d3ffab2c3e2d6f2b367b14b659e5c8fa407641cd9cc1d089e",
+    "training_efficiency.json": "9e1de6aed662a158062083f317c298ee1bd5eb91d8323a490f6cbae84d502523"
+  }
+}

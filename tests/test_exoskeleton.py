@@ -605,6 +605,201 @@ class ExoskeletonTest(unittest.TestCase):
         self.assertAlmostEqual(float(device.action_lo[knee_idx]), -.18, places=5)
         self.assertAlmostEqual(float(device.action_hi[knee_idx]), 1.22, places=5)
 
+    def test_apollo_mass_waist_clevis_and_impedance_force_assist(self):
+        from exoskeleton import (IMPEDANCE_FORCE_IO, MECHANISM, STRUT_EXTRA_OBS,
+                                 WAIST_CLEVIS_MECHANISM, WAIST_MAX_LENGTH_M, WAIST_MIN_LENGTH_M)
+        from moon_scene import APOLLO_CHEST_MASS_KG, APOLLO_MASS_PROFILE, APOLLO_PACK_MASS_KG, scene_spec
+
+        # 1. Compare ankle roll moment arm: waist_clevis_v4 mid-plane vs legacy hooke_slide_ball_v3
+        def max_roll_moment_per_n(mech):
+            spec = scene_spec(geometry='fitted', sole_probes=True, sole_collision=True,
+                              sole_edge_probes=True, exoskeleton=True, exo_mechanism=mech,
+                              suit_ankle_roll=True, apollo_mass=(mech == WAIST_CLEVIS_MECHANISM))
+            m = spec.compile()
+            d = mujoco.MjData(m)
+            mujoco.mj_forward(m, d)
+            arms = []
+            for side in ('left', 'right'):
+                pack = d.sensor(f'robot/exo_{side}_pack_pos').data
+                boot = d.sensor(f'robot/exo_{side}_boot_pos').data
+                ankle = d.sensor(f'robot/exo_{side}_ankle_pos').data
+                axis = d.sensor(f'robot/exo_{side}_ankle_axis').data
+                direction = (boot - pack) / np.linalg.norm(boot - pack)
+                arms.append(abs(float(np.dot(np.cross(boot - ankle, direction), axis))))
+            return max(arms), m
+
+        legacy_arm, legacy_m = max_roll_moment_per_n(MECHANISM)
+        clevis_arm, clevis_m = max_roll_moment_per_n(WAIST_CLEVIS_MECHANISM)
+        # Mid-plane bifurcated boot clevis cuts ankle roll moment arm dramatically (>70% reduction)
+        self.assertLess(clevis_arm, .30 * legacy_arm)
+        # Apollo mass proportions: Torso = 82.5 kg (chest 31.5 + PLSS/OPS 51.0), Head = 8.5 kg, total ~157 kg
+        torso_id = clevis_m.body('robot/Torso').id
+        self.assertAlmostEqual(float(clevis_m.body_mass[torso_id]), APOLLO_CHEST_MASS_KG + APOLLO_PACK_MASS_KG, places=4)
+        self.assertLess(float(clevis_m.body_ipos[torso_id, 0]), float(legacy_m.body_ipos[legacy_m.body('robot/Torso').id, 0]) - .04)
+        self.assertAlmostEqual(float(clevis_m.body_mass[clevis_m.body('robot/Head').id]), 8.5, places=4)
+        pelvis_id = clevis_m.body('robot/Pelvis').id
+        self.assertAlmostEqual(float(clevis_m.body_subtreemass[pelvis_id]), 156.96, delta=1.5)
+        # Upper mount attaches to Pelvis (waist harness), not Torso
+        self.assertEqual(int(clevis_m.body('robot/exo_left_yoke').parentid[0]), pelvis_id)
+
+        # 2. Impedance force control: 168-dim obs, grounded load gate, SLIP spring-damper, bilateral share
+        env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=IMPEDANCE_FORCE_IO, exo_mechanism=WAIST_CLEVIS_MECHANISM,
+            apollo_mass=True, load_sharing=True, vertical_support=True, posture_balance=True,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+            suit_major_joints=True, relax_propulsion=True,
+            reward_overrides={'assist_work_share_weight': 20.0},
+        )
+        self.assertEqual(env.cfg['apollo_mass_profile'], APOLLO_MASS_PROFILE)
+        self.assertEqual(env.cfg['exo_mechanism'], WAIST_CLEVIS_MECHANISM)
+        self.assertEqual(env.cfg['exo_policy_io'], IMPEDANCE_FORCE_IO)
+        obs = env.get_observations()['policy']
+        self.assertEqual(obs.shape[-1], 169 + STRUT_EXTRA_OBS)
+        assist = env.worlds.exoskeleton
+        self.assertEqual(assist.mechanism, WAIST_CLEVIS_MECHANISM)
+        torch.testing.assert_close(assist.min_length_m, torch.full((2,), WAIST_MIN_LENGTH_M), atol=1e-4, rtol=0)
+        torch.testing.assert_close(assist.max_length_m, torch.full((2,), WAIST_MAX_LENGTH_M), atol=1e-4, rtol=0)
+
+        data = env.worlds.sim.data
+        # Airborne (load = 0) -> zero force even at max policy command
+        data.sensordata[:, assist.load] = 0.
+        data.sensordata[:, assist.stroke] = -.15
+        data.actuator_velocity[:, assist.actuators] = -.4
+        air_force = assist.controls(torch.ones((2, 2)))
+        torch.testing.assert_close(air_force, torch.zeros((2, 2)))
+        # Loaded + compressed + descending -> stronger elastic+damping catch than uncompressed
+        data.sensordata[:, assist.load] = env.worlds.device.weight
+        comp_force = assist.controls(torch.full((2, 2), .4))  # u = 0.7
+        data.sensordata[:, assist.stroke] = 0.
+        data.actuator_velocity[:, assist.actuators] = 0.
+        ext_force = assist.controls(torch.full((2, 2), .4))
+        self.assertTrue(bool((comp_force > ext_force).all()))
+        # Bilateral push share rewards symmetric L+R more than unilateral same-total power
+        cmd = env.jump_commands
+        cmd.stage[:] = cmd.EXTEND
+        cmd.target_speed[:] = 1.0
+        data.sensordata[:, cmd.com_velocity_xy.stop] = .40
+        data.actuator_force[:, assist.human_actuators] = 10.
+        data.actuator_velocity[:, assist.human_actuators] = .20
+        data.actuator_velocity[:, assist.actuators] = .30
+        data.actuator_force[0, assist.actuators] = torch.tensor([150., 150.])  # symmetric 90W
+        data.actuator_force[1, assist.actuators] = torch.tensor([300., 0.])    # unilateral 90W
+        assist.last_request[0] = torch.tensor([.6, .6])
+        assist.last_request[1] = torch.tensor([1.0, 0.0])
+        assist.observe(cmd.DT)
+        self.assertGreater(float(assist.efficiency_rate[0]), float(assist.efficiency_rate[1]))
+
+        # 3. Wangyu (望宇) lunar EVA profile: ~169 kg total (70 kg astronaut + 97 kg suit + 2 kg exo),
+        #    91 kg Torso (39 kg HUT + 52 kg PLSS), Wangyu bearing/bellows mobility, 0.82 regolith boot friction.
+        from math import radians
+        from moon_scene import WANGYU_EVA_PROFILE, WANGYU_SOLE_FRICTION
+        w_spec = scene_spec(geometry='fitted', sole_probes=True, sole_collision=True, sole_edge_probes=True,
+                            exoskeleton=True, exo_mechanism=WAIST_CLEVIS_MECHANISM,
+                            suit_ankle_roll=True, suit_ankle_pitch=True, suit_major_joints=True,
+                            relax_propulsion=True, mass_profile=WANGYU_EVA_PROFILE)
+        wm = w_spec.compile()
+        self.assertAlmostEqual(float(wm.body_mass[wm.body('robot/Torso').id]), 91.0, places=4)
+        self.assertAlmostEqual(float(wm.body_subtreemass[wm.body('robot/Pelvis').id]), 168.66, delta=1.5)
+        self.assertAlmostEqual(float(wm.geom_friction[wm.geom('robot/left_sole').id, 0]), WANGYU_SOLE_FRICTION, places=5)
+        np.testing.assert_allclose(wm.jnt_range[wm.joint('robot/WaistPitch').id], [-radians(15.), radians(35.)], atol=1e-6)
+        np.testing.assert_allclose(wm.jnt_range[wm.joint('robot/LeftAnkle').id], [-radians(20.), radians(18.)], atol=1e-6)
+
+        # 4. Option B: Wangyu HUT bottom rigid ring upper mount + centered mid-plane boot Y-fork (hut_ring_clevis_v5)
+        from exoskeleton import HUT_MAX_LENGTH_M, HUT_MIN_LENGTH_M, HUT_RING_CLEVIS_MECHANISM
+        hut_arm, hut_m = max_roll_moment_per_n(HUT_RING_CLEVIS_MECHANISM)
+        self.assertLess(hut_arm, .25 * legacy_arm)
+        self.assertEqual(int(hut_m.body('robot/exo_left_yoke').parentid[0]), hut_m.body('robot/Torso').id)
+        hut_env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=IMPEDANCE_FORCE_IO, exo_mechanism=HUT_RING_CLEVIS_MECHANISM,
+            mass_profile=WANGYU_EVA_PROFILE, load_sharing=True, vertical_support=True, posture_balance=True,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+            suit_major_joints=True, relax_propulsion=True,
+        )
+        self.assertEqual(hut_env.worlds.exoskeleton.mechanism, HUT_RING_CLEVIS_MECHANISM)
+        torch.testing.assert_close(hut_env.worlds.exoskeleton.min_length_m, torch.full((2,), HUT_MIN_LENGTH_M), atol=1e-4, rtol=0)
+        torch.testing.assert_close(hut_env.worlds.exoskeleton.max_length_m, torch.full((2,), HUT_MAX_LENGTH_M), atol=1e-4, rtol=0)
+        # Closed-loop HUT WaistRoll safety guard: 0 N at v=0, full 500 N when upright,
+        # tapers unilateral differential to 280 N when pushing further into an excessive >13 deg roll.
+        h_assist = hut_env.worlds.exoskeleton
+        h_data = hut_env.worlds.sim.data
+        h_data.sensordata[:, h_assist.stroke] = -.12
+        h_data.actuator_velocity[:, h_assist.actuators] = -.3
+        h_data.sensordata[0, h_assist.load] = torch.tensor([0., hut_env.worlds.device.weight])
+        h_data.sensordata[1, h_assist.load] = hut_env.worlds.device.weight
+        hut_env.jump_commands.target_speed[:] = 0.0
+        torch.testing.assert_close(h_assist.controls(torch.ones((2, 2))), torch.zeros((2, 2)))
+        hut_env.jump_commands.target_speed[:] = 1.0
+        h_data.qpos[:, h_assist.waist_roll_qpos] = 0.0
+        upright_f = h_assist.controls(torch.ones((2, 2)))
+        self.assertAlmostEqual(float(upright_f[0, 0]), 0., places=4)
+        self.assertAlmostEqual(float(upright_f[0, 1]), 500., places=3)
+        torch.testing.assert_close(upright_f[1], torch.full((2,), 500.), atol=1e-3, rtol=0)
+        # Excessive negative roll (-13 deg) -> right strut (-y) worsening roll is tapered to 280 N
+        # while bilateral loading still delivers full 500 N per strut.
+        h_data.qpos[:, h_assist.waist_roll_qpos] = -radians(13.)
+        rolled_f = h_assist.controls(torch.ones((2, 2)))
+        self.assertAlmostEqual(float(rolled_f[0, 1]), 280., places=3)
+        torch.testing.assert_close(rolled_f[1], torch.full((2,), 500.), atol=1e-3, rtol=0)
+
+        # 5. Aft HUT Ring + Ultra-Simple Coaxial Outer-Sole Ball + Active Ankle-Roll Force Governor (hut_ball_aft_v6)
+        from exoskeleton import (AFT_BALL_MAX_LENGTH_M, AFT_BALL_MIN_LENGTH_M,
+                                 HUT_BALL_AFT_MECHANISM, fit_struts_to_pose)
+        b_arm, b_m = max_roll_moment_per_n(HUT_BALL_AFT_MECHANISM)
+        self.assertGreater(b_arm, .05)  # simplified outer-sole ball joint (~9 cm arm)
+        self.assertEqual(int(b_m.body('robot/exo_left_yoke').parentid[0]), b_m.body('robot/Torso').id)
+        # Verify 0.000 mm rod/cylinder coaxiality & 0.000 mm ball/socket closure across deep squat + ankle roll
+        bd = mujoco.MjData(b_m)
+        bd.qpos[b_m.joint('robot/WaistPitch').qposadr[0]] = radians(16.)
+        bd.qpos[b_m.joint('robot/LeftHipPitch').qposadr[0]] = radians(-42.)
+        bd.qpos[b_m.joint('robot/LeftKnee').qposadr[0]] = radians(65.)
+        bd.qpos[b_m.joint('robot/LeftAnkle').qposadr[0]] = radians(-18.)
+        bd.qpos[b_m.joint('robot/LeftAnkleRoll').qposadr[0]] = radians(8.)
+        fit_struts_to_pose(b_m, bd)
+        mujoco.mj_forward(b_m, bd)
+        pa = bd.site('robot/exo_left_ball_pin').xpos
+        pb = bd.site('robot/exo_left_boot').xpos
+        self.assertLess(float(np.linalg.norm(pa - pb)), 1e-4)
+        p_out = bd.geom('robot/exo_left_outer_tube').xpos
+        p_in = bd.geom('robot/exo_left_sliding_shaft').xpos
+        z_out = bd.geom('robot/exo_left_outer_tube').xmat.reshape(3, 3)[:, 2]
+        coax_err = float(np.linalg.norm((p_in - p_out) - np.dot(p_in - p_out, z_out) * z_out))
+        self.assertLess(coax_err, 1e-6)
+        b_env = CpuExoJumpEnv(
+            2, 12, False, 'mjbatch', 2, 42, geometry='fitted', assist_force=500.,
+            exo_policy_io=IMPEDANCE_FORCE_IO, exo_mechanism=HUT_BALL_AFT_MECHANISM,
+            mass_profile=WANGYU_EVA_PROFILE, load_sharing=True, vertical_support=True, posture_balance=True,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+            suit_major_joints=True, relax_propulsion=True,
+        )
+        b_assist = b_env.worlds.exoskeleton
+        self.assertEqual(b_assist.mechanism, HUT_BALL_AFT_MECHANISM)
+        torch.testing.assert_close(b_assist.min_length_m, torch.full((2,), AFT_BALL_MIN_LENGTH_M), atol=1e-4, rtol=0)
+        torch.testing.assert_close(b_assist.max_length_m, torch.full((2,), AFT_BALL_MAX_LENGTH_M), atol=1e-4, rtol=0)
+        # Verify closed-loop Ankle Inversion/Eversion Force Governor:
+        # 1) Static steady stance (even on 5 deg side-slope, roll_vel=0) -> full assist (>450 N)
+        # 2) Active rapid eversion (roll_vel = [-90, +90] deg/s) -> governor shuts off force to 0 N!
+        # 3) Opposite roll velocity (inversion) -> strut push HELPS restore level -> full assist!
+        b_data = b_env.worlds.sim.data
+        b_env.jump_commands.target_speed[:] = 1.0
+        b_data.qpos[:, b_assist.waist_roll_qpos] = 0.0
+        b_data.sensordata[:, b_assist.stroke] = -.12
+        b_data.actuator_velocity[:, b_assist.actuators] = -.3
+        b_data.sensordata[:, b_assist.load] = 3.0 * b_env.worlds.device.weight
+        b_data.qpos[:, b_assist.ankle_roll_qpos] = torch.tensor([-radians(5.), radians(5.)])
+        b_data.qvel[:, b_assist.ankle_roll_dof] = 0.0
+        flat_f = b_assist.controls(torch.ones((2, 2)))
+        self.assertGreater(float(flat_f[0, 0]), 450.)
+        self.assertGreater(float(flat_f[0, 1]), 450.)
+        b_data.qvel[:, b_assist.ankle_roll_dof] = torch.tensor([-radians(90.), radians(90.)])
+        evert_f = b_assist.controls(torch.ones((2, 2)))
+        torch.testing.assert_close(evert_f, torch.zeros((2, 2)), atol=1e-3, rtol=0)
+        b_data.qvel[:, b_assist.ankle_roll_dof] = torch.tensor([radians(90.), -radians(90.)])
+        restoring_f = b_assist.controls(torch.ones((2, 2)))
+        self.assertGreater(float(restoring_f[0, 0]), 450.)
+        self.assertGreater(float(restoring_f[0, 1]), 450.)
+
 
 if __name__ == '__main__':
     unittest.main()

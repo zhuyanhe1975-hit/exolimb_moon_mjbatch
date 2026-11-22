@@ -10,8 +10,9 @@ from cpu_jump_task import (DEFAULT_JUMP_HEIGHT_RANGE, FLOW_JUMP_ACTUATION,
                            FORWARD_FACING_BOOT_ACTUATION, FlowJumpCommands)
 from cpu_simulation import CpuWorlds
 from moon_device_core import META
-from moon_scene import (RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
-                        SUIT_ANKLE_ROLL_PROFILE, SUIT_MAJOR_JOINTS_PROFILE, scene_spec)
+from moon_scene import (APOLLO_MASS_PROFILE, MASS_PROFILES, RELAXED_PROPULSION_PROFILE,
+                        SUIT_ANKLE_PITCH_PROFILE, SUIT_ANKLE_ROLL_PROFILE, SUIT_MAJOR_JOINTS_PROFILE,
+                        WANGYU_EVA_PROFILE, scene_spec)
 from suit_proxy_geometry import LEGACY
 
 
@@ -26,8 +27,9 @@ class CpuStandEnv(VecEnv):
 
     def __init__(self, num_envs, terrain_idx, pushes, physics_backend, workers, seed, *,
                  geometry=LEGACY, inward_heading=False, terrain_indices=None, assist_force=None,
-                 exo_policy_io=None, vertical_support=False, stance_transition=False,
-                 suit_ankle_pitch=False, suit_major_joints=False, relax_propulsion=False):
+                 exo_policy_io=None, exo_mechanism=None, vertical_support=False, stance_transition=False,
+                 suit_ankle_pitch=False, suit_major_joints=False, relax_propulsion=False,
+                 apollo_mass=False, mass_profile=None):
         self.num_envs = num_envs
         self.workers = min(workers, num_envs)
         self.device = 'cuda' if physics_backend == 'warp' else 'cpu'
@@ -44,9 +46,10 @@ class CpuStandEnv(VecEnv):
         pd_force = None
         suit_ankle_roll = False
         if assist_force is not None:
-            from exoskeleton import ACTION_FORCE_COSTS, ACTION_FORCE_IO, MECHANISM, POLICY_IO
-            self.cfg.update(assist_force_n=assist_force, exo_mechanism=MECHANISM)
-            suit_ankle_roll = exo_policy_io == ACTION_FORCE_IO
+            from exoskeleton import (ACTION_FORCE_COSTS, DIRECT_FORCE_REVISIONS, MECHANISM, POLICY_IO)
+            mechanism = exo_mechanism or MECHANISM
+            self.cfg.update(assist_force_n=assist_force, exo_mechanism=mechanism)
+            suit_ankle_roll = exo_policy_io in DIRECT_FORCE_REVISIONS
             if suit_ankle_roll:
                 self.cfg.update(ankle_roll_profile=SUIT_ANKLE_ROLL_PROFILE,
                                 exo_action_force_costs=ACTION_FORCE_COSTS.copy())
@@ -58,11 +61,18 @@ class CpuStandEnv(VecEnv):
             self.cfg['suit_major_joints_profile'] = SUIT_MAJOR_JOINTS_PROFILE
         if relax_propulsion:
             self.cfg['propulsion_profile'] = RELAXED_PROPULSION_PROFILE
+        resolved_mass = mass_profile or (APOLLO_MASS_PROFILE if apollo_mass else None)
+        if resolved_mass is not None:
+            if resolved_mass not in MASS_PROFILES:
+                raise ValueError(f'Unknown suit mass profile: {resolved_mass}')
+            self.cfg['apollo_mass_profile'] = resolved_mass
         spec = scene_spec(geometry=geometry, sole_probes=self.sole_probes,
                           exoskeleton=assist_force is not None, exo_pd_force=pd_force,
+                          exo_mechanism=exo_mechanism,
                           sole_collision=self.sole_collision, sole_edge_probes=self.sole_edge_probes,
                           suit_ankle_roll=suit_ankle_roll, suit_ankle_pitch=suit_ankle_pitch,
                           suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion,
+                          mass_profile=resolved_mass,
                           vertical_support=vertical_support, stance_transition=stance_transition)
         if physics_backend == 'warp':
             from warp_exo_worlds import WarpExoWorlds
@@ -185,11 +195,11 @@ class CpuForwardJumpEnv(CpuJumpEnv):
     def __init__(self, *args, speed_range=DEFAULT_SPEED_RANGE, exo_policy_io=None, long_hop_period=None,
                  suit_ankle_pitch=False, slope_adaptive_posture=False,
                  suit_major_joints=False, relax_propulsion=False, **kwargs):
-        from exoskeleton import ACTION_FORCE_IO, FORCE_CONTROL_REVISIONS
+        from exoskeleton import DIRECT_FORCE_REVISIONS, FORCE_CONTROL_REVISIONS
 
         controller_options = {'speed_range': speed_range,
                               'compact_arm_swing': exo_policy_io in FORCE_CONTROL_REVISIONS,
-                              'suit_ankle_roll': exo_policy_io == ACTION_FORCE_IO,
+                              'suit_ankle_roll': exo_policy_io in DIRECT_FORCE_REVISIONS,
                               'suit_ankle_pitch': suit_ankle_pitch,
                               'slope_adaptive_posture': slope_adaptive_posture,
                               'suit_major_joints': suit_major_joints,
@@ -230,8 +240,9 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
 
     def __init__(self, *args, assist_force, stance_center_weight=0., exo_policy_io=None, load_sharing=False,
                  vertical_support=False, posture_balance=False, stance_transition=False, economical_hops=False,
-                 long_hop_period=None, roll_balance=False, reward_overrides=None, speed_track_boost=0., **kwargs):
-        from exoskeleton import (ACTION_FORCE_EFFICIENCY_REWARD, ACTION_FORCE_IO,
+                 long_hop_period=None, roll_balance=False, reward_overrides=None, speed_track_boost=0.,
+                 assist_drop_prob=0., **kwargs):
+        from exoskeleton import (ACTION_FORCE_EFFICIENCY_REWARD, DIRECT_FORCE_REVISIONS,
                                  EFFICIENCY_REWARD, PHASE_FREE_FORCE_REVISIONS, POLICY_IO)
 
         posture_balance = posture_balance or stance_transition
@@ -241,7 +252,7 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
                          vertical_support=vertical_support, stance_transition=stance_transition,
                          long_hop_period=long_hop_period, **kwargs)
         self.cfg['exo_efficiency_reward'] = EFFICIENCY_REWARD.copy()
-        if self.cfg['exo_policy_io'] == ACTION_FORCE_IO:
+        if self.cfg['exo_policy_io'] in DIRECT_FORCE_REVISIONS:
             self.cfg['exo_efficiency_reward'] = ACTION_FORCE_EFFICIENCY_REWARD.copy()
         elif self.cfg['exo_policy_io'] in PHASE_FREE_FORCE_REVISIONS:
             self.cfg['exo_efficiency_reward']['revision'] = 'phase_free_supported_work_v1'
@@ -252,6 +263,9 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
                 reward_overrides=reward_overrides)
             self.cfg['exo_efficiency_reward'] = self.worlds.exoskeleton.reward_cfg.copy()
             self.cfg['jump_objective'] = 'human_energy_and_bilateral_grounded_assistance'
+        if assist_drop_prob:
+            self.worlds.exoskeleton.enable_assist_drop(assist_drop_prob)
+            self.cfg['assist_drop_prob'] = float(assist_drop_prob)
         if economical_hops:
             self.jump_commands.economical_hops = True
             self.cfg['economical_hops'] = True

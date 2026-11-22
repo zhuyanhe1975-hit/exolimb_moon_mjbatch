@@ -1381,6 +1381,13 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
                 self.prior[knee] = knee_prior / .75
         self.hip_yaw_actions = [worlds.device.action_index(f'robot/{side}HipYaw')
                                 for side in ('Left', 'Right')]
+        self.bunny_hop_mirror = (worlds.exoskeleton is not None
+                                 and getattr(worlds.exoskeleton, 'mechanism', None) == 'hut_ring_clevis_v5')
+        if self.bunny_hop_mirror:
+            # True two-footed lunar bunny hop for HUT-mounted bilateral struts:
+            # tighten sagittal leg mirror deadband (still leaving ±3.5-5 deg for uneven rocks).
+            self.mirror_tolerance = torch.tensor([.12, .06, .12, .08, .12, .12, .22, .23, .23, .22], device=self.age.device)
+            self.mirror_gain = torch.tensor([.75, .90, .75, .90, .75, .75, .50, .50, .45, .50], device=self.age.device)
         self.compact_arm_swing = worlds.exoskeleton is not None and (
             worlds.exoskeleton.position_pd or compact_arm_swing)
         if self.compact_arm_swing:
@@ -1511,6 +1518,12 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         cross = torso[:, 0, None] * direction[..., 1] - torso[:, 1, None] * direction[..., 0]
         offset = torch.atan2(cross, dot) - self.neutral_toe_out
         return torch.atan2(offset.sin(), offset.cos())
+
+    def mirror_joint_targets(self, actions, strength=1.):
+        return super().mirror_joint_targets(actions, strength)
+
+    def mirror_motion_cost(self):
+        return super().mirror_motion_cost()
 
     def __call__(self, actions, phase=None):
         commands = super().__call__(actions, phase)

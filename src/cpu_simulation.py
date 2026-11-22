@@ -9,7 +9,7 @@ from moon_scene import SOLE_TERRAIN_CONTACTS, vertical_load_columns
 
 
 class CpuWorlds:
-    def __init__(self, spec, count, terrain_idx, *, pushes=False,
+    def __init__(self, spec, count, terrain_idx, *, pushes=False, terrain_size=16,
                  use_mjbatch=False, workers=1, optimize_cpu=False, inward_heading=False,
                  terrain_indices=None, spawn_seed=42, assist_force=None, edge_start=False):
         self.model = spec.compile()
@@ -42,7 +42,7 @@ class CpuWorlds:
         self.sim.data.time = torch.zeros(count)
         self.sim.native_data = self.data
         self.device = MoonDeviceCore(pushes=pushes, shared_terrain=True, resample_terrain=False,
-                                     terrain_idx=terrain_idx, optimize_cpu=optimize_cpu,
+                                     terrain_size=terrain_size, terrain_idx=terrain_idx, optimize_cpu=optimize_cpu,
                                      inward_heading=inward_heading, edge_start=edge_start)
         self.device.initialize(self.sim)
         self.exoskeleton = None

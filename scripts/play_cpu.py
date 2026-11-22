@@ -81,8 +81,10 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
     parser.add_argument('--episode-seconds', type=int, default=10, help='单回合仿真时限（秒）')
     parser.add_argument('--headless', action='store_true', help='不打开窗口；必须设置 --seconds')
     parser.add_argument('--seconds', type=float, default=0, help='运行的仿真秒数；默认0表示持续运行到窗口关闭')
+    parser.add_argument('--terrain-size', '--terrain_size', type=int, choices=(16, 100), default=16,
+                        help='月面地形尺寸（米）：16（默认64块银行）或100（100x100m连续月面）')
     parser.add_argument('--terrain-idx', '--terrain_idx', type=int, choices=range(1, 65), metavar='1–64',
-                        help='16米地形编号，默认采用检查点的训练地形或第12块')
+                        help='16米地形编号，默认采用检查点的训练地形或第12块（不可与 --terrain-size 100 同时指定）')
     parser.add_argument('--seed', type=int, default=42, help='随机种子，默认42')
     default_policy = '最新本地训练检查点' if latest_default else '导入的站立策略'
     policy = parser.add_mutually_exclusive_group()
@@ -169,9 +171,11 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
             if args.task == 'jump':
                 parser.error('未找到本地跳跃检查点，请先运行 ./train_jump.sh')
             print('[CPU] 未找到已保存的本地训练检查点，加载导入策略。', flush=True)
+    if args.terrain_size == 100 and args.terrain_idx is not None:
+        parser.error('--terrain-size 100 不能与 --terrain-idx 同时指定')
     if args.checkpoint is None:
         args.checkpoint = IMPORTED_CHECKPOINT
-    if args.terrain_idx is None:
+    if args.terrain_size == 16 and args.terrain_idx is None:
         args.terrain_idx = training_terrain(args.checkpoint.parent) or 12
     if not args.checkpoint.is_file():
         parser.error(f'检查点不存在：{args.checkpoint}')
@@ -191,7 +195,7 @@ def main():
                                SOLE_EDGE_PROBE_ACTUATIONS, SOLE_PLANE_LANDING_ACTUATION,
                                SOLE_PROBE_ACTUATIONS)
     from cpu_simulation import CpuWorlds
-    from moon_scene import (RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
+    from moon_scene import (MASS_PROFILES, RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
                             SUIT_MAJOR_JOINTS_PROFILE, scene_spec)
     from provenance import verify_checkpoint
     from suit_proxy_geometry import LEGACY, PROFILES
@@ -231,25 +235,34 @@ def main():
     if prop_profile not in (None, RELAXED_PROPULSION_PROFILE):
         parser.error(f'未知检查点驱动放宽配置：{prop_profile}')
     relax_propulsion = prop_profile == RELAXED_PROPULSION_PROFILE
+    mass_profile = infos.get('apollo_mass_profile', env_config.get('apollo_mass_profile'))
+    if mass_profile not in (None, *MASS_PROFILES):
+        parser.error(f'未知检查点航天服质量配置：{mass_profile}')
+    exo_mechanism = None
     if args.require_force_control and task != 'exo_jump':
         parser.error('请指定原生力控外骨骼检查点')
     if task == 'exo_jump':
         if actuation != FORWARD_FACING_BOOT_ACTUATION:
             parser.error('外骨骼回放需要 v32 前进跳跃策略或由它续训的外骨骼策略')
-        from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, FORCE_CONTROL_REVISIONS, LOAD_SHARING_REWARD,
-                                 POLICY_IO, POSTURE_SUPPORT_REWARD, STANCE_TRANSITION_REWARD, VERTICAL_SUPPORT_REWARD, validate_assist_force, validate_policy_io)
+        from exoskeleton import (DEFAULT_FORCE_N, DIRECT_FORCE_REVISIONS, FORCE_CONTROL_REVISIONS,
+                                 LOAD_SHARING_REWARD, MECHANISM, MECHANISMS,
+                                 POLICY_IO, POSTURE_SUPPORT_REWARD, STANCE_TRANSITION_REWARD,
+                                 VERTICAL_SUPPORT_REWARD, validate_assist_force, validate_policy_io)
         reward_revision = infos.get('exo_efficiency_reward', env_config.get('exo_efficiency_reward', {})).get('revision')
         stance_transition = reward_revision == STANCE_TRANSITION_REWARD['revision']
         posture_balance = stance_transition or reward_revision == POSTURE_SUPPORT_REWARD['revision']
         roll_balance = infos.get('roll_balance', env_config.get('roll_balance', False))
         vertical_support = posture_balance or roll_balance or reward_revision == VERTICAL_SUPPORT_REWARD['revision']
         default_force = infos.get('assist_force_n', DEFAULT_FORCE_N)
+        exo_mechanism = infos.get('exo_mechanism', env_config.get('exo_mechanism', MECHANISM))
+        if exo_mechanism not in MECHANISMS:
+            parser.error(f'未知检查点外骨骼机构：{exo_mechanism}')
         try:
             assist_force = validate_assist_force(
                 default_force if args.assist_force is None else args.assist_force)
             exo_policy_io = validate_policy_io(infos.get('exo_policy_io', env_config.get('exo_policy_io')))
             exo_pd_force = assist_force if exo_policy_io == POLICY_IO else None
-            suit_ankle_roll = exo_policy_io == ACTION_FORCE_IO
+            suit_ankle_roll = exo_policy_io in DIRECT_FORCE_REVISIONS
         except ValueError as exc:
             parser.error(str(exc))
         if args.require_force_control and exo_policy_io not in FORCE_CONTROL_REVISIONS:
@@ -292,15 +305,19 @@ def main():
         print(f'[CPU] Geometry override: checkpoint={trained_geometry}; playback={geometry}', flush=True)
     startup_started=time.monotonic()
     print(f'[Startup] Preparing {args.num_envs} independent CPU environments...',flush=True)
-    physics_spec = scene_spec(geometry=geometry, sole_probes=actuation in SOLE_PROBE_ACTUATIONS,
+    physics_spec = scene_spec(terrain_size=args.terrain_size, geometry=geometry,
+                              sole_probes=actuation in SOLE_PROBE_ACTUATIONS,
                               exoskeleton=assist_force is not None, exo_pd_force=exo_pd_force,
+                              exo_mechanism=exo_mechanism,
                               sole_collision=actuation in SOLE_COLLISION_ACTUATIONS,
                               sole_edge_probes=actuation in SOLE_EDGE_PROBE_ACTUATIONS,
                               suit_ankle_roll=suit_ankle_roll, suit_ankle_pitch=suit_ankle_pitch,
                               suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion,
+                              mass_profile=mass_profile,
                               vertical_support=vertical_support, stance_transition=stance_transition)
-    worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx,
-                       edge_start=args.require_force_control, inward_heading=task in forward_tasks, assist_force=assist_force)
+    worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx, terrain_size=args.terrain_size,
+                       edge_start=args.require_force_control and args.terrain_size == 16,
+                       inward_heading=task in forward_tasks, assist_force=assist_force)
     model, data, sim, device = worlds.model, worlds.data[0], worlds.sim, worlds.device
     print(f'[Startup] CPU environments ready in {time.monotonic()-startup_started:.2f}s',flush=True)
     jump_counter = None
@@ -456,7 +473,7 @@ def main():
             state['paused'] = not state['paused']
         elif keycode in (ord('R'), ord('r')):
             reset_requested.set()
-        elif keycode in (ord('['), ord(']')):
+        elif args.terrain_size == 16 and keycode in (ord('['), ord(']')):
             terrain_requested.append(-1 if keycode == ord('[') else 1)
             reset_requested.set()
     if args.headless:
@@ -558,7 +575,7 @@ def main():
     report = dict(backend='native_mujoco_cpu', policy_device='cpu', mujoco=mujoco.__version__,
         task=task, geometry=geometry, viewer=args.viewer, viz=args.viz, num_envs=args.num_envs,
         transitions=steps * args.num_envs,
-        checkpoint=str(args.checkpoint), terrain_idx=args.terrain_idx, steps=steps,
+        checkpoint=str(args.checkpoint), terrain_size_m=args.terrain_size, terrain_idx=args.terrain_idx, steps=steps,
         simulated_seconds=steps / 60, wall_seconds=time.monotonic() - start,
         failure_resets=failures, timeout_resets=timeouts, max_raw_action=max_action,
         finite=True, training=False, exact_replay=False)

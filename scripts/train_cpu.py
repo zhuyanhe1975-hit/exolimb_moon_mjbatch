@@ -31,8 +31,16 @@ def main():
                         help='forward jump speed range in m/s (default: 0 1.5)')
     parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
                         help='per-strut peak force in the exoskeleton task (default: 500 N)')
-    parser.add_argument('--exo-control', choices=('position-pd', 'force', 'force-policy', 'force-action'),
+    parser.add_argument('--exo-control', choices=('position-pd', 'force', 'force-policy', 'force-action', 'impedance-force'),
                         help='exoskeleton actuator mode (defaults to the checkpoint mode or position-pd)')
+    parser.add_argument('--exo-mechanism', choices=('hooke_slide_ball_v3', 'waist_clevis_v4', 'hut_ring_clevis_v5', 'hut_ball_aft_v6'),
+                        help='exoskeleton mount geometry (default: checkpoint mechanism or hooke_slide_ball_v3)')
+    parser.add_argument('--apollo-mass', action='store_true',
+                        help='apply NASA Apollo A7LB + PLSS/OPS lunar EVA mass & inertia proportions')
+    parser.add_argument('--wangyu-eva', action='store_true',
+                        help='apply China CMSA Wangyu (望宇) lunar spacesuit mass, inertia, bearing/bellows mobility, and regolith boot friction')
+    parser.add_argument('--assist-drop-prob', type=float, default=0., metavar='PROB',
+                        help='per-episode probability of zero/partial exoskeleton assist drop for robustness')
     parser.add_argument('--stance-transition', action='store_true',
                         help='train distributed boot loading and bilateral support during COM rise')
     parser.add_argument('--economical-hops', action='store_true',
@@ -196,8 +204,8 @@ def main():
                 args.jump_height_range or DEFAULT_JUMP_HEIGHT_RANGE)
         elif args.task in forward_tasks:
             task_options['speed_range'] = validate_speed_range(args.jump_speed_range or DEFAULT_SPEED_RANGE)
-            from moon_scene import (RELAXED_PROPULSION_PROFILE, SUIT_ANKLE_PITCH_PROFILE,
-                                    SUIT_MAJOR_JOINTS_PROFILE)
+            from moon_scene import (APOLLO_MASS_PROFILE, MASS_PROFILES, RELAXED_PROPULSION_PROFILE,
+                                    SUIT_ANKLE_PITCH_PROFILE, SUIT_MAJOR_JOINTS_PROFILE, WANGYU_EVA_PROFILE)
             init_pitch_profile = init_info.get('ankle_pitch_profile')
             if init_pitch_profile not in (None, SUIT_ANKLE_PITCH_PROFILE):
                 parser.error(f'未知的初始化脚踝俯仰配置：{init_pitch_profile}')
@@ -215,9 +223,19 @@ def main():
                 parser.error(f'未知的初始化驱动放宽配置：{init_prop_profile}')
             if args.relax_propulsion or init_prop_profile == RELAXED_PROPULSION_PROFILE:
                 task_options['relax_propulsion'] = True
+            init_mass_profile = init_info.get('apollo_mass_profile')
+            if init_mass_profile not in (None, *MASS_PROFILES):
+                parser.error(f'未知的初始化航天服质量配置：{init_mass_profile}')
+            if args.wangyu_eva:
+                task_options['mass_profile'] = WANGYU_EVA_PROFILE
+            elif args.apollo_mass:
+                task_options['mass_profile'] = APOLLO_MASS_PROFILE
+            elif init_mass_profile is not None:
+                task_options['mass_profile'] = init_mass_profile
         if args.task == 'exo_jump':
-            from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, FORCE_CONTROL_REVISIONS, FORCE_POLICY_IO,
-                                     POLICY_IO, POLICY_TIMED_FORCE_IO,
+            from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, DIRECT_FORCE_REVISIONS,
+                                     FORCE_CONTROL_REVISIONS, FORCE_POLICY_IO, IMPEDANCE_FORCE_IO,
+                                     MECHANISM, MECHANISMS, POLICY_IO, POLICY_TIMED_FORCE_IO,
                                      validate_assist_force, validate_policy_io)
             requested = DEFAULT_FORCE_N if args.assist_force is None else args.assist_force
             task_options['assist_force'] = validate_assist_force(requested)
@@ -225,11 +243,16 @@ def main():
             source_exo_io = validate_policy_io(init_info.get('exo_policy_io'))
             target_exo_io = {'position-pd': POLICY_IO, 'force': FORCE_POLICY_IO,
                              'force-policy': POLICY_TIMED_FORCE_IO,
-                             'force-action': ACTION_FORCE_IO}.get(args.exo_control)
+                             'force-action': ACTION_FORCE_IO,
+                             'impedance-force': IMPEDANCE_FORCE_IO}.get(args.exo_control)
             if target_exo_io is None:
                 target_exo_io = source_exo_io if source_exo_io in FORCE_CONTROL_REVISIONS else POLICY_IO
-            if args.load_sharing and target_exo_io != ACTION_FORCE_IO:
-                parser.error('--load-sharing requires force-action control')
+            if args.load_sharing and target_exo_io not in DIRECT_FORCE_REVISIONS:
+                parser.error('--load-sharing requires force-action or impedance-force control')
+            init_mechanism = init_info.get('exo_mechanism')
+            if init_mechanism not in (None, *MECHANISMS):
+                parser.error(f'未知的初始化外骨骼机构：{init_mechanism}')
+            task_options['exo_mechanism'] = args.exo_mechanism or init_mechanism or MECHANISM
             task_options['load_sharing'] = args.load_sharing
             task_options['vertical_support'] = args.vertical_support
             task_options['posture_balance'] = args.posture_balance
@@ -238,6 +261,10 @@ def main():
             task_options['economical_hops'] = args.economical_hops
             task_options['long_hop_period'] = args.long_hop_period
             task_options['exo_policy_io'] = target_exo_io
+            if args.assist_drop_prob:
+                if not (math.isfinite(args.assist_drop_prob) and 0. <= args.assist_drop_prob <= 1.):
+                    parser.error('--assist-drop-prob must be in [0, 1]')
+                task_options['assist_drop_prob'] = args.assist_drop_prob
             reward_overrides = {}
             if args.human_energy_weight is not None:
                 if not (math.isfinite(args.human_energy_weight) and args.human_energy_weight >= 0):
@@ -266,8 +293,7 @@ def main():
                 if not (args.load_sharing or args.vertical_support):
                     parser.error('reward weight overrides require --load-sharing / --vertical-support')
                 task_options['reward_overrides'] = reward_overrides
-            migrate_exo_policy = source_exo_io is None or (
-                (source_exo_io == POLICY_IO) != (target_exo_io == POLICY_IO))
+            migrate_exo_policy = source_exo_io is None or source_exo_io != target_exo_io
     except ValueError as exc:
         parser.error(str(exc))
     env = env_class(args.num_envs, args.terrain_idx, args.pushes,
@@ -334,7 +360,7 @@ def main():
             keys = ('task', 'jump_actuation', 'jump_height_range_m', 'jump_speed_range_mps',
                     'geometry', 'assist_force_n', 'exo_mechanism', 'exo_efficiency_reward',
                     'exo_policy_io', 'stance_center_weight', 'ankle_roll_profile', 'ankle_pitch_profile',
-                    'suit_major_joints_profile', 'propulsion_profile',
+                    'suit_major_joints_profile', 'propulsion_profile', 'apollo_mass_profile',
                     'slope_adaptive_posture', 'exo_action_force_costs', 'economical_hops',
                     'long_hop_period_s', 'roll_balance')
             task_info = {key: env.cfg[key] for key in keys if key in env.cfg}
