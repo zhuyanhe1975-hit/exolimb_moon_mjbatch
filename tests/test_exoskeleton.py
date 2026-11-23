@@ -799,6 +799,48 @@ class ExoskeletonTest(unittest.TestCase):
         restoring_f = b_assist.controls(torch.ones((2, 2)))
         self.assertGreater(float(restoring_f[0, 0]), 450.)
         self.assertGreater(float(restoring_f[0, 1]), 450.)
+        # Verify symmetric startup guard during WAIT (prevents front-back leg split on launch)
+        cmd = b_env.jump_commands
+        self.assertTrue(cmd.symmetric_startup)
+        cmd.stage[:] = cmd.WAIT
+        cmd.first_takeoff_done[:] = False
+        cmd.first_landing_done[:] = False
+        split_act = torch.zeros((2, b_env.worlds.device.default_q.shape[0]))
+        lh_idx, rh_idx = cmd.hip_pitch_actions
+        split_act[:, lh_idx] = -1.5
+        split_act[:, rh_idx] = +1.5
+        coupled = cmd.mirror_joint_targets(split_act)
+        self.assertLess(float((coupled[:, lh_idx] - coupled[:, rh_idx]).abs().max()), 0.35)
+        b_data.qpos[:, b_env.worlds.model.joint('robot/LeftHipPitch').qposadr[0]] = -radians(55.)
+        b_data.qpos[:, b_env.worlds.model.joint('robot/RightHipPitch').qposadr[0]] = radians(15.)
+        self.assertGreater(float(cmd.mirror_motion_cost().min()), 15.)
+        # Verify event-driven 3-stage startup speed ramp (starts at 0.75 m/s for crisp
+        # crouch-launch and ramps at 0.75 m/s^2 to reach 1.5 m/s within 1.0s) and
+        # backward hip-extension cap during startup (released after first landing).
+        cmd.fixed_speed = 1.5
+        cmd.reset()
+        torch.testing.assert_close(cmd.command_speed, torch.full((2,), 1.5))
+        torch.testing.assert_close(cmd.target_speed, torch.full((2,), 0.75))
+        cmd.startup_elapsed[:] = 0.5 - cmd.DT
+        b_env.step(torch.zeros((2, b_env.num_actions)))
+        torch.testing.assert_close(cmd.target_speed, torch.full((2,), 1.125), atol=1e-4, rtol=0)
+        cmd.startup_elapsed[:] = 1.0 - cmd.DT
+        b_env.step(torch.zeros((2, b_env.num_actions)))
+        torch.testing.assert_close(cmd.target_speed, torch.full((2,), 1.5), atol=1e-4, rtol=0)
+        kick_act = torch.zeros((2, b_env.worlds.device.default_q.shape[0] + 1))
+        kick_act[:, lh_idx] = 2.0
+        kick_act[:, rh_idx] = 2.0
+        cmd.stage[:] = cmd.FLIGHT
+        cmd.first_landing_done[:] = False
+        cmd.startup_elapsed[:] = 0.5
+        capped_cmd = cmd(kick_act)
+        scale_h = b_env.worlds.device.action_scale[lh_idx]
+        neutral_h = b_env.worlds.device.default_q[lh_idx]
+        self.assertLessEqual(float(neutral_h + scale_h * capped_cmd[0, lh_idx]), 0.16)
+        # Once first landing completes, startup hip cap is released for full cruise bounding.
+        cmd.first_landing_done[:] = True
+        cruise_cmd = cmd(kick_act)
+        self.assertGreater(float(neutral_h + scale_h * cruise_cmd[0, lh_idx]), 0.25)
 
 
 if __name__ == '__main__':

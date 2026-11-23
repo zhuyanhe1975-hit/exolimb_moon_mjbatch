@@ -1,0 +1,133 @@
+{
+  "env": {
+    "backend": "mujoco_warp_cuda",
+    "physics_backend": "warp",
+    "task": "exo_jump",
+    "num_envs": 8192,
+    "terrain_size_m": 100,
+    "terrain_idx": null,
+    "pushes": true,
+    "seed": 271,
+    "physics_workers": 16,
+    "geometry": "fit3d_18v",
+    "assist_force_n": 500.0,
+    "exo_mechanism": "hut_ball_aft_v6",
+    "ankle_roll_profile": "suit_roll_8deg_damped_v1",
+    "exo_action_force_costs": {
+      "revision": "unloaded_force_and_ankle_moment_v1",
+      "unloaded_strut_force": 2.0,
+      "unsupported_ankle_moment": 3.0
+    },
+    "ankle_pitch_profile": "suit_pitch_18_15deg_bellows_v1",
+    "suit_major_joints_profile": "suit_eva_major_joints_v1",
+    "propulsion_profile": "propulsion_relaxed_v1",
+    "apollo_mass_profile": "wangyu_lunar_eva_v1",
+    "spawn_sampling": "independent_position_and_36_uniform_headings_gpu_with_replacement",
+    "warp_100m_tiles": "36x20m",
+    "warp_cuda_graphs": true,
+    "measurement_cuda_graph": true,
+    "batched_terrain_queries": true,
+    "jump_actuation": "forward_boot_yaw_free_height_v32",
+    "jump_objective": "human_energy_and_bilateral_grounded_assistance",
+    "jump_speed_range_mps": [
+      0.0,
+      1.5
+    ],
+    "slope_adaptive_posture": true,
+    "exo_policy_io": "impedance_force_v1",
+    "exo_efficiency_reward": {
+      "positive_work_cost": 4.0,
+      "negative_work_cost": 0.8333333333333334,
+      "human_mean_squared_torque": 2.2,
+      "peak_leg_squared_torque": 2.2,
+      "revision": "human_energy_stance_transition_v6",
+      "human_metabolic_proxy_power": 5.5,
+      "strut_impulse_balance": 6.0,
+      "boot_support_balance": 4.0,
+      "bilateral_force_share_deadband": 0.2,
+      "single_foot_overload_bw": 4.5,
+      "single_foot_overload_weight": 2.0,
+      "touchdown_window_s": 0.05,
+      "touchdown_impulse_bw_s": 0.15,
+      "touchdown_impulse_weight": 4.0,
+      "posture_filter_seconds": 1.5,
+      "pack_roll_free_deg": 1.5,
+      "waist_roll_free_deg": 4.0,
+      "pack_roll_weight_per_rad2": 850.0,
+      "waist_roll_weight_per_rad2": 160.0,
+      "push_boot_vertical_impulse_balance": 8.0,
+      "push_extra_strut_impulse_balance": 6.0,
+      "braking_sole_weight": 22.0,
+      "rising_support_weight": 26.0,
+      "regional_load_bw": 0.15,
+      "rise_support_bw": 0.4,
+      "rise_extension_mps": 0.18,
+      "vertical_speed_mps": 0.25,
+      "unloaded_strut_force_linear": 0.5,
+      "assist_work_share_weight": 140.0
+    },
+    "assist_drop_prob": 0.05,
+    "economical_hops": true,
+    "roll_balance": true,
+    "long_hop_period_s": 1.7,
+    "stance_center_weight": 22.0,
+    "speed_track_boost": 90.0,
+    "warp_torch_compile": true,
+    "update_device": "cuda",
+    "init_checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/logs/cpu_exo_train/v26_100m_native_arc/model_399.pt"
+  },
+  "runner": {
+    "num_steps_per_env": 32,
+    "save_interval": 25,
+    "logger": "tensorboard",
+    "obs_groups": {
+      "actor": [
+        "policy"
+      ],
+      "critic": [
+        "critic"
+      ]
+    },
+    "actor": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "rsl_rl.modules.GaussianDistribution",
+        "init_std": 0.25,
+        "std_type": "scalar"
+      }
+    },
+    "critic": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        128,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true
+    },
+    "algorithm": {
+      "class_name": "rsl_rl.algorithms.PPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.0001,
+      "schedule": "fixed",
+      "gamma": 0.995,
+      "lam": 0.95,
+      "entropy_coef": 0.001,
+      "desired_kl": 0.01,
+      "clip_param": 0.2,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "normalize_advantage_per_mini_batch": false
+    }
+  },
+  "iterations": 400,
+  "torch_threads": 4
+}

@@ -1,0 +1,8 @@
+{
+  "revision": "boot_hull_fit3d_18v_v1",
+  "files": {
+    "assets/wangyu_skin/skin.xml": "78fb12ab28b507237b4fed331eb10c323cb646b52967a759aad56fd4692395ce",
+    "scripts/prepare_boot_hull_18v.py": "5cf6e2be3ca0b9c832e22368e91791c388555657c35b80b5dea65a2f9143f4be",
+    "assets/boot_hull_18v/fit.json": "f0447a3e02dc5ed27916aee8e8b84720be0d5f0ea12b58b445ca30ba9be28b9a"
+  }
+}

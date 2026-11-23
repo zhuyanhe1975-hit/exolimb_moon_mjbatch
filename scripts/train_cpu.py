@@ -49,6 +49,8 @@ def main():
                         help='favor longer landing-to-landing cycles at the requested forward speed')
     parser.add_argument('--keep-strut-heads', action='store_true',
                         help='keep the two force output heads intact when initializing load sharing')
+    parser.add_argument('--reset-strut-heads', action='store_true',
+                        help='symmetrize and re-center both strut output heads (+0.35 bias) to break dead-zone bias')
     parser.add_argument('--roll-balance', action='store_true',
                         help='penalize persistent pack and waist roll on either side')
     parser.add_argument('--posture-balance', action='store_true',
@@ -87,11 +89,13 @@ def main():
                         help='minimum action std floor when initializing from a checkpoint')
     parser.add_argument('--min-strut-std', type=float, metavar='STD',
                         help='minimum strut action std floor when initializing from a checkpoint')
-    parser.add_argument('--geometry', choices=('legacy', 'fitted'), default='fitted',
+    parser.add_argument('--geometry', choices=('legacy', 'fitted', 'fitted_3box', 'bodyfit_v2_hull', 'fit3d_18v'), default='fitted',
                         help='suit collision geometry (default: fitted)')
     parser.add_argument('--steps-per-env', type=int, default=32)
+    parser.add_argument('--terrain-size', type=int, choices=(16, 100), default=16,
+                        help='lunar terrain size in meters: 16 (64-patch bank) or 100 (100x100m continuous)')
     terrain = parser.add_mutually_exclusive_group()
-    terrain.add_argument('--terrain-idx', type=int, choices=range(1, 65), default=12, metavar='1–64')
+    terrain.add_argument('--terrain-idx', type=int, choices=range(1, 65), default=None, metavar='1–64')
     terrain.add_argument('--terrain-idxs', nargs='+', type=int, choices=range(1, 65), metavar='1–64',
                          help='split forward-jump worlds across these terrains with independent headings')
     parser.add_argument('--seed', type=int, default=42)
@@ -128,12 +132,17 @@ def main():
         parser.error('--assist-force 仅用于外骨骼跳跃任务')
     if args.exo_control is not None and args.task != 'exo_jump':
         parser.error('--exo-control 仅用于外骨骼跳跃任务')
-    if args.terrain_idxs is not None:
+    if args.terrain_size == 100:
+        if args.terrain_idx is not None or args.terrain_idxs is not None:
+            parser.error('--terrain-size 100 cannot be combined with --terrain-idx / --terrain-idxs')
+    elif args.terrain_idxs is not None:
         if args.task not in forward_tasks:
             parser.error('--terrain-idxs 仅用于前进跳跃任务')
         if len(set(args.terrain_idxs)) != len(args.terrain_idxs) or len(args.terrain_idxs) > args.num_envs:
             parser.error('地形编号必须唯一，且每块地形至少有一个训练环境')
         args.terrain_idx = args.terrain_idxs[0]
+    elif args.terrain_idx is None:
+        args.terrain_idx = 12
     if args.jump_height_range is not None and args.task != 'jump':
         parser.error('--jump-height-range 仅用于原地跳跃任务')
     if args.jump_speed_range is not None and args.task not in forward_tasks:
@@ -192,8 +201,13 @@ def main():
             parser.error('原地跳跃任务需要原地跳跃检查点初始化')
         if args.task == 'exo_jump' and init_actuation != FORWARD_FACING_BOOT_ACTUATION:
             parser.error('外骨骼实验需要 v32 前进跳跃策略或由它续训的外骨骼策略')
-        if init_info.get('geometry') != args.geometry:
-            parser.error('初始化检查点的几何版本须与训练配置一致')
+        init_geom = init_info.get('geometry')
+        fitted_family = {'fitted', 'fitted_3box', 'bodyfit_v2_hull', 'fit3d_18v'}
+        if init_geom != args.geometry:
+            if init_geom in fitted_family and args.geometry in fitted_family:
+                print(f'[CPU train] Geometry transfer: {init_geom} -> {args.geometry}', flush=True)
+            else:
+                parser.error('初始化检查点的几何版本须与训练配置一致')
     env_class = {'stand': CpuStandEnv, 'jump': CpuJumpEnv,
                  'forward_jump': CpuForwardJumpEnv, 'exo_jump': CpuExoJumpEnv}[args.task]
     task_options = {}
@@ -298,7 +312,8 @@ def main():
         parser.error(str(exc))
     env = env_class(args.num_envs, args.terrain_idx, args.pushes,
                     args.physics_backend, args.physics_workers, args.seed,
-                    geometry=args.geometry, terrain_indices=args.terrain_idxs, **task_options)
+                    geometry=args.geometry, terrain_indices=args.terrain_idxs,
+                    terrain_size=args.terrain_size, **task_options)
     mix_strut_heads = args.load_sharing and not (args.posture_balance or args.roll_balance or args.keep_strut_heads) and init_state is not None and not migrate_exo_policy
     if mix_strut_heads:
         env.cfg['strut_head_warm_start_mix'] = .5
@@ -337,7 +352,8 @@ def main():
     (log_dir / 'config.json').write_text(json.dumps(
         {'env': env.cfg, 'runner': cfg, 'iterations': args.iterations,
          'torch_threads': args.torch_threads}, indent=2) + '\n')
-    terrain_description = ','.join(map(str, args.terrain_idxs or [args.terrain_idx]))
+    terrain_description = ('100m' if args.terrain_size == 100
+                           else ','.join(map(str, args.terrain_idxs or [args.terrain_idx])))
     physics_description = ('Warp CUDA' if full_cuda
                            else f'{args.physics_backend} with {env.workers} physics threads')
     print(f'[Train] task={args.task}, geometry={args.geometry}, '
@@ -358,7 +374,7 @@ def main():
     class LocalRunner(OnPolicyRunner):
         def save(self, path, infos=None):
             keys = ('task', 'jump_actuation', 'jump_height_range_m', 'jump_speed_range_mps',
-                    'geometry', 'assist_force_n', 'exo_mechanism', 'exo_efficiency_reward',
+                    'geometry', 'terrain_size_m', 'assist_force_n', 'exo_mechanism', 'exo_efficiency_reward',
                     'exo_policy_io', 'stance_center_weight', 'ankle_roll_profile', 'ankle_pitch_profile',
                     'suit_major_joints_profile', 'propulsion_profile', 'apollo_mass_profile',
                     'slope_adaptive_posture', 'exo_action_force_costs', 'economical_hops',
@@ -397,7 +413,16 @@ def main():
                     init_state[key], model.state_dict(), initial_command=command,
                     replace_strut_io=source_exo_io is not None,
                 )
-        if mix_strut_heads:
+        if args.reset_strut_heads and args.task == 'exo_jump':
+            actor = init_state['actor_state_dict']
+            w = actor['mlp.4.weight'].clone()
+            b = actor['mlp.4.bias'].clone()
+            w_mean = w[-2:].mean(dim=0, keepdim=True) * .25
+            w[-2:] = w_mean.expand(2, -1)
+            b[-2:] = .35
+            actor['mlp.4.weight'] = w
+            actor['mlp.4.bias'] = b
+        elif mix_strut_heads:
             # Bring the two inherited output means closer for exploration. The
             # learned heads remain independent throughout optimization and replay.
             actor = init_state['actor_state_dict']

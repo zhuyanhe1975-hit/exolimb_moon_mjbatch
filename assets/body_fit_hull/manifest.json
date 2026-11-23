@@ -1,0 +1,9 @@
+{
+  "revision": "bodyfit_v2_hull",
+  "files": {
+    "assets/wangyu_skin/skin.xml": "78fb12ab28b507237b4fed331eb10c323cb646b52967a759aad56fd4692395ce",
+    "assets/body_fit/fit.json": "62c72849325fdcfe66cb98943e716617ce4bd1780033d19f95bb87500d74a27d",
+    "scripts/prepare_foot_hulls.py": "72739fe8b760a1f42a8848a541e4074435f0d430494ba891ad80d61e6df77ea3",
+    "assets/body_fit_hull/fit.json": "9993b6853218f8a141d7d9390004386319ff13573c3a5c77c2288b3089edcf2d"
+  }
+}

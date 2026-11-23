@@ -1,5 +1,6 @@
 """RSL-RL environment for the native CPU stand task."""
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 from rsl_rl.env import VecEnv
 from tensordict import TensorDict
@@ -26,7 +27,8 @@ class CpuStandEnv(VecEnv):
     max_episode_length = round(10 / META['control_dt'])
 
     def __init__(self, num_envs, terrain_idx, pushes, physics_backend, workers, seed, *,
-                 geometry=LEGACY, inward_heading=False, terrain_indices=None, assist_force=None,
+                 geometry=LEGACY, inward_heading=False, terrain_indices=None, terrain_size=16,
+                 assist_force=None,
                  exo_policy_io=None, exo_mechanism=None, vertical_support=False, stance_transition=False,
                  suit_ankle_pitch=False, suit_major_joints=False, relax_propulsion=False,
                  apollo_mass=False, mass_profile=None):
@@ -36,7 +38,8 @@ class CpuStandEnv(VecEnv):
         self.cfg = {
             'backend': 'mujoco_warp_cuda' if physics_backend == 'warp' else 'native_mujoco_cpu',
             'physics_backend': physics_backend, 'task': self.task,
-            'num_envs': num_envs, 'terrain_idx': terrain_idx, 'pushes': pushes, 'seed': seed,
+            'num_envs': num_envs, 'terrain_size_m': terrain_size,
+            'terrain_idx': terrain_idx, 'pushes': pushes, 'seed': seed,
             'physics_workers': self.workers,
             'geometry': geometry,
         }
@@ -66,25 +69,28 @@ class CpuStandEnv(VecEnv):
             if resolved_mass not in MASS_PROFILES:
                 raise ValueError(f'Unknown suit mass profile: {resolved_mass}')
             self.cfg['apollo_mass_profile'] = resolved_mass
-        spec = scene_spec(geometry=geometry, sole_probes=self.sole_probes,
+        spec = scene_spec(terrain_size=terrain_size, geometry=geometry, sole_probes=self.sole_probes,
                           exoskeleton=assist_force is not None, exo_pd_force=pd_force,
                           exo_mechanism=exo_mechanism,
                           sole_collision=self.sole_collision, sole_edge_probes=self.sole_edge_probes,
                           suit_ankle_roll=suit_ankle_roll, suit_ankle_pitch=suit_ankle_pitch,
                           suit_major_joints=suit_major_joints, relax_propulsion=relax_propulsion,
                           mass_profile=resolved_mass,
-                          vertical_support=vertical_support, stance_transition=stance_transition)
+                          vertical_support=vertical_support, stance_transition=stance_transition,
+                          tiled_100m=(terrain_size == 100 and physics_backend == 'warp'))
         if physics_backend == 'warp':
             from warp_exo_worlds import WarpExoWorlds
             self.worlds = WarpExoWorlds(spec, num_envs, terrain_idx, pushes=pushes,
                                         terrain_indices=terrain_indices, seed=seed,
-                                        assist_force=assist_force)
+                                        assist_force=assist_force, terrain_size=terrain_size)
             self.cfg['spawn_sampling'] = 'independent_position_and_36_uniform_headings_gpu_with_replacement'
+            if terrain_size == 100:
+                self.cfg['warp_100m_tiles'] = f'{len(self.worlds.device.ground.zmin)}x20m'
             self.cfg['warp_cuda_graphs'] = self.worlds.use_cuda_graphs
             self.cfg['measurement_cuda_graph'] = self.worlds.device.use_measurement_graph
             self.cfg['batched_terrain_queries'] = self.worlds.device.batch_measurement_terrain
         else:
-            self.worlds = CpuWorlds(spec, num_envs, terrain_idx, pushes=pushes,
+            self.worlds = CpuWorlds(spec, num_envs, terrain_idx, terrain_size=terrain_size, pushes=pushes,
                                     use_mjbatch=physics_backend == 'mjbatch', workers=self.workers,
                                     optimize_cpu=True, inward_heading=inward_heading,
                                     terrain_indices=terrain_indices, spawn_seed=seed,
@@ -142,10 +148,15 @@ class CpuStandEnv(VecEnv):
         if done.any():
             self.worlds.reset(done)
             self.reset_task(done)
-            self.episode_length_buf[done] = 0
-            ids = done.nonzero(as_tuple=True)[0]
-            reset_obs = self.worlds.device.get_measurements(self.worlds.sim, env_ids=ids)
-            measured['wangyu/state'][ids] = reset_obs['wangyu/state']
+            self.episode_length_buf.masked_fill_(done, 0)
+            if self.worlds.device.use_measurement_graph:
+                reset_obs = self.worlds.device.get_measurements(self.worlds.sim)
+                measured['wangyu/state'] = torch.where(
+                    done[:, None], reset_obs['wangyu/state'], measured['wangyu/state'])
+            else:
+                ids = done.nonzero(as_tuple=True)[0]
+                reset_obs = self.worlds.device.get_measurements(self.worlds.sim, env_ids=ids)
+                measured['wangyu/state'][ids] = reset_obs['wangyu/state']
         return self._observations(measured), rewards, done, {'time_outs': timeouts}
 
 
@@ -279,6 +290,18 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
         self.speed_track_boost = speed_track_boost
         if speed_track_boost:
             self.cfg['speed_track_boost'] = speed_track_boost
+        if self.device == 'cuda' and os.environ.get('MOON_WARP_COMPILE', '1') == '1':
+            self.commands = torch.compile(self.commands, mode='default')
+            self.advance_task = torch.compile(self.advance_task, mode='default')
+            self.reward = torch.compile(self.reward, mode='default')
+            self.policy_state = torch.compile(self.policy_state, mode='default')
+            self.worlds.exoskeleton._observe_tensors = torch.compile(
+                self.worlds.exoskeleton._observe_tensors, mode='default')
+            self.worlds.exoskeleton.controls = torch.compile(
+                self.worlds.exoskeleton.controls, mode='default')
+            self.worlds.device.set_substep_commands = torch.compile(
+                self.worlds.device.set_substep_commands, mode='default')
+            self.cfg['warp_torch_compile'] = True
 
     def stance_center_cost(self):
         root = self.worlds.sim.data.qpos
@@ -299,21 +322,21 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
             com_vel = self.worlds.sim.data.sensordata[:, cmd.com_velocity_xy]
             forward = (com_vel * cmd.heading).sum(-1)
             target = cmd.target_speed
-            # Compensate for stance-phase braking dips and startup lag at
-            # high speeds (+0.08 at 1.0, +0.16 at 1.5; exact 0.0 / 0.5) with
-            # sharp smooth-L1 tracking and bounded asymmetric underspeed urgency.
-            moving = (target / .35).clamp(0., 1.)
-            high = 1. + 1.0 * (target - .55).clamp_min(0.)
-            effective_target = target + .16 * ((target - .50) / 1.0).clamp(0., 1.)
+            # Calibrated cruise speed tracking across 0.5..1.5 m/s: remove low/mid-speed
+            # feedforward bias so 0.5 and 1.0 m/s track accurately without overshooting,
+            # while giving a modest +0.05 m/s high-speed dip offset near 1.5 m/s.
+            moving = (target / .25).clamp(0., 1.)
+            high = 1. + .8 * (target - .60).clamp_min(0.)
+            effective_target = target + .05 * ((target - 1.0) / .50).clamp(0., 1.)
             error = forward - effective_target
             improve = (effective_target.square() + .006).sqrt() - (error.square() + .006).sqrt()
             shortfall = (effective_target - forward).clamp_min(0.)
-            overshoot = (forward - (effective_target + .08)).clamp_min(0.)
-            underspeed_pen = shortfall + .45 * shortfall.square()
-            overspeed_pen = 1.2 * overshoot.square()
+            overshoot = (forward - (effective_target + .05)).clamp_min(0.)
+            underspeed_pen = shortfall + .65 * shortfall.square()
+            overspeed_pen = .80 * overshoot + 2.4 * overshoot.square()
             still = (1. - target / .15).clamp(0., 1.)
             still_pen = 20. * still * forward.square()
             rate = (rate
-                    + self.speed_track_boost * moving * high * (improve - .70 * underspeed_pen - overspeed_pen)
+                    + self.speed_track_boost * moving * high * (improve - .75 * underspeed_pen - overspeed_pen)
                     - still_pen)
         return super().reward(measured) + rate * self.jump_commands.DT * ~measured['wangyu/failed']

@@ -1,0 +1,1114 @@
+{
+  "checkpoint": "/home/yhzhu/myWorks/exolimb_moon_mjbatch/logs/cpu_exo_train/v27_100m_boot18v/model_399.pt",
+  "geometry": "fit3d_18v",
+  "boot_hull_revision": "boot_hull_fit3d_18v_v1",
+  "mass_profile": "wangyu_lunar_eva_v1",
+  "exo_mechanism": "hut_ball_aft_v6",
+  "exo_policy_io": "impedance_force_v1",
+  "terrain_training": "100m (36x20m exact Warp tiles from assets/playground_100m/state.npz)",
+  "eval_100m_150s_5seeds": {
+    "on_1.5": {
+      "speed": 1.5,
+      "assist_N": 500.0,
+      "total_s": 150,
+      "falls": 0,
+      "per_seed": [
+        {
+          "seed": 42,
+          "falls": 0,
+          "dist": 39.4
+        },
+        {
+          "seed": 7,
+          "falls": 0,
+          "dist": 39.6
+        },
+        {
+          "seed": 19,
+          "falls": 0,
+          "dist": 43.0
+        },
+        {
+          "seed": 101,
+          "falls": 0,
+          "dist": 39.3
+        },
+        {
+          "seed": 202,
+          "falls": 0,
+          "dist": 42.6
+        }
+      ],
+      "dist_m": 203.9,
+      "mean_v": 1.359,
+      "cruise_v": 1.437,
+      "met_J_per_m": 554.6,
+      "hPos_J": 25364.3,
+      "sPos_L_J": 118.3,
+      "sPos_R_J": 1142.7,
+      "exo_share_pct": 4.7,
+      "strut_sym": 0.1,
+      "torso_mean_deg": 8.0,
+      "torso_p95_deg": 24.8,
+      "tilt_mean_deg": 7.8,
+      "tilt_max_deg": 34.5,
+      "slope_mean_deg": 12.2,
+      "slope_max_deg": 24.7,
+      "hops": 143,
+      "com_rise_cm": 9.9,
+      "sole_clear_cm": 13.9,
+      "sole_clear_max_cm": 24.5,
+      "flight_s": 0.68
+    },
+    "off_1.5": {
+      "speed": 1.5,
+      "assist_N": 0.0,
+      "total_s": 150,
+      "falls": 3,
+      "per_seed": [
+        {
+          "seed": 42,
+          "falls": 0,
+          "dist": 37.6
+        },
+        {
+          "seed": 7,
+          "falls": 2,
+          "dist": 36.5
+        },
+        {
+          "seed": 19,
+          "falls": 0,
+          "dist": 41.4
+        },
+        {
+          "seed": 101,
+          "falls": 1,
+          "dist": 39.0
+        },
+        {
+          "seed": 202,
+          "falls": 0,
+          "dist": 40.4
+        }
+      ],
+      "dist_m": 195.0,
+      "mean_v": 1.3,
+      "cruise_v": 1.411,
+      "met_J_per_m": 567.5,
+      "hPos_J": 24018.7,
+      "sPos_L_J": 0.0,
+      "sPos_R_J": 0.0,
+      "exo_share_pct": 0.0,
+      "strut_sym": 0.0,
+      "torso_mean_deg": 0.8,
+      "torso_p95_deg": 16.2,
+      "tilt_mean_deg": 7.5,
+      "tilt_max_deg": 42.8,
+      "slope_mean_deg": 12.6,
+      "slope_max_deg": 24.7,
+      "hops": 157,
+      "com_rise_cm": 4.0,
+      "sole_clear_cm": 10.8,
+      "sole_clear_max_cm": 19.0,
+      "flight_s": 0.57
+    },
+    "on_1.0": {
+      "speed": 1.0,
+      "assist_N": 500.0,
+      "total_s": 150,
+      "falls": 1,
+      "per_seed": [
+        {
+          "seed": 42,
+          "falls": 1,
+          "dist": 25.9
+        },
+        {
+          "seed": 7,
+          "falls": 0,
+          "dist": 28.1
+        },
+        {
+          "seed": 19,
+          "falls": 0,
+          "dist": 29.2
+        },
+        {
+          "seed": 101,
+          "falls": 0,
+          "dist": 29.2
+        },
+        {
+          "seed": 202,
+          "falls": 0,
+          "dist": 29.3
+        }
+      ],
+      "dist_m": 141.7,
+      "mean_v": 0.945,
+      "cruise_v": 1.008,
+      "met_J_per_m": 579.3,
+      "hPos_J": 18081.7,
+      "sPos_L_J": 128.9,
+      "sPos_R_J": 972.4,
+      "exo_share_pct": 5.7,
+      "strut_sym": 0.13,
+      "torso_mean_deg": 1.1,
+      "torso_p95_deg": 19.8,
+      "tilt_mean_deg": 5.9,
+      "tilt_max_deg": 32.2,
+      "slope_mean_deg": 12.4,
+      "slope_max_deg": 23.2,
+      "hops": 128,
+      "com_rise_cm": 9.5,
+      "sole_clear_cm": 17.0,
+      "sole_clear_max_cm": 24.1,
+      "flight_s": 0.74
+    },
+    "on_0.5": {
+      "speed": 0.5,
+      "assist_N": 500.0,
+      "total_s": 150,
+      "falls": 1,
+      "per_seed": [
+        {
+          "seed": 42,
+          "falls": 1,
+          "dist": 14.6
+        },
+        {
+          "seed": 7,
+          "falls": 0,
+          "dist": 16.1
+        },
+        {
+          "seed": 19,
+          "falls": 0,
+          "dist": 16.2
+        },
+        {
+          "seed": 101,
+          "falls": 0,
+          "dist": 16.0
+        },
+        {
+          "seed": 202,
+          "falls": 0,
+          "dist": 16.0
+        }
+      ],
+      "dist_m": 78.9,
+      "mean_v": 0.526,
+      "cruise_v": 0.559,
+      "met_J_per_m": 818.3,
+      "hPos_J": 14151.4,
+      "sPos_L_J": 100.0,
+      "sPos_R_J": 1031.5,
+      "exo_share_pct": 7.4,
+      "strut_sym": 0.1,
+      "torso_mean_deg": 0.9,
+      "torso_p95_deg": 16.5,
+      "tilt_mean_deg": 4.6,
+      "tilt_max_deg": 22.7,
+      "slope_mean_deg": 11.8,
+      "slope_max_deg": 20.4,
+      "hops": 122,
+      "com_rise_cm": 8.6,
+      "sole_clear_cm": 17.1,
+      "sole_clear_max_cm": 25.8,
+      "flight_s": 0.72
+    }
+  },
+  "eval_16m_6t_summary": {
+    "on": {
+      "0.0": {
+        "fails": 0,
+        "runs": 6,
+        "mean_speed_mps": -0.0228,
+        "cruise_speed_mps": -0.0229,
+        "met_j_per_m": 22438.27,
+        "h_pos_j": 515.48,
+        "strut_share": 0.0,
+        "strut_sym": 0.0,
+        "max_tilt_1st_deg": -3.54
+      },
+      "0.5": {
+        "fails": 0,
+        "runs": 6,
+        "mean_speed_mps": 0.4412,
+        "cruise_speed_mps": 0.5022,
+        "met_j_per_m": 1023.99,
+        "h_pos_j": 992.83,
+        "strut_share": 0.0672,
+        "strut_sym": 0.4016,
+        "max_tilt_1st_deg": 3.25
+      },
+      "1.0": {
+        "fails": 0,
+        "runs": 6,
+        "mean_speed_mps": 0.7631,
+        "cruise_speed_mps": 0.9614,
+        "met_j_per_m": 870.19,
+        "h_pos_j": 1481.02,
+        "strut_share": 0.0521,
+        "strut_sym": 0.3942,
+        "max_tilt_1st_deg": 4.44
+      },
+      "1.5": {
+        "fails": 0,
+        "runs": 6,
+        "mean_speed_mps": 0.9038,
+        "cruise_speed_mps": 1.2933,
+        "met_j_per_m": 984.49,
+        "h_pos_j": 2003.28,
+        "strut_share": 0.073,
+        "strut_sym": 0.4688,
+        "max_tilt_1st_deg": 3.89
+      }
+    },
+    "off": {
+      "1.0": {
+        "fails": 0,
+        "runs": 6,
+        "mean_speed_mps": 0.7517,
+        "cruise_speed_mps": 0.9221,
+        "met_j_per_m": 978.26,
+        "h_pos_j": 1642.79,
+        "strut_share": 0.0,
+        "strut_sym": 0.0,
+        "max_tilt_1st_deg": 6.43
+      },
+      "1.5": {
+        "fails": 4,
+        "runs": 6,
+        "mean_speed_mps": 0.8237,
+        "cruise_speed_mps": 1.2525,
+        "met_j_per_m": 1281.69,
+        "h_pos_j": 2371.75,
+        "strut_share": 0.0,
+        "strut_sym": 0.0,
+        "max_tilt_1st_deg": 8.87
+      }
+    }
+  },
+  "eval_16m_6t_raw": {
+    "checkpoint": "logs/cpu_exo_train/v27_100m_boot18v/model_399.pt",
+    "terrains": [
+      12,
+      3,
+      24,
+      47,
+      15,
+      42
+    ],
+    "on": {
+      "0.0": [
+        {
+          "speed_mps": -0.0425988732363597,
+          "cruise_speed_mps": -0.05147426694499913,
+          "edge_resets": 0,
+          "dist_m": -0.42598873236359697,
+          "fails": 0,
+          "h_pos_j": 426.1087951660156,
+          "h_met_j": 1954.0953369140625,
+          "met_j_per_m": 19540.953369140625,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.08009478449821472,
+          "max_tilt_1st_deg": -3.07377472028574
+        },
+        {
+          "speed_mps": -0.025716679790287647,
+          "cruise_speed_mps": -0.029957218754943653,
+          "edge_resets": 0,
+          "dist_m": -0.25716679790287644,
+          "fails": 0,
+          "h_pos_j": 474.7979736328125,
+          "h_met_j": 2170.535888671875,
+          "met_j_per_m": 21705.35888671875,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.11584919691085815,
+          "max_tilt_1st_deg": -0.27275443332316335
+        },
+        {
+          "speed_mps": -0.029205809096990075,
+          "cruise_speed_mps": -0.026448047792504148,
+          "edge_resets": 0,
+          "dist_m": -0.29205809096990076,
+          "fails": 0,
+          "h_pos_j": 431.2000732421875,
+          "h_met_j": 1977.506103515625,
+          "met_j_per_m": 19775.06103515625,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.06663060933351517,
+          "max_tilt_1st_deg": -5.370692396526641
+        },
+        {
+          "speed_mps": -0.046696380311938505,
+          "cruise_speed_mps": -0.04974879145916559,
+          "edge_resets": 0,
+          "dist_m": -0.46696380311938507,
+          "fails": 0,
+          "h_pos_j": 494.86834716796875,
+          "h_met_j": 2259.923828125,
+          "met_j_per_m": 22599.23828125,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.0831754133105278,
+          "max_tilt_1st_deg": -4.008011191633741
+        },
+        {
+          "speed_mps": 0.013337006834869195,
+          "cruise_speed_mps": 0.019209109949579233,
+          "edge_resets": 0,
+          "dist_m": 0.13337006834869194,
+          "fails": 0,
+          "h_pos_j": 603.541259765625,
+          "h_met_j": 2742.345947265625,
+          "met_j_per_m": 20561.929533513066,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.04411419853568077,
+          "max_tilt_1st_deg": -4.900070074280218
+        },
+        {
+          "speed_mps": -0.006158327511478395,
+          "cruise_speed_mps": 0.0011126437597654434,
+          "edge_resets": 0,
+          "dist_m": -0.06158327511478395,
+          "fails": 0,
+          "h_pos_j": 662.3665771484375,
+          "h_met_j": 3044.70556640625,
+          "met_j_per_m": 30447.0556640625,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.11861161142587662,
+          "max_tilt_1st_deg": -3.619470948622756
+        }
+      ],
+      "0.5": [
+        {
+          "speed_mps": 0.36797388096795963,
+          "cruise_speed_mps": 0.4325580437688966,
+          "edge_resets": 0,
+          "dist_m": 3.679738809679596,
+          "fails": 0,
+          "h_pos_j": 855.4871215820312,
+          "h_met_j": 3924.633544921875,
+          "met_j_per_m": 1066.5522059875773,
+          "strut_pos_j": [
+            19.399696350097656,
+            37.08340835571289
+          ],
+          "strut_share": 0.061935250820329954,
+          "strut_sym": 0.5231368207585221,
+          "peak_force_n": [
+            366.5997619628906,
+            450.0
+          ],
+          "max_foot_back_m": 0.1697615385055542,
+          "max_tilt_1st_deg": 5.0037483057300784
+        },
+        {
+          "speed_mps": 0.4533475483710936,
+          "cruise_speed_mps": 0.5300698118621248,
+          "edge_resets": 0,
+          "dist_m": 4.5334754837109354,
+          "fails": 0,
+          "h_pos_j": 1127.406005859375,
+          "h_met_j": 5023.27978515625,
+          "met_j_per_m": 1108.0416786646829,
+          "strut_pos_j": [
+            22.451932907104492,
+            85.53623962402344
+          ],
+          "strut_share": 0.08741191630983493,
+          "strut_sym": 0.26248445110274304,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.19707699120044708,
+          "max_tilt_1st_deg": 2.712640556740748
+        },
+        {
+          "speed_mps": 0.3890994937439488,
+          "cruise_speed_mps": 0.46245764722571303,
+          "edge_resets": 0,
+          "dist_m": 3.890994937439488,
+          "fails": 0,
+          "h_pos_j": 773.755615234375,
+          "h_met_j": 3577.974609375,
+          "met_j_per_m": 919.5526252032406,
+          "strut_pos_j": [
+            10.824596405029297,
+            47.2557258605957
+          ],
+          "strut_share": 0.06982184785160836,
+          "strut_sym": 0.22906422889285066,
+          "peak_force_n": [
+            271.5907897949219,
+            450.0
+          ],
+          "max_foot_back_m": 0.1907341480255127,
+          "max_tilt_1st_deg": 5.660824225324492
+        },
+        {
+          "speed_mps": 0.5053385730814868,
+          "cruise_speed_mps": 0.5527852760035382,
+          "edge_resets": 0,
+          "dist_m": 5.053385730814868,
+          "fails": 0,
+          "h_pos_j": 1072.7244873046875,
+          "h_met_j": 4953.6689453125,
+          "met_j_per_m": 980.2673314854419,
+          "strut_pos_j": [
+            21.124801635742188,
+            71.04530334472656
+          ],
+          "strut_share": 0.07912312890015227,
+          "strut_sym": 0.29734269038503874,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.19095057249069214,
+          "max_tilt_1st_deg": 2.790966174798242
+        },
+        {
+          "speed_mps": 0.45318169318304474,
+          "cruise_speed_mps": 0.5119328956098418,
+          "edge_resets": 0,
+          "dist_m": 4.5318169318304475,
+          "fails": 0,
+          "h_pos_j": 1077.20166015625,
+          "h_met_j": 4818.58740234375,
+          "met_j_per_m": 1063.279358991554,
+          "strut_pos_j": [
+            19.880109786987305,
+            31.373151779174805
+          ],
+          "strut_share": 0.045418971178690884,
+          "strut_sym": 0.6336663248537091,
+          "peak_force_n": [
+            488.7733459472656,
+            450.0
+          ],
+          "max_foot_back_m": 0.19164319336414337,
+          "max_tilt_1st_deg": 1.759041851755992
+        },
+        {
+          "speed_mps": 0.4784053641689873,
+          "cruise_speed_mps": 0.523527294954986,
+          "edge_resets": 0,
+          "dist_m": 4.784053641689873,
+          "fails": 0,
+          "h_pos_j": 1050.40673828125,
+          "h_met_j": 4814.00244140625,
+          "met_j_per_m": 1006.2601304164722,
+          "strut_pos_j": [
+            21.169666290283203,
+            45.60776901245117
+          ],
+          "strut_share": 0.059772987195574855,
+          "strut_sym": 0.46416798603991716,
+          "peak_force_n": [
+            481.8243408203125,
+            422.39459228515625
+          ],
+          "max_foot_back_m": 0.16699489951133728,
+          "max_tilt_1st_deg": 1.5692753051056234
+        }
+      ],
+      "1.0": [
+        {
+          "speed_mps": 0.720964735534629,
+          "cruise_speed_mps": 0.9493211769992537,
+          "edge_resets": 1,
+          "dist_m": 7.2096473553462905,
+          "fails": 0,
+          "h_pos_j": 1382.7236328125,
+          "h_met_j": 6306.39697265625,
+          "met_j_per_m": 874.7164267306031,
+          "strut_pos_j": [
+            34.48643493652344,
+            75.90769958496094
+          ],
+          "strut_share": 0.07393531638070122,
+          "strut_sym": 0.45432064369074876,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.19567430019378662,
+          "max_tilt_1st_deg": 2.951413816611455
+        },
+        {
+          "speed_mps": 0.7225548445284433,
+          "cruise_speed_mps": 0.9593146879648425,
+          "edge_resets": 1,
+          "dist_m": 7.225548445284433,
+          "fails": 0,
+          "h_pos_j": 1580.705810546875,
+          "h_met_j": 7173.65869140625,
+          "met_j_per_m": 992.8185722826275,
+          "strut_pos_j": [
+            35.5417594909668,
+            60.6335563659668
+          ],
+          "strut_share": 0.05735368735599549,
+          "strut_sym": 0.5861730965679616,
+          "peak_force_n": [
+            500.0,
+            450.0
+          ],
+          "max_foot_back_m": 0.16629016399383545,
+          "max_tilt_1st_deg": 1.5470390750592242
+        },
+        {
+          "speed_mps": 0.8054470086878428,
+          "cruise_speed_mps": 0.9483100405106177,
+          "edge_resets": 0,
+          "dist_m": 8.054470086878428,
+          "fails": 0,
+          "h_pos_j": 1492.590087890625,
+          "h_met_j": 6523.044921875,
+          "met_j_per_m": 809.8664283950499,
+          "strut_pos_j": [
+            11.651491165161133,
+            33.47532653808594
+          ],
+          "strut_share": 0.029346635612241594,
+          "strut_sym": 0.34806206152776026,
+          "peak_force_n": [
+            374.95703125,
+            355.0411071777344
+          ],
+          "max_foot_back_m": 0.35005104541778564,
+          "max_tilt_1st_deg": 8.925647300493132
+        },
+        {
+          "speed_mps": 0.7362621748267156,
+          "cruise_speed_mps": 0.9917483463142458,
+          "edge_resets": 1,
+          "dist_m": 7.3626217482671565,
+          "fails": 0,
+          "h_pos_j": 1612.5543212890625,
+          "h_met_j": 7207.67724609375,
+          "met_j_per_m": 978.9552543277299,
+          "strut_pos_j": [
+            26.29021644592285,
+            99.73223114013672
+          ],
+          "strut_share": 0.07248598384734972,
+          "strut_sym": 0.2636080246613724,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.22618339955806732,
+          "max_tilt_1st_deg": 4.265795874193926
+        },
+        {
+          "speed_mps": 0.803749317440961,
+          "cruise_speed_mps": 0.9352867092759098,
+          "edge_resets": 0,
+          "dist_m": 8.03749317440961,
+          "fails": 0,
+          "h_pos_j": 1431.0428466796875,
+          "h_met_j": 6278.1416015625,
+          "met_j_per_m": 781.1069279102259,
+          "strut_pos_j": [
+            15.30005168914795,
+            30.970794677734375
+          ],
+          "strut_share": 0.03132093514374791,
+          "strut_sym": 0.4940154700049564,
+          "peak_force_n": [
+            500.0,
+            407.1458740234375
+          ],
+          "max_foot_back_m": 0.25364166498184204,
+          "max_tilt_1st_deg": 4.826995544827674
+        },
+        {
+          "speed_mps": 0.7899215032065695,
+          "cruise_speed_mps": 0.9843163917952055,
+          "edge_resets": 1,
+          "dist_m": 7.899215032065695,
+          "fails": 0,
+          "h_pos_j": 1386.5107421875,
+          "h_met_j": 6190.279296875,
+          "met_j_per_m": 783.6575244181197,
+          "strut_pos_j": [
+            12.589816093444824,
+            57.4144172668457
+          ],
+          "strut_share": 0.04806283116585339,
+          "strut_sym": 0.21927969824950028,
+          "peak_force_n": [
+            500.0,
+            490.9737854003906
+          ],
+          "max_foot_back_m": 0.22449252009391785,
+          "max_tilt_1st_deg": 4.120310614912194
+        }
+      ],
+      "1.5": [
+        {
+          "speed_mps": 0.9867750867757907,
+          "cruise_speed_mps": 1.3720701172206942,
+          "edge_resets": 1,
+          "dist_m": 9.867750867757907,
+          "fails": 0,
+          "h_pos_j": 1804.22802734375,
+          "h_met_j": 8107.6572265625,
+          "met_j_per_m": 821.631731000995,
+          "strut_pos_j": [
+            35.97015380859375,
+            92.30258178710938
+          ],
+          "strut_share": 0.06637655107602253,
+          "strut_sym": 0.38969824150267923,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.20722705125808716,
+          "max_tilt_1st_deg": 3.6128779134585227
+        },
+        {
+          "speed_mps": 0.922198766853835,
+          "cruise_speed_mps": 1.3429183553266262,
+          "edge_resets": 1,
+          "dist_m": 9.22198766853835,
+          "fails": 0,
+          "h_pos_j": 1716.1031494140625,
+          "h_met_j": 7825.38037109375,
+          "met_j_per_m": 848.5568027585579,
+          "strut_pos_j": [
+            74.13463592529297,
+            94.51545715332031
+          ],
+          "strut_share": 0.08948125901911994,
+          "strut_sym": 0.7843652049953465,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.20039397478103638,
+          "max_tilt_1st_deg": 3.719246608014887
+        },
+        {
+          "speed_mps": 0.9137972787661662,
+          "cruise_speed_mps": 1.314771830221343,
+          "edge_resets": 1,
+          "dist_m": 9.137972787661662,
+          "fails": 0,
+          "h_pos_j": 2269.52099609375,
+          "h_met_j": 9872.0478515625,
+          "met_j_per_m": 1080.3323757860176,
+          "strut_pos_j": [
+            36.59994888305664,
+            91.77900695800781
+          ],
+          "strut_share": 0.053538078491339146,
+          "strut_sym": 0.3987834483740103,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.22917169332504272,
+          "max_tilt_1st_deg": 3.693861910248605
+        },
+        {
+          "speed_mps": 0.8422957159511861,
+          "cruise_speed_mps": 1.213516118447425,
+          "edge_resets": 1,
+          "dist_m": 8.422957159511862,
+          "fails": 0,
+          "h_pos_j": 2182.818359375,
+          "h_met_j": 9578.720703125,
+          "met_j_per_m": 1137.2158876895105,
+          "strut_pos_j": [
+            68.62911987304688,
+            107.48226165771484
+          ],
+          "strut_share": 0.07465732381802095,
+          "strut_sym": 0.63851577752989,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.25394120812416077,
+          "max_tilt_1st_deg": 5.120081311552026
+        },
+        {
+          "speed_mps": 0.8739225671228572,
+          "cruise_speed_mps": 1.2431274925806246,
+          "edge_resets": 1,
+          "dist_m": 8.739225671228573,
+          "fails": 0,
+          "h_pos_j": 1897.5140380859375,
+          "h_met_j": 8361.4013671875,
+          "met_j_per_m": 956.7668443115101,
+          "strut_pos_j": [
+            37.763031005859375,
+            125.19297790527344
+          ],
+          "strut_share": 0.07908681281177804,
+          "strut_sym": 0.30163857140959266,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.22750696539878845,
+          "max_tilt_1st_deg": 3.9929869606714026
+        },
+        {
+          "speed_mps": 0.8835135843074841,
+          "cruise_speed_mps": 1.2734714468210442,
+          "edge_resets": 1,
+          "dist_m": 8.835135843074841,
+          "fails": 0,
+          "h_pos_j": 2149.49951171875,
+          "h_met_j": 9387.0029296875,
+          "met_j_per_m": 1062.4627732289168,
+          "strut_pos_j": [
+            40.243980407714844,
+            134.1801300048828
+          ],
+          "strut_share": 0.07505587049054026,
+          "strut_sym": 0.29992503663732006,
+          "peak_force_n": [
+            500.0,
+            500.0
+          ],
+          "max_foot_back_m": 0.2083778828382492,
+          "max_tilt_1st_deg": 3.2072443455728328
+        }
+      ]
+    },
+    "off": {
+      "1.0": [
+        {
+          "speed_mps": 0.8261421851774018,
+          "cruise_speed_mps": 0.9413798409291464,
+          "edge_resets": 0,
+          "dist_m": 8.261421851774017,
+          "fails": 0,
+          "h_pos_j": 1362.7041015625,
+          "h_met_j": 6345.35302734375,
+          "met_j_per_m": 768.0703323461421,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.17403200268745422,
+          "max_tilt_1st_deg": 2.309271773553996
+        },
+        {
+          "speed_mps": 0.7862393154166056,
+          "cruise_speed_mps": 0.9314365437769344,
+          "edge_resets": 0,
+          "dist_m": 7.862393154166057,
+          "fails": 0,
+          "h_pos_j": 1658.0352783203125,
+          "h_met_j": 7274.31689453125,
+          "met_j_per_m": 925.203910806317,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.3837359547615051,
+          "max_tilt_1st_deg": 11.985614157284868
+        },
+        {
+          "speed_mps": 0.7870817520972924,
+          "cruise_speed_mps": 0.930397359954986,
+          "edge_resets": 0,
+          "dist_m": 7.870817520972924,
+          "fails": 0,
+          "h_pos_j": 1693.3819580078125,
+          "h_met_j": 7438.78466796875,
+          "met_j_per_m": 945.109532541828,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.3124353289604187,
+          "max_tilt_1st_deg": 7.415102130480093
+        },
+        {
+          "speed_mps": 0.7211652246066539,
+          "cruise_speed_mps": 0.9290602644926956,
+          "edge_resets": 1,
+          "dist_m": 7.211652246066539,
+          "fails": 0,
+          "h_pos_j": 1737.521484375,
+          "h_met_j": 7605.23779296875,
+          "met_j_per_m": 1054.5763347250813,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.2815631628036499,
+          "max_tilt_1st_deg": 6.430874225695482
+        },
+        {
+          "speed_mps": 0.6876665475931562,
+          "cruise_speed_mps": 0.8951429407584843,
+          "edge_resets": 1,
+          "dist_m": 6.876665475931562,
+          "fails": 0,
+          "h_pos_j": 1736.78125,
+          "h_met_j": 7748.1982421875,
+          "met_j_per_m": 1126.7377000242802,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.241802379488945,
+          "max_tilt_1st_deg": 4.757192867494409
+        },
+        {
+          "speed_mps": 0.7021233426374601,
+          "cruise_speed_mps": 0.9051054813141046,
+          "edge_resets": 1,
+          "dist_m": 7.021233426374601,
+          "fails": 0,
+          "h_pos_j": 1668.290771484375,
+          "h_met_j": 7371.3349609375,
+          "met_j_per_m": 1049.8632524091531,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.265653520822525,
+          "max_tilt_1st_deg": 5.694505408795827
+        }
+      ],
+      "1.5": [
+        {
+          "speed_mps": 0.8259314580350959,
+          "cruise_speed_mps": 1.1728070188951756,
+          "edge_resets": 1,
+          "dist_m": 8.25931458035096,
+          "fails": 0,
+          "h_pos_j": 2557.9169921875,
+          "h_met_j": 11223.5263671875,
+          "met_j_per_m": 1358.8931936178392,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.43738120794296265,
+          "max_tilt_1st_deg": 14.554361374071613
+        },
+        {
+          "speed_mps": 0.8152078382534333,
+          "cruise_speed_mps": 1.151826869019971,
+          "edge_resets": 1,
+          "dist_m": 8.152078382534334,
+          "fails": 0,
+          "h_pos_j": 2417.80859375,
+          "h_met_j": 10491.255859375,
+          "met_j_per_m": 1286.9424663350032,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.2185138612985611,
+          "max_tilt_1st_deg": 2.6281851545771806
+        },
+        {
+          "speed_mps": 0.8728273322331248,
+          "cruise_speed_mps": 1.3586928028018534,
+          "edge_resets": 0,
+          "dist_m": 8.728273322331248,
+          "fails": 2,
+          "h_pos_j": 2055.01025390625,
+          "h_met_j": 9275.099609375,
+          "met_j_per_m": 1062.6499958066963,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.31122055649757385,
+          "max_tilt_1st_deg": 8.003445643833695
+        },
+        {
+          "speed_mps": 0.7435797536559585,
+          "cruise_speed_mps": 1.249099523835891,
+          "edge_resets": 1,
+          "dist_m": 7.435797536559585,
+          "fails": 1,
+          "h_pos_j": 2527.696044921875,
+          "h_met_j": 11206.478515625,
+          "met_j_per_m": 1507.098392677599,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.25333720445632935,
+          "max_tilt_1st_deg": 5.2480416399902845
+        },
+        {
+          "speed_mps": 0.7619444773362678,
+          "cruise_speed_mps": 1.286789759415299,
+          "edge_resets": 1,
+          "dist_m": 7.6194447733626784,
+          "fails": 1,
+          "h_pos_j": 2279.34375,
+          "h_met_j": 10043.5673828125,
+          "met_j_per_m": 1318.1495084687106,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.500271201133728,
+          "max_tilt_1st_deg": 18.908554466830935
+        },
+        {
+          "speed_mps": 0.9226311655567891,
+          "cruise_speed_mps": 1.2957684456972787,
+          "edge_resets": 1,
+          "dist_m": 9.22631165556789,
+          "fails": 0,
+          "h_pos_j": 2392.69580078125,
+          "h_met_j": 10669.482421875,
+          "met_j_per_m": 1156.4190350578701,
+          "strut_pos_j": [
+            0.0,
+            0.0
+          ],
+          "strut_share": 0.0,
+          "strut_sym": 0.0,
+          "peak_force_n": [
+            0.0,
+            0.0
+          ],
+          "max_foot_back_m": 0.21697908639907837,
+          "max_tilt_1st_deg": 3.861280201297201
+        }
+      ]
+    }
+  }
+}

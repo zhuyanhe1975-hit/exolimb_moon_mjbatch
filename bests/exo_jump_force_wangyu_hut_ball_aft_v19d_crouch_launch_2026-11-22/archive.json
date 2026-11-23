@@ -1,0 +1,12 @@
+{
+  "selected_checkpoint": "model_250.pt",
+  "source_training_run": "logs/cpu_exo_train/wangyu_hut_ball_aft_v19d_crouch_launch_20261122",
+  "replay_command": "./run_exo_force.sh bests/exo_jump_force_wangyu_hut_ball_aft_v19d_crouch_launch_2026-11-22/model_250.pt",
+  "sha256": {
+    "model_250.pt": "4f76b99f98a01ef1721e0b2ec084b9f3fd5c7f115e1c157618e099196c92e91e",
+    "config.json": "ed4143fbe40cf47fc8900414d26bcaf4045ba6e31a52ff895c8f9d72e48f8b67",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "final_verification.json": "541db52a93257fb1c193011ed9be085b0ee29578ac1cd81d820ab318132e6dfc",
+    "training_efficiency.json": "21ee244841d9c366f0ccaf829dff33743f4d920adb2d8c9dfd3d720616819a32"
+  }
+}

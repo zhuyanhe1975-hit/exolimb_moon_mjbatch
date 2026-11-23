@@ -252,6 +252,9 @@ class LongStrideForwardJumpCommands(SpeedTrackingForwardJumpCommands):
             self.seen_landing[rows] = False
             self.long_hop_weight[rows] = 1.
 
+    def effective_long_hop_period(self):
+        return self.long_hop_period
+
     def advance(self, measured):
         before = self.stage
         super().advance(measured)
@@ -269,7 +272,7 @@ class LongStrideForwardJumpCommands(SpeedTrackingForwardJumpCommands):
             cycle_distance = torch.where(
                 self.seen_landing, self.touchdown_progress - self.previous_landing, self.hop_distance)
             self.long_hop_weight.copy_(long_hop_event_weight(
-                cycle_seconds, cycle_distance, self.target_speed, self.long_hop_period))
+                cycle_seconds, cycle_distance, self.target_speed, self.effective_long_hop_period()))
             torch.where(self.completed, self.touchdown_progress, self.previous_landing, out=self.previous_landing)
             self.landing_elapsed.masked_fill_(self.completed, 0.)
             self.seen_landing.logical_or_(self.completed)
@@ -1310,8 +1313,22 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
     def __init__(self, worlds, *, compact_arm_swing=False, suit_ankle_roll=False, suit_ankle_pitch=False,
                  slope_adaptive_posture=False, suit_major_joints=False, relax_propulsion=False, **kwargs):
         self.suit_major_joints = bool(suit_major_joints)
+        self.symmetric_startup = (worlds.exoskeleton is not None
+                                  and getattr(worlds.exoskeleton, 'mechanism', None) == 'hut_ball_aft_v6')
+        # Event-driven 3-stage startup: crouch in place to store energy, launch forward
+        # with an immediate 0.75 m/s target, and ramp at 0.75 m/s^2 so full 1.5 m/s
+        # long-stride cruise is reached within ~1.0s (right after the first hop).
+        self.startup_base_mps = .75
+        self.startup_accel_mps2 = .75
+        self.startup_ramp_s = 1.5
         if self.suit_major_joints:
             self.first_takeoff_done = worlds.sim.data.qpos.new_zeros(worlds.count, dtype=torch.bool)
+            self.first_landing_done = worlds.sim.data.qpos.new_zeros(worlds.count, dtype=torch.bool)
+            self.startup_elapsed = worlds.sim.data.qpos.new_zeros(worlds.count)
+            self.command_speed = worlds.sim.data.qpos.new_zeros(worlds.count)
+            self.startup_foot_origin = worlds.sim.data.qpos.new_zeros((worlds.count, 2))
+            self.peak_sole_clearance = worlds.sim.data.qpos.new_zeros(worlds.count)
+            self.hip_qpos = [int(worlds.model.joint(f'robot/{side}HipPitch').qposadr[0]) for side in ('Left', 'Right')]
         super().__init__(worlds, **kwargs)
         model = worlds.model
         self.slope_adaptive_posture = bool(slope_adaptive_posture)
@@ -1388,6 +1405,9 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
             # tighten sagittal leg mirror deadband (still leaving ±3.5-5 deg for uneven rocks).
             self.mirror_tolerance = torch.tensor([.12, .06, .12, .08, .12, .12, .22, .23, .23, .22], device=self.age.device)
             self.mirror_gain = torch.tensor([.75, .90, .75, .90, .75, .75, .50, .50, .45, .50], device=self.age.device)
+        if self.symmetric_startup:
+            self.startup_mirror_tol = torch.tensor([.10, .07, .10, .08, .12, .12, .20, .20, .20, .20], device=self.age.device)
+            self.startup_mirror_gain = torch.tensor([.85, .94, .85, .92, .75, .75, .50, .50, .45, .50], device=self.age.device)
         self.compact_arm_swing = worlds.exoskeleton is not None and (
             worlds.exoskeleton.position_pd or compact_arm_swing)
         if self.compact_arm_swing:
@@ -1438,9 +1458,19 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         com_vel = self.worlds.sim.data.sensordata[:, self.com_velocity_xy]
         forward = (com_vel * self.heading).sum(-1)
         shortfall = (self.target_speed - forward).clamp_min(0.)
-        accel_lean = .16 * (shortfall / 1.2).clamp(0., 1.) * (self.target_speed > .25)
+        accel_gain = .18 if (self.symmetric_startup and self.suit_major_joints) else (.07 if self.symmetric_startup else .16)
+        accel_lean = accel_gain * (shortfall / 1.2).clamp(0., 1.) * (self.target_speed > .25)
         speed_lean = .08 * (self.target_speed / 1.5).clamp(0., 1.) + accel_lean
         reference = self.torso_lean_reference(vz) + speed_lean
+        in_pre_takeoff = (self.symmetric_startup and self.suit_major_joints)
+        if in_pre_takeoff:
+            # Physically, the heavy Wangyu PLSS backpack puts standing COM at -12 cm (-6.6 deg,
+            # just 9 mm ahead of the heel edge). Shifting COM over the forefeet (+3..+9 deg)
+            # while keeping boots flat (ankle -17 deg, knee 35 deg, hip -45 deg) geometrically
+            # requires torso_pitch ~ 28..38 deg (0.49..0.66 rad).
+            pre_to = (~self.first_takeoff_done) & (self.command_speed > .20)
+            pre_ref = torch.where(self.stage == self.EXTEND, .38, .54)
+            reference = torch.where(pre_to, pre_ref, reference)
         in_flight = self.stage == self.FLIGHT
         slope = self.terrain_slope()
         uphill = (slope / .14).clamp(0., 1.)
@@ -1464,11 +1494,27 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         accel_relief = (1. - shortfall / .60).clamp(.15, 1.)
         takeoff_cost = uphill_relief * accel_relief * (next_to_takeoff + early_flight) * (
             3. * missed_opening + 12. * missed_opening.square())
-        return (torch.where(in_flight, 120., 110.) * error.square()
+        if in_pre_takeoff:
+            takeoff_cost = torch.where(pre_to, torch.zeros_like(takeoff_cost), takeoff_cost)
+        cost = (torch.where(in_flight, 120., 110.) * error.square()
                 + 14. * excessive_extension.square()
                 + (12. + 32. * uphill) * pelvis_lag.square()
                 + 55. * pelvis_uphill.square()
                 + 16. * backwards.square() + takeoff_cost)
+        if self.symmetric_startup and self.suit_major_joints:
+            # Allow physically required torso forward lean (~38 deg) before first takeoff so
+            # the heavy backpack COM moves forward over planted feet, then return to upright
+            # cruise dive limits (16 deg) once airborne / cruising.
+            in_first_hop = (~self.first_landing_done) & (self.startup_elapsed < self.startup_ramp_s)
+            startup_blend = in_first_hop.float()
+            dive_lim = torch.where(pre_to, .68, .28)
+            startup_dive = (torso - dive_lim).clamp_min(0.)
+            waist_arch = (pelvis - torso - .08).clamp_min(0.)
+            cruise_dive = torch.where(pre_to, (torso - .68).clamp_min(0.), (torso - .28).clamp_min(0.))
+            cost = (cost + 65. * startup_blend * startup_dive.square()
+                    + (25. + 30. * startup_blend) * waist_arch.square()
+                    + 40. * cruise_dive.square())
+        return cost
 
     def sole_placement_cost(self):
         if not self.slope_adaptive_posture:
@@ -1520,10 +1566,50 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         return torch.atan2(offset.sin(), offset.cos())
 
     def mirror_joint_targets(self, actions, strength=1.):
-        return super().mirror_joint_targets(actions, strength)
+        if not (self.symmetric_startup and self.suit_major_joints):
+            return super().mirror_joint_targets(actions, strength)
+        coupled = super().mirror_joint_targets(actions, strength)
+        opening = ~self.first_takeoff_done
+        transition = self.first_takeoff_done & (~self.first_landing_done) & (self.startup_elapsed < self.startup_ramp_s)
+        # Keep gentle symmetric coupling (0.35, with 4 deg terrain-adaptation deadband) at
+        # cruise so both legs and both exoskeleton struts land and push off together.
+        extra_strength = torch.where(opening, 1., torch.where(transition, .55, .35))
+        indices = self.mirror_actions
+        device = self.worlds.device
+        neutral = device.default_q[indices]
+        scale = device.action_scale[indices]
+        raw = coupled[:, indices]
+        target = (neutral + scale * raw.clamp(-2., 2.)).clamp(
+            device.action_lo[indices], device.action_hi[indices])
+        angles = target - neutral
+        left, right = angles.unbind(dim=1)
+        difference = left - self.mirror_sign * right
+        excess = (difference.abs() - self.startup_mirror_tol).clamp_min(0.)
+        correction = .5 * self.startup_mirror_gain * extra_strength[:, None] * difference.sign() * excess
+        adjusted = torch.stack((left - correction, right + self.mirror_sign * correction), dim=1)
+        out = coupled.clone()
+        paired = (correction != 0.)[:, None]
+        out[:, indices] = torch.where(paired, adjusted / scale, raw)
+        return out
 
     def mirror_motion_cost(self):
-        return super().mirror_motion_cost()
+        base = super().mirror_motion_cost()
+        if not (self.symmetric_startup and self.suit_major_joints):
+            return base
+        positions = self.worlds.sim.data.qpos[:, self.mirror_qpos] - self.mirror_neutral
+        left, right = positions.unbind(dim=1)
+        err = ((left - self.mirror_sign * right).abs() - self.startup_mirror_tol).clamp_min(0.)
+        lower_err = (err[:, :6] / .35).clamp_max(2.5).square().mean(-1)
+        hip_knee_err = (err[:, (1, 3)] / .25).clamp_max(3.).square().mean(-1)
+        opening = (~self.first_takeoff_done).float()
+        transition = (self.first_takeoff_done & (~self.first_landing_done) & (self.startup_elapsed < self.startup_ramp_s)).float()
+        steady = ((opening == 0.) & (transition == 0.)).float()
+        # Enforce strong symmetry during launch and gentle two-foot bounding symmetry at cruise
+        # (retaining the 4 deg deadband for rough lunar slopes) to eliminate single-leg galloping.
+        startup_cost = (opening * (10. * lower_err + 12. * hip_knee_err)
+                        + transition * (5. * lower_err + 6. * hip_knee_err)
+                        + steady * (3.0 * lower_err + 4.5 * hip_knee_err))
+        return base + startup_cost
 
     def __call__(self, actions, phase=None):
         commands = super().__call__(actions, phase)
@@ -1548,16 +1634,15 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
                 device.action_lo[indices], device.action_hi[indices])
             commands[:, indices] = (self.shoulder_trim + self.shoulder_gain * (target - neutral)) / scale
         if self.suit_major_joints:
-            # During the opening settle/crouch before first takeoff, keep knee
-            # flexion athletic (<= 43 deg) and prevent backward hip swing during
-            # WAIT/COMPRESS so the feet stay grounded and flat rather than
-            # tucking vertically, without throttling the first EXTEND push-off.
+            # During the opening crouch before first takeoff, allow full athletic
+            # knee flexion (<= 52 deg) to lower COM and store elastic/muscular energy
+            # while keeping feet grounded and preventing premature backward hip swing.
             opening = ~self.first_takeoff_done
             k_idx = self.knee_pitch_actions
             k_neutral, k_scale = device.default_q[k_idx], device.action_scale[k_idx]
             k_target = (k_neutral + k_scale * commands[:, k_idx].clamp(-2., 2.)).clamp(
                 device.action_lo[k_idx], device.action_hi[k_idx])
-            k_capped = k_target.clamp_max(.75)
+            k_capped = k_target.clamp_max(.90)
             commands[:, k_idx] = torch.where(
                 opening[:, None], (k_capped - k_neutral) / k_scale, commands[:, k_idx])
             opening_pre_push = opening & (self.stage != self.EXTEND)
@@ -1565,20 +1650,97 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
             h_neutral, h_scale = device.default_q[h_idx], device.action_scale[h_idx]
             h_target = (h_neutral + h_scale * commands[:, h_idx].clamp(-2., 2.)).clamp(
                 device.action_lo[h_idx], device.action_hi[h_idx])
-            h_capped = h_target.clamp_max(.14)
-            commands[:, h_idx] = torch.where(
-                opening_pre_push[:, None], (h_capped - h_neutral) / h_scale, commands[:, h_idx])
+            if self.symmetric_startup:
+                # Guard against backward kick only until first landing (or startup_ramp_s),
+                # while permitting strong forward EXTEND push-off (up to +15 deg).
+                in_startup = (~self.first_landing_done) & (self.startup_elapsed < self.startup_ramp_s)
+                hip_cap = torch.where(self.stage == self.EXTEND, .26, .15)[:, None]
+                h_capped = h_target.minimum(hip_cap)
+                commands[:, h_idx] = torch.where(
+                    in_startup[:, None], (h_capped - h_neutral) / h_scale, commands[:, h_idx])
+            else:
+                h_capped = h_target.clamp_max(.14)
+                commands[:, h_idx] = torch.where(
+                    opening_pre_push[:, None], (h_capped - h_neutral) / h_scale, commands[:, h_idx])
         return commands
 
     def reset(self, mask=None):
         super().reset(mask)
         if self.suit_major_joints:
-            self.first_takeoff_done[slice(None) if mask is None else mask] = False
+            rows = slice(None) if mask is None else mask
+            self.first_takeoff_done[rows] = False
+            self.first_landing_done[rows] = False
+            self.startup_elapsed[rows] = 0.
+            self.peak_sole_clearance[rows] = 0.
+            self.command_speed[rows] = self.target_speed[rows]
+            if self.symmetric_startup:
+                self.target_speed[rows] = self.command_speed[rows].clamp_max(self.startup_base_mps)
+                foot_mid_xy = self.sole_probes()[..., :2].mean(dim=(1, 2))
+                self.startup_foot_origin[rows] = foot_mid_xy[rows]
+
+    def ready_to_push(self, supported, knee_angle, vertical_speed):
+        ready = super().ready_to_push(supported, knee_angle, vertical_speed)
+        if not (self.symmetric_startup and self.suit_major_joints):
+            return ready
+        # Before the first forward takeoff, wait until the heavy backpack COM has shifted
+        # forward over the planted feet (body_tilt >= +1.5 deg) or a 0.55s cap so the first
+        # push-off launches forward instead of jumping straight up and kicking backward.
+        pre_launch = (~self.first_takeoff_done) & (self.command_speed > .20)
+        probes = self.sole_probes()
+        foot_mid = probes.mean(dim=(1, 2))
+        com_xyz = self.worlds.sim.data.sensordata[:, self.com_xy.start:self.com_xy.start + 3]
+        com_ahead = ((com_xyz[:, :2] - foot_mid[:, :2]) * self.heading).sum(-1)
+        body_tilt = torch.atan2(com_ahead, (com_xyz[:, 2] - foot_mid[:, 2]).clamp_min(.25))
+        com_ready = (body_tilt >= .025) | (self.age >= .55)
+        return torch.where(pre_launch, ready & com_ready, ready)
+
+    def grounded_delay_cost(self):
+        cost = super().grounded_delay_cost()
+        if self.symmetric_startup and self.suit_major_joints:
+            # Do not penalize brief in-place crouch energy storage before the first forward takeoff.
+            in_opening_crouch = (~self.first_takeoff_done) & (self.stage == self.COMPRESS) & (self.age < .55)
+            return torch.where(in_opening_crouch, torch.zeros_like(cost), cost)
+        return cost
+
+    def effective_long_hop_period(self):
+        if self.symmetric_startup and self.suit_major_joints and self.long_hop_period is not None:
+            # First hop targets a crisp forward launch (~0.95s), then immediately
+            # transitions to full long-distance bounding period once first landing completes.
+            speed_frac = (self.target_speed / 1.0).clamp(0., 1.)
+            cruise_period = .95 + (self.long_hop_period - .95) * speed_frac
+            return torch.where(self.first_landing_done, cruise_period, torch.full_like(cruise_period, .95))
+        return self.long_hop_period
 
     def advance(self, measured):
+        before = self.stage
         super().advance(measured)
         if self.suit_major_joints:
             self.first_takeoff_done |= (self.stage == self.FLIGHT)
+            self.first_landing_done |= self.completed
+            self.startup_elapsed.add_(self.DT)
+            if self.symmetric_startup:
+                v_cap = self.startup_base_mps + self.startup_accel_mps2 * self.startup_elapsed
+                self.target_speed.copy_(self.command_speed.minimum(v_cap))
+                took_off = (before != self.FLIGHT) & (self.stage == self.FLIGHT)
+                flying = (self.stage == self.FLIGHT) & (self.ground_frames == 0)
+                min_clear = self.sole_clearances().amin(dim=(-1, -2)).clamp_min(0.)
+                torch.where(
+                    took_off, min_clear,
+                    torch.where(flying, self.peak_sole_clearance.maximum(min_clear), self.peak_sole_clearance),
+                    out=self.peak_sole_clearance)
+
+    def stride_reward(self):
+        base = super().stride_reward()
+        if not (self.symmetric_startup and self.suit_major_joints):
+            return base
+        # Strongly reward genuine lunar bounding arc height (COM rise ~15..24 cm and
+        # both-boot minimum sole clearance ~20..30 cm) on completed hops so the astronaut
+        # clears rough lunar terrain cleanly instead of skimming the ground and tripping.
+        moving = (self.command_speed / .40).clamp(0., 1.)
+        rise_score = (self.peak_com_rise / .18).clamp(0., 1.35)
+        clear_score = (self.peak_sole_clearance / .22).clamp(0., 1.35)
+        high_arc = self.completed * moving * (24.0 * rise_score + 22.0 * clear_score)
+        return base + high_arc
 
     def waist_motion_cost(self):
         data = self.worlds.sim.data
@@ -1611,12 +1773,123 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         # Prevent rapid leg tucking off the ground right after spawn during COMPRESS.
         ungrounded_compress = ((self.stage == self.COMPRESS) & (self.ground_frames == 0)).float()
         tuck_cost = ungrounded_compress * (20. + 60. * (knee - .30).clamp_min(0.).square().mean(-1))
-        # Keep opening crouch <= 45 deg and steady-state fast landing crouch <= 52 deg.
-        crouch_lim = torch.where(self.first_takeoff_done, .90, .78)[:, None]
+        # Allow deep athletic crouch (<= 52 deg) both for opening energy storage and fast landings.
+        crouch_lim = torch.full_like(self.startup_elapsed, .90)[:, None]
         deep_crouch = (knee - crouch_lim).clamp_min(0.)
         crouch_cost = (self.stage == self.COMPRESS).float() * 45. * deep_crouch.square().mean(-1)
         opening_weight = torch.where(self.first_takeoff_done, 1., 3.)
-        return sole_cost + opening_weight * (tuck_cost + crouch_cost)
+        cost = sole_cost + opening_weight * (tuck_cost + crouch_cost)
+        if self.symmetric_startup:
+            # Directly penalize fore-aft foot splitting during initial crouch/launch
+            # and first hop flight, then transition immediately to steady-state cruise.
+            foot_xy = probes[..., :2].mean(dim=2)  # (W, 2, 2)
+            foot_dx = ((foot_xy[:, 0] - foot_xy[:, 1]) * self.heading).sum(-1).abs()
+            opening = (~self.first_takeoff_done).float()
+            first_flight = (self.first_takeoff_done & (~self.first_landing_done) & (self.startup_elapsed < self.startup_ramp_s)).float()
+            steady = ((opening == 0.) & (first_flight == 0.)).float()
+            open_split = (foot_dx - .14).clamp_min(0.)
+            flight_split = (foot_dx - .16).clamp_min(0.)
+            steady_split = (foot_dx - .15).clamp_min(0.)
+            cost = (cost
+                    + opening * (12. * open_split.clamp_max(.6) + 40. * open_split.clamp_max(.6).square())
+                    + first_flight * 20. * flight_split.clamp_max(.6).square()
+                    + steady * (10. * steady_split.clamp_max(.6) + 38. * steady_split.clamp_max(.6).square()))
+            # Prevent both legs kicking backward behind the torso during startup or flight.
+            hip_q = data.qpos[:, self.hip_qpos]  # (W, 2)
+            startup_blend = torch.where(
+                self.first_landing_done,
+                torch.zeros_like(self.startup_elapsed),
+                (1. - self.startup_elapsed / self.startup_ramp_s).clamp(0., 1.),
+            )
+            hip_allow = torch.where(in_extend, .26, torch.where(startup_blend > .05, .14, .21))[:, None]
+            kick_back = (hip_q - hip_allow).clamp_min(0.)
+            kick_w = torch.where(in_extend, 25., 28. + 32. * startup_blend)
+            cost = cost + kick_w * kick_back.clamp_max(.6).square().mean(-1)
+            # Event-driven launch guard: keep FULL weight (1.0) through the entire first hop
+            # (crouch + launch + first flight + first touchdown) so the policy cannot cheat by
+            # hopping vertically and swinging both feet backward mid-air; release immediately
+            # once first_landing_done completes.
+            moving_cmd = (self.command_speed / .20).clamp(0., 1.)
+            launch_w = (~self.first_landing_done).float()
+            foot_mid = probes.mean(dim=(1, 2))  # (W, 3)
+            foot_back = -((foot_mid[:, :2] - self.startup_foot_origin) * self.heading).sum(-1)
+            # Tight 2 cm tolerance across the entire first hop to eliminate backward foot-swing.
+            back_tol = torch.where(~self.first_landing_done, .02, .04)
+            back_exc = (foot_back - back_tol).clamp_min(0.).clamp_max(.60)
+            com_xyz = data.sensordata[:, self.com_xy.start:self.com_xy.start + 3]
+            com_vel = data.sensordata[:, self.com_velocity_xy]
+            com_vx = (com_vel * self.heading).sum(-1)
+            com_ahead = ((com_xyz[:, :2] - foot_mid[:, :2]) * self.heading).sum(-1)
+            body_tilt = torch.atan2(com_ahead, (com_xyz[:, 2] - foot_mid[:, 2]).clamp_min(.25))
+            slope = self.terrain_slope()
+            # Keep startup (10/13 deg) and cruise (12/15 deg) body tilt upright, and tighten
+            # forward tilt allowance on downhills so fast bounding never dives on steep lunar slopes.
+            in_fc = (self.stage == self.FLIGHT) | (self.stage == self.COMPRESS)
+            start_allow = torch.where(in_fc, .175, .225)
+            cruise_allow = torch.where(in_fc, .21, .26)
+            downhill = (-slope).clamp_min(0.)
+            tilt_allow = (torch.lerp(cruise_allow, start_allow, launch_w) - .55 * downhill).clamp_min(.08)
+            tilt_exc = (body_tilt - slope.clamp_min(0.) - tilt_allow).clamp_min(0.).clamp_max(.50)
+            tilt_lin_w = 40. + 95. * launch_w
+            tilt_quad_w = 120. + 260. * launch_w
+            flight_tuck = ((self.stage == self.FLIGHT).float()
+                           * (knee - .50).clamp_min(0.).clamp_max(.80).square().mean(-1))
+            # Heavily penalize jumping vertically in place (low forward vx) during the 1st flight,
+            # which is the exact precursor to swinging both feet backward mid-air.
+            first_flight_mask = (self.first_takeoff_done & (~self.first_landing_done) & (self.stage == self.FLIGHT)).float()
+            min_launch_vx = (0.50 * (self.command_speed / 1.0).clamp(0., 1.)).clamp_max(.55)
+            vertical_hop_shortfall = (min_launch_vx - com_vx).clamp_min(0.)
+            vertical_hop_cost = first_flight_mask * (90. * vertical_hop_shortfall + 220. * vertical_hop_shortfall.square())
+            cost = (cost
+                    + moving_cmd * (launch_w * (420. * back_exc + 1200. * back_exc.square() + 45. * flight_tuck)
+                                    + vertical_hop_cost
+                                    + tilt_lin_w * tilt_exc + tilt_quad_w * tilt_exc.square()))
+        return cost
+
+    def in_place_crouch_launch_reward(self):
+        """Reward grounded in-place knee flexion + COM forward shift, and genuine forward 1st takeoff."""
+        if not (self.symmetric_startup and self.suit_major_joints):
+            return self.worlds.sim.data.qpos.new_zeros(self.worlds.count)
+        moving_cmd = (self.command_speed / .20).clamp(0., 1.)
+        data = self.worlds.sim.data
+        knee_mean = data.qpos[:, self.knee_qpos].mean(-1)
+        probes = self.sole_probes()
+        foot_mid = probes.mean(dim=(1, 2))
+        foot_back = -((foot_mid[:, :2] - self.startup_foot_origin) * self.heading).sum(-1)
+        com_xyz = data.sensordata[:, self.com_xy.start:self.com_xy.start + 3]
+        com_vel = data.sensordata[:, self.com_velocity_xy]
+        com_vx = (com_vel * self.heading).sum(-1)
+        com_ahead = ((com_xyz[:, :2] - foot_mid[:, :2]) * self.heading).sum(-1)
+        body_tilt = torch.atan2(com_ahead, (com_xyz[:, 2] - foot_mid[:, 2]).clamp_min(.25))
+        # 1) Grounded in-place crouch: keep feet planted (no backward shift), bend knees 25..50 deg,
+        #    and shift heavy backpack COM forward from -6.7 deg toward +4..+11 deg.
+        in_crouch = (~self.first_takeoff_done) & (self.stage == self.COMPRESS) & (self.ground_frames >= 2)
+        anchored = torch.exp(-(foot_back.clamp_min(0.) / .02).square())
+        crouch_score = ((knee_mean - .30) / .35).clamp(0., 1.) * (1. - ((knee_mean - .90) / .20).clamp(0., 1.))
+        com_shift = ((body_tilt + .08) / .22).clamp(0., 1.) * torch.exp(-((body_tilt - .14) / .10).square())
+        crouch_bonus = in_crouch.float() * 24.0 * anchored * crouch_score * com_shift
+        # 2) Genuine forward 1st flight: reward forward velocity while feet stay ahead of origin.
+        in_first_flight = self.first_takeoff_done & (~self.first_landing_done) & (self.stage == self.FLIGHT)
+        no_back_swing = torch.exp(-(foot_back.clamp_min(0.) / .03).square())
+        fwd_launch = (com_vx / .65).clamp(0., 1.2)
+        flight_bonus = in_first_flight.float() * 36.0 * no_back_swing * fwd_launch
+        # 3) Dense upward takeoff drive (grounded EXTEND) and airborne clearance reward +
+        #    low-skim penalty across all moving hops so the astronaut launches with vz ~0.75 m/s
+        #    and clears rough lunar terrain by 18..30 cm instead of skimming at 7 cm.
+        com_vz = data.sensordata[:, self.com_velocity_xy.stop]
+        move_arc = (self.command_speed / .40).clamp(0., 1.)
+        target_vz = .68 + .12 * ((self.command_speed - .50) / 1.0).clamp(0., 1.)
+        up_drive = (com_vz / target_vz).clamp(0., 1.15)
+        in_extend_push = (self.stage == self.EXTEND) & (self.ground_frames > 0)
+        extend_lift_bonus = in_extend_push.float() * 42.0 * up_drive
+        in_air = (self.stage == self.FLIGHT) & (self.ground_frames == 0)
+        min_clear = self.sole_clearances().amin(dim=(-1, -2)).clamp_min(0.)
+        air_clear_bonus = in_air.float() * 45.0 * ((min_clear - .05) / .20).clamp(0., 1.3)
+        mid_flight = in_air & (self.age > .08) & (com_vz > -.25)
+        low_skim = ((.15 - min_clear) / .15).clamp(0., 1.)
+        skim_penalty = mid_flight.float() * 35.0 * low_skim.square()
+        return moving_cmd * (crouch_bonus + flight_bonus) + move_arc * (
+            extend_lift_bonus + air_clear_bonus - skim_penalty)
 
     def reward(self, measured):
         error = self.boot_yaw_error()
@@ -1625,7 +1898,8 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
         cost = (2.4 * boot_error + 2.6 * center_error) * (self.stage != self.WAIT)
         if self.suit_major_joints:
             cost = cost + self.waist_motion_cost() + self.natural_leg_cost()
-        return super().reward(measured) - self.DT * cost * ~measured['wangyu/failed']
+        bonus = self.in_place_crouch_launch_reward()
+        return super().reward(measured) + self.DT * (bonus - cost) * ~measured['wangyu/failed']
 
 
 def replace_height_command_input(state):

@@ -364,3 +364,17 @@ Studio界面使用项目内 `native_ui_bridge.py`，通过公开mjrf上传ImGui�
 衣服背光面的硬黑斑修复：此前PNG月面IBL只有镜面反射，且Royal转换KTX也没有`sh`元数据；MuJoCo仅在KTX含SH时调用Filament的`irradiance(3, ...)`，布料缺少月面反弹漫反射。两个环境现均保存线性HDR KTX与9个RGB辐照SH系数（包含余弦卷积及Lambert 1/π），无需额外头灯、复制光源或抬高曝光。月面反射仍保留原黑天空/地面分界，自阴影及太阳直射保留。CPU测试验证常量环境能量守恒、下半球照明方向和KTX元数据；固定姿态同相机前后图`suit_shadow_before.png`/`suit_shadow_irradiance.png`、另一侧`suit_shadow_fixed.png`，均0物理步。原始材质/模型/策略及训练逻辑未变，环境资产需重启窗口重新加载。
 
 用户后续要求衣服更干净：`scripts/prepare_clean_cloth.py`从原始地图生成`assets/clean_cloth`显示派生图。原白布sRGB约213，低饱和明亮区域局部+22（上限245），保留底色中的缝线差异，红蓝/国旗/CMS标识颜色逐像素不变；白布和红织物金属度从原约.17改0、粗糙度至少.82，布料法线与平面法线混合强度.28，其他区域.55、头盔外壳法线.45。大褶皱几何与缝线保留，减弱原法线近乎掠射造成的黑色划痕。源图SHA和产物SHA均校验，原图不改；直接重指向已有共享texture资产，不增加纹理数量或复制每个人的资源，面罩镜面不变。静态同相机原图`cloth_source_comparison.png`、清洁版`cloth_clean_final.png`；`audit_reference_render.py --cloth-closeup --source-cloth`只用于静态A/B审计。
+
+### 望宇月面跌倒脱困
+
+独立任务 `Wangyu-Replant-v1` 参考原项目 `--best replant` 的 V15 两阶段动作。使用本项目望宇 fitted 人体、望宇 EVA 质量和关节参数、1.635 m/s² 重力及原生 CPU MuJoCo。起始场景沿用参考验证的平面，四肢朝地，固定初态。背包两侧各有一个主动摆轴和一个伸缩轴，球端自由触地。策略共控制 23 个人体关节和 4 个杆关节。杆长、行程、初始姿态与跪姿门槛按望宇模型重新设置，属于仿真假设。
+
+```bash
+./replant.sh check
+./replant.sh train                          # 默认 8192 个 CUDA 环境，2000 次 PPO 更新
+./replant.sh play                           # 自动加载最新训练目录中编号最大的已保存检查点
+./replant.sh play logs/wangyu_replant/<训练目录>/model_<迭代>.pt
+./replant.sh play logs/wangyu_replant/<训练目录>/model_<迭代>.pt --headless --episodes 3
+```
+
+训练使用 MuJoCo Warp 批量物理，接触支撑域、奖励、部分复位、采样和 PPO 更新均在 CUDA 上执行。启动时由 CPU 编译模型并构造一次固定趴伏模板。通过 `--num-envs` 调整显存需求，`PLAYGROUND_PYTHON` 可指定已有 GPU 环境。回放沿用原生 CPU MuJoCo。训练从零开始。判据依次检查跪稳、双杆同时卸载离地、两杆换点后近质心承重、双脚双杆连续站稳。跪稳要求至少三个靴底/胫部承重部位及质心投影落入支撑域；换点要求每个杆端水平位移至少 15 cm。最终连续 1 秒内每脚至少 5 N、每杆至少 10 N、质心投影到双杆端有限线段不超过 10 cm，并满足骨盆高度、躯干姿态和低速度条件。每回合上限 36 秒。回放用 MuJoCo 原生窗口显示碰撞代理，可加 `--headless` 输出各回合结果。此任务尚无训练完成的望宇检查点。

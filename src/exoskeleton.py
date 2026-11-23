@@ -987,8 +987,8 @@ class TelescopingAssist:
         self.phase_support_seconds.add_(footprint.clamp_max(1.) * supported * dt)
         self.phase_impulse_ns[:, 0].add_(impulse * (phase == 1)[:, None])
         self.phase_impulse_ns[:, 1].add_(impulse * (phase == 2)[:, None])
-        band = costs['bilateral_force_share_deadband']
-        strut_bal_w = 16. if self.policy_io == IMPEDANCE_FORCE_IO else costs['strut_impulse_balance']
+        band = .10 if self.policy_io == IMPEDANCE_FORCE_IO else costs['bilateral_force_share_deadband']
+        strut_bal_w = 22. if self.policy_io == IMPEDANCE_FORCE_IO else costs['strut_impulse_balance']
         boot_bal_w = 10. if self.policy_io == IMPEDANCE_FORCE_IO else costs['boot_support_balance']
         balance = (strut_bal_w * excess_side_difference(self.phase_force_impulse, band) / weight
                    + boot_bal_w * excess_side_difference(self.phase_support_seconds, band))
@@ -1052,6 +1052,10 @@ class TelescopingAssist:
         return rate
 
     def observe(self, dt):
+        self.sample_seconds += dt
+        self._observe_tensors(dt)
+
+    def _observe_tensors(self, dt):
         command = self.commands
         data = self.worlds.sim.data
         power = data.actuator_force * data.actuator_velocity
@@ -1106,10 +1110,11 @@ class TelescopingAssist:
                     moving_share = (command.target_speed / .25).clamp(0., 1.)
                     exo_push_sides = exo_power * load
                     if self.mechanism in HUT_MECHANISMS:
-                        # Rewards both two-footed hops (1.0x) and fast lunar lope thrusts (0.65x)
-                        exo_push_eff = .65 * exo_push_sides.sum(-1) + .70 * exo_push_sides.amin(-1)
+                        # Strongly reward bilateral symmetric propulsion & braking (min-side weighted)
+                        # so both struts actively assist rather than one strut dominating.
+                        exo_push_eff = .40 * exo_push_sides.sum(-1) + 1.20 * exo_push_sides.amin(-1)
                         exo_brake_sides = (-strut_power).clamp_min(0.) * load
-                        exo_brake_eff = .65 * exo_brake_sides.sum(-1) + .70 * exo_brake_sides.amin(-1)
+                        exo_brake_eff = .45 * exo_brake_sides.sum(-1) + 1.10 * exo_brake_sides.amin(-1)
                     else:
                         exo_push_eff = .4 * exo_push_sides.sum(-1) + 1.2 * exo_push_sides.amin(-1)
                         exo_brake_sides = (-strut_power).clamp_min(0.) * load
@@ -1117,10 +1122,19 @@ class TelescopingAssist:
                     push_share = exo_push_eff / (exo_push_sides.sum(-1) + human_positive + .12 * weight)
                     falling = ((-data.sensordata[:, command.com_velocity_xy.stop] - .05) / .30).clamp(0., 1.)
                     brake_share = exo_brake_eff / (exo_brake_sides.sum(-1) + human_negative + .12 * weight)
-                    self.efficiency_rate.add_(assist_share_w * moving_share * (push_share * rising + .85 * brake_share * falling))
+                    push_power_bonus = (exo_push_eff / (.35 * weight)).clamp(0., 1.2)
+                    self.efficiency_rate.add_(assist_share_w * moving_share * (
+                        (push_share + .25 * push_power_bonus) * rising + .85 * brake_share * falling))
+                    # Encourage bilateral synchronized foot loading during COM rise so left and
+                    # right struts stay loaded and extend together rather than one foot lifting early.
+                    any_loaded = (load.amax(-1) > .15).float()
+                    rising_load_diff = (load[:, 0] - load[:, 1]).abs()
+                    rising_sync_bonus = load.amin(-1)
+                    self.efficiency_rate.add_(moving_share * rising * any_loaded * (
+                        18. * rising_sync_bonus - 24. * rising_load_diff.square()))
                     both_loaded = (load.amin(-1) > .20).float()
-                    cmd_asym = ((self.last_request[:, 0] - self.last_request[:, 1]).abs() - .12).clamp_min(0.)
-                    self.efficiency_rate.sub_(12. * both_loaded * cmd_asym.square())
+                    cmd_asym = ((self.last_request[:, 0] - self.last_request[:, 1]).abs() - .08).clamp_min(0.)
+                    self.efficiency_rate.sub_(20. * both_loaded * cmd_asym.square())
                 else:
                     exo_push = (exo_power * load).sum(-1)
                     push_share = exo_push / (exo_push + human_positive + .15 * weight)
@@ -1137,7 +1151,6 @@ class TelescopingAssist:
             self.efficiency_rate.add_(EFFICIENCY_REWARD['supported_exo_work_share'] * work_share
                                       + EFFICIENCY_REWARD['supported_exo_positive_power'] * useful_power)
 
-        self.sample_seconds += dt
         self.positive_work_j.add_(exo_power * dt)
         self.supported_work_j.add_(supported_power * dt)
         self.human_positive_work_j.add_(human_positive * dt)

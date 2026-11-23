@@ -15,11 +15,12 @@ ASSET=Path(__file__).resolve().parents[1]/'assets/playground'
 META=json.loads((ASSET/'metadata.json').read_text())
 
 class MoonDeviceCore:
-    def __init__(self,name='wangyu',pushes=True,push_force=30.,push_torque=0.,resample_terrain=True,shared_terrain=False,terrain_size=16,terrain_idx=None,*,optimize_cpu=False,inward_heading=False,edge_start=False):
+    def __init__(self,name='wangyu',pushes=True,push_force=30.,push_torque=0.,resample_terrain=True,shared_terrain=False,terrain_size=16,terrain_idx=None,*,optimize_cpu=False,inward_heading=False,edge_start=False,tiled_100m=False):
         self._name=name;self.pushes=pushes
         self.optimize_cpu=optimize_cpu
         self.inward_heading=inward_heading
         self.edge_start=edge_start
+        self.tiled_100m=tiled_100m
         self.push_force=float(push_force);self.push_torque=float(push_torque)
         self.resample_terrain=resample_terrain
         if terrain_idx is not None and (type(terrain_idx) is not int or not 1<=terrain_idx<=64 or terrain_size!=16):
@@ -68,8 +69,8 @@ class MoonDeviceCore:
         self.veladr=int(m.sensor('robot/balance_torso_com_vel').adr[0])
         # Load the exported bank, rather than silently regenerate changed terrain.
         if self.terrain_size==100:
-            from large_terrain import bank_data
-            bank=bank_data()
+            from large_terrain import bank_data, tiled_bank_data
+            bank=tiled_bank_data() if self.tiled_100m else bank_data()
         else:
             with np.load(ASSET/'state.npz') as z:bank={k:z[k].copy() for k in ('normalized','zmin','height_range','spawn_xy','spawn_counts','centers','altitudes')}
         if self.terrain_size==16:terrain.bank_data=lambda:bank
@@ -113,8 +114,13 @@ class MoonDeviceCore:
         simulator.model.geom_dataid[:,g.geom_id]=g.native_ids[p]
         simulator.model.geom_pos[:,g.geom_id,2]=g.zmin[p]
         padding = g.clearance_padding[p]
+        precomputed_z = None
         if self.device_spawns is not None:
-            xy, yaw, padding = self.device_spawns.sample()
+            sampled = self.device_spawns.sample()
+            if len(sampled) == 4:
+                xy, yaw, padding, precomputed_z = sampled
+            else:
+                xy, yaw, padding = sampled
             distributed = True
         elif sampler is not None:
             ids = mask.nonzero(as_tuple=True)[0]
@@ -148,24 +154,27 @@ class MoonDeviceCore:
                     yaw[ids]=torch.as_tensor(headings,device=self.dev,dtype=yaw.dtype)
                     padding=padding.clone()
                     padding[ids]=torch.as_tensor(margins,device=self.dev,dtype=padding.dtype)
-        c=yaw.cos();s=yaw.sin();foot=g.sole_points
-        # Preserve full-batch random draws and their order, but evaluate the
-        # 208-point sole covering bound only for worlds that actually reset.
-        # Full resets keep the fixed-size path and need no nonzero() sync.
-        sparse=env_mask is not None and (self.device_spawns is not None or sampler is not None or self.optimize_cpu or os.environ.get('MOON_SPARSE_RESET','0')=='1')
-        ids=mask.nonzero(as_tuple=True)[0] if sparse else None
-        active_xy=xy if ids is None else xy[ids]
-        active_c=c if ids is None else c[ids];active_s=s if ids is None else s[ids]
-        active_p=p if ids is None else p[ids]
-        points=torch.stack((active_xy[:,None,0]+active_c[:,None]*foot[None,:,0]-active_s[:,None]*foot[None,:,1],active_xy[:,None,1]+active_s[:,None]*foot[None,:,0]+active_c[:,None]*foot[None,:,1]),-1)
-        heights=g.height(points,env_ids=ids)
-        active_z=(heights-foot[None,:,2]).max(-1).values+.015+(padding if ids is None else padding[ids])
-        gaps=active_z[:,None]+foot[None,:,2]-heights
-        valid=torch.isfinite(gaps).all(-1)&(points.abs()<=(g.half-2.25 if distributed else 2.)).all((1,2))&(gaps.min(-1).values>=.0145)&(gaps.max(-1).values<=.20)
-        if not bool((valid if sparse else valid|~mask).all()):raise ValueError("Invalid whole-sole terrain spawn")
-        if sparse:
-            z=torch.zeros_like(yaw);z[ids]=active_z
-        else:z=active_z
+        if precomputed_z is not None:
+            z = precomputed_z
+        else:
+            c=yaw.cos();s=yaw.sin();foot=g.sole_points
+            # Preserve full-batch random draws and their order, but evaluate the
+            # 208-point sole covering bound only for worlds that actually reset.
+            # Full resets keep the fixed-size path and need no nonzero() sync.
+            sparse=env_mask is not None and (self.device_spawns is not None or sampler is not None or self.optimize_cpu or os.environ.get('MOON_SPARSE_RESET','0')=='1')
+            ids=mask.nonzero(as_tuple=True)[0] if sparse else None
+            active_xy=xy if ids is None else xy[ids]
+            active_c=c if ids is None else c[ids];active_s=s if ids is None else s[ids]
+            active_p=p if ids is None else p[ids]
+            points=torch.stack((active_xy[:,None,0]+active_c[:,None]*foot[None,:,0]-active_s[:,None]*foot[None,:,1],active_xy[:,None,1]+active_s[:,None]*foot[None,:,0]+active_c[:,None]*foot[None,:,1]),-1)
+            heights=g.height(points,env_ids=ids)
+            active_z=(heights-foot[None,:,2]).max(-1).values+.015+(padding if ids is None else padding[ids])
+            gaps=active_z[:,None]+foot[None,:,2]-heights
+            valid=torch.isfinite(gaps).all(-1)&(points.abs()<=(g.half-2.25 if distributed else 2.)).all((1,2))&(gaps.min(-1).values>=.0145)&(gaps.max(-1).values<=.20)
+            if not bool((valid if sparse else valid|~mask).all()):raise ValueError("Invalid whole-sole terrain spawn")
+            if sparse:
+                z=torch.zeros_like(yaw);z[ids]=active_z
+            else:z=active_z
         q=self.q0.repeat(self.n,1);q[:,:2]=xy;q[:,2]=z;q[:,3:7]=0;q[:,3]=(yaw/2).cos();q[:,6]=(yaw/2).sin()
         simulator.data.qpos[:]=torch.where(mask[:,None],q,simulator.data.qpos[:])
         simulator.data.qvel[:]=torch.where(mask[:,None],0.,simulator.data.qvel[:])

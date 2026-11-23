@@ -1,0 +1,19 @@
+{
+  "selected_checkpoint": "model_399.pt",
+  "source_training_run": "logs/cpu_exo_train/v27_100m_boot18v",
+  "init_checkpoint": "logs/cpu_exo_train/v26_100m_native_arc/model_399.pt",
+  "geometry": "fit3d_18v",
+  "boot_hull_revision": "boot_hull_fit3d_18v_v1",
+  "terrain_size_m": 100,
+  "replay_command": "./run_exo_force.sh bests/exo_jump_force_wangyu_hut_ball_aft_v27_100m_boot18v_2026-11-23/model_399.pt --terrain-size 100 --jump-speed 1.5",
+  "replay_command_16m": "./run_exo_force.sh bests/exo_jump_force_wangyu_hut_ball_aft_v27_100m_boot18v_2026-11-23/model_399.pt --jump-speed 1.5",
+  "sha256": {
+    "model_399.pt": "6c2ca36e50e1ebdaea303b30232036c1d965adb6a980f77fd3e70c6ca42d056d",
+    "config.json": "c678603e5b8e2cc3681fbda22f4b6b2098c4e3c70909967279c4db298f55fdb5",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "final_verification.json": "06982fdf20ad7e4cd617cff8a901052645f4845274a8de60148a73230668396c",
+    "training_efficiency.json": "04d1b89d35ef8db42e904116708ece692d147e3269e1e2984396968825332ff7",
+    "assets/boot_hull_18v/fit.json": "f0447a3e02dc5ed27916aee8e8b84720be0d5f0ea12b58b445ca30ba9be28b9a",
+    "assets/boot_hull_18v/manifest.json": "b0a71f2ab6c4f00df076b921666abd847234490eeca2006f2ce222ed4ffa5c61"
+  }
+}

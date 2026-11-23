@@ -89,7 +89,12 @@ class IndependentSpawns:
         self.position_rng = np.random.default_rng(position_seed)
         self.heading_rng = np.random.default_rng(heading_seed)
         half = float(bank.get('half_extent_m', HALF))
-        axis = np.linspace(-2.4, 2.4, 13)
+        if half > 10.:
+            axis = np.linspace(-(half - 8.), half - 8., 29)
+        elif half > 8.:
+            axis = np.linspace(-(half - 6.5), half - 6.5, 15)
+        else:
+            axis = np.linspace(-2.4, 2.4, 13)
         xy = np.stack(np.meshgrid(axis, axis), axis=-1).reshape(-1, 2)
         step = 2 * half / (bank['normalized'].shape[1] - 1)
         radius = int(np.ceil(np.linalg.norm(sole_points[:, :2], axis=-1).max() / step)) + 2

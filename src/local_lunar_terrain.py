@@ -32,13 +32,29 @@ def sole_sampling(model,spacing=.025):
     points=[];cover=0.
     for side in ('left','right'):
         gid=model.geom(f'robot/{side}_sole').id
-        if not np.allclose(data.geom_xmat[gid].reshape(3,3)[:,2],[0,0,1],atol=1e-8):
-            raise ValueError('Certified spawn sampling requires horizontal rest soles')
-        size=model.geom_size[gid];nx=int(np.ceil(2*size[0]/spacing));ny=int(np.ceil(2*size[1]/spacing))
-        x,y=np.meshgrid(np.linspace(-size[0],size[0],nx+1),np.linspace(-size[1],size[1],ny+1))
-        local=np.stack((x,y,np.full_like(x,-size[2])),-1).reshape(-1,3)
-        points.append(local@data.geom_xmat[gid].reshape(3,3).T+data.geom_xpos[gid]-data.qpos[:3])
-        cover=max(cover,float(np.hypot(size[0]/nx,size[1]/ny)))
+        if model.geom_contype[gid]==0:
+            bid=model.body(f'robot/{side.title()}Foot').id
+            gids=[g for g in range(model.ngeom) if model.geom_bodyid[g]==bid and model.geom_contype[g]!=0]
+        else:
+            gids=[gid]
+        for g in gids:
+            if model.geom_type[g]==mujoco.mjtGeom.mjGEOM_MESH:
+                mesh=int(model.geom_dataid[g]);start=int(model.mesh_vertadr[mesh])
+                vertices=model.mesh_vert[start:start+int(model.mesh_vertnum[mesh])]
+                world=vertices@data.geom_xmat[g].reshape(3,3).T+data.geom_xpos[g]
+                low=world.min(0);high=world.max(0)
+                nx=int(np.ceil((high[0]-low[0])/spacing));ny=int(np.ceil((high[1]-low[1])/spacing))
+                x,y=np.meshgrid(np.linspace(low[0],high[0],nx+1),np.linspace(low[1],high[1],ny+1))
+                points.append(np.stack((x,y,np.full_like(x,low[2])),-1).reshape(-1,3)-data.qpos[:3])
+                cover=max(cover,float(np.hypot((high[0]-low[0])/(2*nx),(high[1]-low[1])/(2*ny))))
+                continue
+            if not np.allclose(data.geom_xmat[g].reshape(3,3)[:,2],[0,0,1],atol=1e-8):
+                raise ValueError('Certified spawn sampling requires horizontal rest soles')
+            size=model.geom_size[g];nx=int(np.ceil(2*size[0]/spacing));ny=int(np.ceil(2*size[1]/spacing))
+            x,y=np.meshgrid(np.linspace(-size[0],size[0],nx+1),np.linspace(-size[1],size[1],ny+1))
+            local=np.stack((x,y,np.full_like(x,-size[2])),-1).reshape(-1,3)
+            points.append(local@data.geom_xmat[g].reshape(3,3).T+data.geom_xpos[g]-data.qpos[:3])
+            cover=max(cover,float(np.hypot(size[0]/nx,size[1]/ny)))
     return np.concatenate(points),cover
 
 

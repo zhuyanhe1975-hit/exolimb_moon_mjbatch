@@ -108,7 +108,7 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
     parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
                         help='外骨骼每根支杆的助力上限（0–500 N，默认采用检查点记录的值）')
     parser.add_argument('--require-force-control', action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument('--geometry', choices=('legacy', 'fitted'),
+    parser.add_argument('--geometry', choices=('legacy', 'fitted', 'fitted_3box', 'bodyfit_v2_hull', 'fit3d_18v'),
                         help='物理几何版本，默认采用检查点的训练配置')
     parser.add_argument('--terrain-transfer', '--terrain_transfer', action='store_true', help='显式允许检查点向当前地形迁移')
     parser.add_argument('--report', type=Path, help='退出时保存 JSON 验证报告')

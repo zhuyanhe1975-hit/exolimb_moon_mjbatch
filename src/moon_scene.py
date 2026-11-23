@@ -2,7 +2,9 @@ from math import radians
 from pathlib import Path
 import mujoco
 import numpy as np
-from suit_proxy_geometry import FITTED, LEGACY, PROFILES, fit_suit_proxies
+from suit_proxy_geometry import (BODYFIT_HULL, FIT3D_18V, FITTED, FITTED_3BOX, LEGACY, PROFILES,
+                                 apply_3box_sole_collision, apply_bodyfit_hull_collision,
+                                 apply_fit3d_18v_collision, fit_suit_proxies)
 ASSET=Path(__file__).resolve().parents[1]/"assets/playground"
 SOLE_TERRAIN_CONTACTS = 12
 SUIT_ANKLE_ROLL_LIMIT = radians(8.)
@@ -193,7 +195,7 @@ def scene_spec(terrain_size=16, *, geometry=LEGACY, sole_probes=False, sole_coll
                sole_edge_probes=False, exoskeleton=False, exo_pd_force=None, exo_mechanism=None,
                suit_ankle_roll=False, suit_ankle_pitch=False, suit_major_joints=False,
                relax_propulsion=False, apollo_mass=False, mass_profile=None,
-               vertical_support=False, stance_transition=False):
+               vertical_support=False, stance_transition=False, tiled_100m=False):
     if geometry not in PROFILES:
         raise ValueError(f'Unknown suit geometry profile: {geometry}')
     if mass_profile is None and apollo_mass:
@@ -219,10 +221,10 @@ def scene_spec(terrain_size=16, *, geometry=LEGACY, sole_probes=False, sole_coll
             objtype=mujoco.mjtObj.mjOBJ_GEOM,objname=f'robot/{side}_sole',
             reftype=mujoco.mjtObj.mjOBJ_GEOM,refname='terrain',intprm=[27,2,4])
     if terrain_size==100:
-        from large_terrain import configure
-        configure(spec)
+        from large_terrain import configure, configure_tiled
+        (configure_tiled if tiled_100m else configure)(spec)
     elif terrain_size!=16:raise ValueError('Supported terrain sizes: 16, 100')
-    if geometry == FITTED:
+    if geometry in (FITTED, FITTED_3BOX, BODYFIT_HULL, FIT3D_18V):
         fit_suit_proxies(spec)
     is_wangyu = mass_profile == WANGYU_EVA_PROFILE
     if mass_profile == APOLLO_MASS_PROFILE:
@@ -268,6 +270,12 @@ def scene_spec(terrain_size=16, *, geometry=LEGACY, sole_probes=False, sole_coll
         from exoskeleton import MECHANISM, add_exoskeleton
         add_exoskeleton(spec, pd_force=exo_pd_force, guard_action_force=suit_ankle_roll,
                         contact_tangent=stance_transition, mechanism=exo_mechanism or MECHANISM)
+    if geometry == FITTED_3BOX:
+        apply_3box_sole_collision(spec)
+    elif geometry == BODYFIT_HULL:
+        apply_bodyfit_hull_collision(spec)
+    elif geometry == FIT3D_18V:
+        apply_fit3d_18v_collision(spec)
     return spec
 
 
