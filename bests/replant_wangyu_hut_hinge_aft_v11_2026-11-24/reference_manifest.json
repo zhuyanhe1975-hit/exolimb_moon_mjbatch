@@ -1,0 +1,75 @@
+{
+  "revision": "wangyu_replant_ref_v7",
+  "source_motion": "/home/yhzhu/myWorks/zbot_exoarm_moon/experiments/apollo_lunar/data/kimodo/two_stage_replant_20261111/fixed_support_v14/motion.npz",
+  "source_sha256": "263ee5d693577fbfe28cffa907c35516df6bb8612dff32b825a17498f9d6cb66",
+  "script": "scripts/prepare_wangyu_replant_ref.py",
+  "script_sha256": "a42df64eb1295cba9162a522a626bf47776135f2cd8e60abb4f6c8215b70ee8e",
+  "files": {
+    "assets/wangyu_replant_ref/motion.npz": "3555d14715c6f1e24528522bc93624c812b4924d61160b1be19a9fbd1530fe00"
+  },
+  "audit": {
+    "task": "Wangyu-Replant-v11",
+    "geometry": "fit3d_18v",
+    "exo_mechanism": "hut_hinge_aft_v7_detached",
+    "frames": 527,
+    "dt": 0.016666666666666666,
+    "duration_s": 8.7667,
+    "t_kneel_s": 3.0402,
+    "t_replant_end_s": 4.0494,
+    "anchor_prone_xy": [
+      0.5239,
+      0.345
+    ],
+    "anchor_stand_xy": [
+      -0.1003,
+      0.345
+    ],
+    "replant_shift_m": 0.6242,
+    "max_strut_fk_error_m": 0.0,
+    "max_joint_limit_violation_rad": 0.0,
+    "min_ground_gap_m": 0.001,
+    "min_forearm_chest_gap_m": 0.2133,
+    "min_strut_human_gap_m": 0.0279,
+    "strut_pitch_deg_range": [
+      -103.67,
+      0.72
+    ],
+    "strut_roll_deg_range": [
+      -7.31,
+      7.55
+    ],
+    "strut_length_m_range": [
+      0.5735,
+      0.9787
+    ],
+    "prone_hand_gaps_m": [
+      0.0012,
+      0.0012
+    ],
+    "kneel_frame": {
+      "index": 182,
+      "z_m": 0.4037,
+      "upright": 1.0,
+      "com_xy": [
+        -0.2145,
+        0.0009
+      ],
+      "leg_gaps_m": {
+        "robot/left_sole_hull": 0.0256,
+        "robot/right_sole_hull": 0.0259,
+        "robot/left_shin": 0.001,
+        "robot/right_shin": 0.001
+      }
+    },
+    "stand_frame": {
+      "index": 526,
+      "z_m": 0.8131,
+      "upright": 1.0,
+      "com_xy": [
+        -0.1224,
+        0.001
+      ],
+      "com_to_tip_line_m": 0.0221
+    }
+  }
+}

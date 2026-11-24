@@ -1,0 +1,20 @@
+{
+  "selected_checkpoint": "model_999.pt",
+  "task": "Wangyu-Replant-v12",
+  "source_training_run": "logs/wangyu_replant/2026-11-24_13-44-00_873610",
+  "init_from": "bests/replant_wangyu_hut_hinge_aft_v11_2026-11-24/model_1999.pt",
+  "geometry": "fit3d_18v",
+  "exo_mechanism": "hut_hinge_hoof_v8_detached",
+  "reference_revision": "wangyu_replant_ref_v8",
+  "replay_command": "./replant.sh play bests/replant_wangyu_hut_hinge_hoof_v12_2026-11-24/model_999.pt",
+  "replay_command_best": "./replant.sh play --best",
+  "preview_command": "./replant.sh preview",
+  "sha256": {
+    "model_999.pt": "bf803cc8f5716b9ef6791b8bcad2b42ac1fc132783744d1cefb5317033ec58c5",
+    "config.json": "691c599aa2dbac46768ae5fb775142dda27dd94d6106a1587e1b7c39f116f8ce",
+    "reference_manifest.json": "e61d1212dcc6cdd5fb5a47efb135598e4c089eada91c6c9b840deb205ea7228e",
+    "final_verification.json": "1116fedf1293b6771286bf7acd86e5083b550f56cf864ea9f411618560fc28ad",
+    "reference/motion.npz": "53a99ea0740900d0ded6d9992332b652bd942187d32e26aba65c9e5e36ffbc2e",
+    "reference/manifest.json": "e61d1212dcc6cdd5fb5a47efb135598e4c089eada91c6c9b840deb205ea7228e"
+  }
+}

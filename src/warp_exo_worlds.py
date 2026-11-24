@@ -34,9 +34,12 @@ class WarpSpawnTable:
             candidates[row, :len(xy), :2] = xy
             candidates[row, :len(xy), 2] = padding
         device = ground.sole_points.device
-        self.patches = torch.as_tensor(np.repeat(patches, sizes), device=device)
-        self.rows = torch.as_tensor(np.repeat(np.arange(len(patches)), sizes), device=device)
-        self.counts = torch.as_tensor(np.repeat(counts, sizes), device=device)
+        # Interleave terrain patches across env IDs so any subset of terminating worlds
+        # spans all patches uniformly instead of clustering high-index tiles at the tail.
+        row_ids = np.arange(count, dtype=np.int64) % len(patches)
+        self.patches = torch.as_tensor(patches[row_ids], device=device)
+        self.rows = torch.as_tensor(row_ids, device=device)
+        self.counts = torch.as_tensor(np.asarray(counts, dtype=np.int64)[row_ids], device=device)
         self.candidates = torch.as_tensor(candidates, device=device)
         self.headings = torch.as_tensor(table.headings, device=device, dtype=torch.float32)
         self.generator = torch.Generator(device=device).manual_seed(seed)
@@ -85,7 +88,7 @@ class WarpSpawnTable:
 
 class WarpExoWorlds:
     def __init__(self, spec, count, terrain_idx, *, pushes, terrain_indices, seed, assist_force,
-                 terrain_size=16):
+                 terrain_size=16, hinge_torque=None):
         self.model = spec.compile()
         self.count = count
         self.terrain_size = terrain_size
@@ -156,7 +159,7 @@ class WarpExoWorlds:
                          if terrain_size == 100 else (terrain_indices or (terrain_idx,)))
         self.device.device_spawns = WarpSpawnTable(
             self.model, self.device.ground, count, spawn_patches, seed)
-        self.exoskeleton = TelescopingAssist(self, assist_force)
+        self.exoskeleton = TelescopingAssist(self, assist_force, hinge_torque=hinge_torque)
         # Force accounting uses terrain-only contacts, excluding boot-to-boot contacts.
         sensor_columns = []
         load_columns = []

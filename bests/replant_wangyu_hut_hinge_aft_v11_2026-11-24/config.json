@@ -1,0 +1,81 @@
+{
+  "task": "Wangyu-Replant-v11",
+  "geometry": "fit3d_18v",
+  "exo_mechanism": "hut_hinge_aft_v7_detached",
+  "reference_revision": "wangyu_replant_ref_v7",
+  "reference_sha256": "3555d14715c6f1e24528522bc93624c812b4924d61160b1be19a9fbd1530fe00",
+  "rsi_prob": 0.5,
+  "env": {
+    "task": "Wangyu-Replant-v11",
+    "geometry": "fit3d_18v",
+    "exo_mechanism": "hut_hinge_aft_v7_detached",
+    "physics_backend": "mujoco_warp",
+    "device": "cuda:0",
+    "reference_revision": "wangyu_replant_ref_v7",
+    "reference_sha256": "3555d14715c6f1e24528522bc93624c812b4924d61160b1be19a9fbd1530fe00",
+    "rsi_prob": 0.5,
+    "residual_action": true,
+    "lookahead_steps": 12,
+    "residual_leg_rad": 0.35,
+    "residual_arm_rad": 0.2,
+    "residual_strut_rad": 0.25,
+    "residual_strut_roll_rad": 0.1,
+    "residual_strut_slide_m": 0.16,
+    "terminate_on_ref_div": true
+  },
+  "runner": {
+    "num_steps_per_env": 32,
+    "save_interval": 25,
+    "logger": "tensorboard",
+    "obs_groups": {
+      "actor": [
+        "policy"
+      ],
+      "critic": [
+        "policy"
+      ]
+    },
+    "actor": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        512,
+        256
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "rsl_rl.modules.GaussianDistribution",
+        "init_std": 0.12,
+        "std_type": "scalar"
+      }
+    },
+    "critic": {
+      "class_name": "rsl_rl.models.MLPModel",
+      "hidden_dims": [
+        512,
+        256
+      ],
+      "activation": "elu",
+      "obs_normalization": true
+    },
+    "algorithm": {
+      "class_name": "rsl_rl.algorithms.PPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.0002,
+      "schedule": "adaptive",
+      "gamma": 0.99,
+      "lam": 0.95,
+      "entropy_coef": 0.0005,
+      "desired_kl": 0.008,
+      "clip_param": 0.2,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "normalize_advantage_per_mini_batch": false
+    }
+  },
+  "seed": 42,
+  "num_envs": 8192,
+  "iterations": 2000
+}

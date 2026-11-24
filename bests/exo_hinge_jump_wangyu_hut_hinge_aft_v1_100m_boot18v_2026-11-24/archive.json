@@ -1,0 +1,24 @@
+{
+  "selected_checkpoint": "model_399.pt",
+  "task": "exo_hinge_jump",
+  "source_training_run": "logs/cpu_exo_hinge_train/v1_100m_hinge100",
+  "init_checkpoint": "bests/exo_jump_force_wangyu_hut_ball_aft_v27_100m_boot18v_2026-11-23/model_399.pt",
+  "geometry": "fit3d_18v",
+  "boot_hull_revision": "boot_hull_fit3d_18v_v1",
+  "exo_mechanism": "hut_hinge_aft_v7",
+  "exo_policy_io": "impedance_hinge_force_v1",
+  "assist_force_n": 500.0,
+  "hinge_torque_nm": 100.0,
+  "terrain_size_m": 100,
+  "replay_command": "./run_exo_hinge.sh bests/exo_hinge_jump_wangyu_hut_hinge_aft_v1_100m_boot18v_2026-11-24/model_399.pt --terrain-size 100 --jump-speed 1.5",
+  "replay_command_16m": "./run_exo_hinge.sh bests/exo_hinge_jump_wangyu_hut_hinge_aft_v1_100m_boot18v_2026-11-24/model_399.pt --terrain-size 16 --jump-speed 1.5",
+  "sha256": {
+    "model_399.pt": "70c4fa18f092b532f27bcd8c4954108d97805d9ce722aa08253c24425fd55b58",
+    "config.json": "41c5244402c5f0eac5fcd7c4b2dbd76e90d70a0b54e1c970a21809350ba3bc35",
+    "terrain_manifest.json": "ab0421c806508971a1fd1322a83395d5c585bc3353a3d2fba0b4fc4c32add842",
+    "final_verification.json": "77f37d53f6835b7393cdbf264b3346ac88ef1dffe86be9e5beaf5c49f05db522",
+    "training_efficiency.json": "c838e7ce278a2f6ee7016b6323c69f2d42bc86c7ed1994ce4ed9034e578ebfb9",
+    "assets/boot_hull_18v/fit.json": "f0447a3e02dc5ed27916aee8e8b84720be0d5f0ea12b58b445ca30ba9be28b9a",
+    "assets/boot_hull_18v/manifest.json": "b0a71f2ab6c4f00df076b921666abd847234490eeca2006f2ce222ed4ffa5c61"
+  }
+}

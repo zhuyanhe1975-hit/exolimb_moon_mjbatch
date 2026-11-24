@@ -1314,7 +1314,8 @@ class ForwardFacingBootCommands(SolePlaneMirroredLandingCommands):
                  slope_adaptive_posture=False, suit_major_joints=False, relax_propulsion=False, **kwargs):
         self.suit_major_joints = bool(suit_major_joints)
         self.symmetric_startup = (worlds.exoskeleton is not None
-                                  and getattr(worlds.exoskeleton, 'mechanism', None) == 'hut_ball_aft_v6')
+                                  and getattr(worlds.exoskeleton, 'mechanism', None)
+                                  in ('hut_ball_aft_v6', 'hut_hinge_aft_v7', 'hut_hinge_hoof_v8'))
         # Event-driven 3-stage startup: crouch in place to store energy, launch forward
         # with an immediate 0.75 m/s target, and ramp at 0.75 m/s^2 so full 1.5 m/s
         # long-stride cruise is reached within ~1.0s (right after the first hop).

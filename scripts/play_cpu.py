@@ -15,9 +15,11 @@ sys.path.insert(0, str(ROOT / 'src'))
 from provenance import training_env_config
 
 EXO_CHECKPOINT = ROOT / 'bests/exo_jump_position_pd500_2026-11-19/model_199.pt'
+EXO_HINGE_CHECKPOINT = ROOT / 'bests/exo_hinge_jump_wangyu_hut_hinge_aft_v1_100m_boot18v_2026-11-24/model_399.pt'
 EXO_BASE_CHECKPOINT = ROOT / 'bests/forward_jump_boot_yaw_2026-11-18/model_104.pt'
 BEST_CHECKPOINTS = {
     'exo_jump': EXO_CHECKPOINT,
+    'exo_hinge_jump': EXO_HINGE_CHECKPOINT,
     'forward_jump': EXO_BASE_CHECKPOINT,
     'jump': ROOT / 'bests/jump_flow_rebound_2026-11-18/model_149.pt',
 }
@@ -35,9 +37,10 @@ def latest_training_checkpoint(log_dir, task=None):
     for run in log_dir.iterdir() if log_dir.is_dir() else ():
         if not run.is_dir() or not (run / 'terrain_manifest.json').is_file():
             continue
-        if training_terrain(run) is None:
+        cfg = training_env_config(run)
+        if training_terrain(run) is None and cfg.get('terrain_size_m') != 100:
             continue
-        if task is not None and training_env_config(run).get('task', 'stand') != task:
+        if task is not None and cfg.get('task', 'stand') != task:
             continue
         for checkpoint in run.glob('model_*.pt'):
             match = re.fullmatch(r'model_(\d+)\.pt', checkpoint.name)
@@ -97,7 +100,7 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
                         help='自动选择最新本地训练检查点，可用 --task 筛选')
     policy.add_argument('--list-bests', action='store_true',
                         help='列出当前归档及对应检查点，然后退出')
-    parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump'),
+    parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump', 'exo_hinge_jump'),
                         help='按任务筛选检查点，也可与 --best 一起指定归档任务')
     height_args = parser.add_mutually_exclusive_group()
     height_args.add_argument('--jump-height', type=float, metavar='M',
@@ -107,6 +110,8 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
                         help='设定前进跳跃的目标速度（米/秒），例如 1.0')
     parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
                         help='外骨骼每根支杆的助力上限（0–500 N，默认采用检查点记录的值）')
+    parser.add_argument('--hinge-torque', type=float, metavar='NM',
+                        help='外骨骼每侧矢状面铰链力矩上限（0–200 N·m，仅用于 exo_hinge_jump）')
     parser.add_argument('--require-force-control', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--geometry', choices=('legacy', 'fitted', 'fitted_3box', 'bodyfit_v2_hull', 'fit3d_18v'),
                         help='物理几何版本，默认采用检查点的训练配置')
@@ -131,11 +136,17 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
         if args.task not in BEST_CHECKPOINTS:
             parser.error(f'任务 {args.task} 没有归档检查点，可用 --list-bests 查看')
         args.checkpoint = BEST_CHECKPOINTS[args.task]
-    forward_tasks = ('forward_jump', 'exo_jump')
+    exo_tasks = ('exo_jump', 'exo_hinge_jump')
+    forward_tasks = ('forward_jump', *exo_tasks)
     if args.assist_force is not None:
-        if args.task not in (None, 'exo_jump'):
+        if args.task not in (None, *exo_tasks):
             parser.error('--assist-force 只能用于外骨骼跳跃任务')
-        args.task = 'exo_jump'
+        if args.task is None and args.checkpoint is None:
+            args.task = 'exo_jump'
+    if args.hinge_torque is not None:
+        if args.task not in (None, 'exo_hinge_jump'):
+            parser.error('--hinge-torque 只能用于矢状面铰链外骨骼任务（exo_hinge_jump）')
+        args.task = 'exo_hinge_jump'
     fixed_height = args.jump_height
     if args.jump_height_cm is not None:
         fixed_height = args.jump_height_cm / 100
@@ -161,11 +172,16 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
     if args.seconds > 0 and round(args.seconds * 60) < 1:
         parser.error('--seconds 至少需要一个控制步（约0.0167秒）')
     if args.checkpoint is None and (args.latest_training or latest_default or args.task):
-        log_root = 'cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'
+        log_root = ('cpu_exo_hinge_train' if args.task == 'exo_hinge_jump'
+                    else ('cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'))
         args.checkpoint = latest_training_checkpoint(ROOT / 'logs' / log_root, task=args.task)
         if args.checkpoint is None and args.task == 'exo_jump':
             args.checkpoint = EXO_CHECKPOINT if EXO_CHECKPOINT.is_file() else EXO_BASE_CHECKPOINT
+        if args.checkpoint is None and args.task == 'exo_hinge_jump' and EXO_HINGE_CHECKPOINT.is_file():
+            args.checkpoint = EXO_HINGE_CHECKPOINT
         if args.checkpoint is None:
+            if args.task == 'exo_hinge_jump':
+                parser.error('未找到矢状面铰链外骨骼检查点，请先运行 ./train_exo_hinge.sh')
             if args.task == 'forward_jump':
                 parser.error('未找到前进跳跃检查点，请先运行 ./train_forward_jump.sh')
             if args.task == 'jump':
@@ -184,7 +200,8 @@ run.sh 专用：--backend cpu（默认）或 --backend playground（CUDA/Warp �
 
 def main():
     parser, args, fixed_height = parse_args()
-    forward_tasks = ('forward_jump', 'exo_jump')
+    exo_tasks = ('exo_jump', 'exo_hinge_jump')
+    forward_tasks = ('forward_jump', *exo_tasks)
     import mujoco
     import torch
     from tensordict import TensorDict
@@ -239,15 +256,18 @@ def main():
     if mass_profile not in (None, *MASS_PROFILES):
         parser.error(f'未知检查点航天服质量配置：{mass_profile}')
     exo_mechanism = None
-    if args.require_force_control and task != 'exo_jump':
+    hinge_torque = None
+    if args.require_force_control and task not in exo_tasks:
         parser.error('请指定原生力控外骨骼检查点')
-    if task == 'exo_jump':
+    if task in exo_tasks:
         if actuation != FORWARD_FACING_BOOT_ACTUATION:
             parser.error('外骨骼回放需要 v32 前进跳跃策略或由它续训的外骨骼策略')
-        from exoskeleton import (DEFAULT_FORCE_N, DIRECT_FORCE_REVISIONS, FORCE_CONTROL_REVISIONS,
+        from exoskeleton import (DEFAULT_FORCE_N, DEFAULT_HINGE_TORQUE_NM, DIRECT_FORCE_REVISIONS,
+                                 FORCE_CONTROL_REVISIONS, HINGE_MECHANISMS,
                                  LOAD_SHARING_REWARD, MECHANISM, MECHANISMS,
                                  POLICY_IO, POSTURE_SUPPORT_REWARD, STANCE_TRANSITION_REWARD,
-                                 VERTICAL_SUPPORT_REWARD, validate_assist_force, validate_policy_io)
+                                 VERTICAL_SUPPORT_REWARD, validate_assist_force, validate_hinge_torque,
+                                 validate_policy_io)
         reward_revision = infos.get('exo_efficiency_reward', env_config.get('exo_efficiency_reward', {})).get('revision')
         stance_transition = reward_revision == STANCE_TRANSITION_REWARD['revision']
         posture_balance = stance_transition or reward_revision == POSTURE_SUPPORT_REWARD['revision']
@@ -260,6 +280,12 @@ def main():
         try:
             assist_force = validate_assist_force(
                 default_force if args.assist_force is None else args.assist_force)
+            if exo_mechanism in HINGE_MECHANISMS or task == 'exo_hinge_jump':
+                default_hinge = infos.get('hinge_torque_nm', env_config.get('hinge_torque_nm', DEFAULT_HINGE_TORQUE_NM))
+                hinge_torque = validate_hinge_torque(
+                    default_hinge if args.hinge_torque is None else args.hinge_torque)
+            elif args.hinge_torque is not None:
+                parser.error('当前检查点不包含矢状面铰链驱动，无法使用 --hinge-torque')
             exo_policy_io = validate_policy_io(infos.get('exo_policy_io', env_config.get('exo_policy_io')))
             exo_pd_force = assist_force if exo_policy_io == POLICY_IO else None
             suit_ankle_roll = exo_policy_io in DIRECT_FORCE_REVISIONS
@@ -317,7 +343,8 @@ def main():
                               vertical_support=vertical_support, stance_transition=stance_transition)
     worlds = CpuWorlds(physics_spec, args.num_envs, args.terrain_idx, terrain_size=args.terrain_size,
                        edge_start=args.require_force_control and args.terrain_size == 16,
-                       inward_heading=task in forward_tasks, assist_force=assist_force)
+                       inward_heading=task in forward_tasks, assist_force=assist_force,
+                       hinge_torque=hinge_torque)
     model, data, sim, device = worlds.model, worlds.data[0], worlds.sim, worlds.device
     print(f'[Startup] CPU environments ready in {time.monotonic()-startup_started:.2f}s',flush=True)
     jump_counter = None
@@ -391,7 +418,7 @@ def main():
                     FORWARD_FACING_BOOT_ACTUATION: ForwardFacingBootCommands,
                 }[actuation]
                 controller_options = {'compact_arm_swing': True, 'suit_ankle_roll': suit_ankle_roll} if (
-                    task == 'exo_jump' and exo_policy_io in FORCE_CONTROL_REVISIONS) else {}
+                    task in exo_tasks and exo_policy_io in FORCE_CONTROL_REVISIONS) else {}
                 if suit_ankle_pitch:
                     controller_options['suit_ankle_pitch'] = True
                 if suit_major_joints:
@@ -436,7 +463,8 @@ def main():
             assist.enable_load_sharing(vertical_support=vertical_support, posture_balance=posture_balance,
                                       stance_transition=stance_transition, roll_balance=roll_balance)
         mode = exo_policy_io or 'scheduled force'
-        print(f'[CPU] Exoskeleton {mode}: up to {assist_force:g} N per strut', flush=True)
+        hinge_desc = f', ±{hinge_torque:g} N·m sagittal hinge' if hinge_torque is not None else ''
+        print(f'[CPU] Exoskeleton {mode}: up to {assist_force:g} N per strut{hinge_desc}', flush=True)
 
     def jump_phase():
         return event_jump.phase() if event_jump is not None else sim.data.time

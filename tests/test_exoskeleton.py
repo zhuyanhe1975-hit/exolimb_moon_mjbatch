@@ -842,6 +842,171 @@ class ExoskeletonTest(unittest.TestCase):
         cruise_cmd = cmd(kick_act)
         self.assertGreater(float(neutral_h + scale_h * cruise_cmd[0, lh_idx]), 0.25)
 
+    def test_hut_hinge_aft_sagittal_drive_and_warmstart(self):
+        from math import radians
+        from cpu_stand_env import CpuExoHingeJumpEnv
+        from exoskeleton import (DEFAULT_HINGE_TORQUE_NM, HINGE_ACTIONS, HINGE_OBSERVATIONS,
+                                 HUT_HINGE_AFT_MECHANISM, IMPEDANCE_HINGE_FORCE_IO,
+                                 validate_hinge_torque)
+        from moon_scene import WANGYU_EVA_PROFILE
+
+        self.assertEqual(validate_hinge_torque(100.), 100.)
+        with self.assertRaises(ValueError):
+            validate_hinge_torque(200.1)
+
+        # 1. Exact sagittal hinge kinematics & assembly with fit3d_18v + Wangyu EVA
+        spec = scene_spec(geometry='fit3d_18v', exoskeleton=True,
+                          exo_mechanism=HUT_HINGE_AFT_MECHANISM,
+                          suit_ankle_roll=True, suit_ankle_pitch=True,
+                          suit_major_joints=True, relax_propulsion=True,
+                          mass_profile=WANGYU_EVA_PROFILE,
+                          sole_probes=True, sole_collision=True,
+                          sole_edge_probes=True, vertical_support=True,
+                          stance_transition=True)
+        model = spec.compile()
+        data = mujoco.MjData(model)
+        mujoco.mj_forward(model, data)
+        torso_id = model.body('robot/Torso').id
+        torso_y_world = data.xmat[torso_id].reshape(3, 3)[:, 1]
+        for side in STRUTS:
+            name = f'robot/exo_{side}'
+            pitch = model.joint(f'{name}_hinge_pitch')
+            roll = model.joint(f'{name}_hooke_roll')
+            slide = model.joint(f'{name}_slide')
+            self.assertEqual(pitch.type[0], mujoco.mjtJoint.mjJNT_HINGE)
+            self.assertEqual(roll.type[0], mujoco.mjtJoint.mjJNT_HINGE)
+            self.assertEqual(slide.type[0], mujoco.mjtJoint.mjJNT_SLIDE)
+            # Sagittal hinge axis must align strictly with Torso +Y and be orthogonal to roll axis.
+            np.testing.assert_allclose(data.xaxis[pitch.id], torso_y_world, atol=1e-9)
+            self.assertAlmostEqual(float(data.xaxis[pitch.id] @ data.xaxis[roll.id]), 0., places=9)
+            # Zero rest-pose ball joint detachment.
+            ball = data.site(f'{name}_ball_pin').xpos
+            boot = data.site(mount_names(side)[1]).xpos
+            np.testing.assert_allclose(ball, boot, atol=1e-9)
+            # Bidirectional torque actuator range and sensor presence.
+            hinge_act = model.actuator(f'{name}_hinge')
+            np.testing.assert_array_equal(hinge_act.ctrlrange, [-200., 200.])
+            np.testing.assert_array_equal(hinge_act.forcerange, [-200., 200.])
+            self.assertGreaterEqual(model.sensor(f'{name}_hinge_pos').id, 0)
+            self.assertGreaterEqual(model.sensor(f'{name}_hinge_vel').id, 0)
+
+        # Verify closed-form fit_struts_to_pose closes ball joint on arbitrary flexed pose.
+        data.joint('robot/LeftKnee').qpos[0] = .45
+        data.joint('robot/RightHipPitch').qpos[0] = -.35
+        data.joint('robot/WaistPitch').qpos[0] = .18
+        fit_struts_to_pose(model, data)
+        mujoco.mj_forward(model, data)
+        for side in STRUTS:
+            name = f'robot/exo_{side}'
+            np.testing.assert_allclose(data.site(f'{name}_ball_pin').xpos,
+                                       data.site(mount_names(side)[1]).xpos, atol=1e-9)
+        eq_rows = data.efc_type[:data.nefc] == mujoco.mjtConstraint.mjCNSTR_EQUALITY
+        self.assertEqual(int(eq_rows.sum()), 6)
+        np.testing.assert_allclose(data.efc_pos[:data.nefc][eq_rows], 0., atol=1e-9)
+
+        # 2. CpuExoHingeJumpEnv dimensions, bidirectional gating, motor speed envelope & report
+        env = CpuExoHingeJumpEnv(
+            2, 12, False, 'threaded', 1, 42,
+            geometry='fit3d_18v', assist_force=500., hinge_torque=DEFAULT_HINGE_TORQUE_NM,
+            suit_ankle_pitch=True, slope_adaptive_posture=True,
+            suit_major_joints=True, relax_propulsion=True,
+            mass_profile=WANGYU_EVA_PROFILE,
+            stance_transition=True, roll_balance=True, long_hop_period=1.7,
+        )
+        self.assertEqual(env.task, 'exo_hinge_jump')
+        self.assertEqual(env.num_actions, env.jump_commands.NUM_ACTIONS + STRUT_ACTIONS + HINGE_ACTIONS)
+        self.assertEqual(env.cfg['exo_mechanism'], HUT_HINGE_AFT_MECHANISM)
+        self.assertEqual(env.cfg['exo_policy_io'], IMPEDANCE_HINGE_FORCE_IO)
+        self.assertEqual(env.cfg['hinge_torque_nm'], 100.)
+        assist = env.worlds.exoskeleton
+        self.assertTrue(assist.has_hinge)
+        self.assertEqual(len(assist.actuators), 4)
+        self.assertTrue(env.jump_commands.symmetric_startup)
+
+        sdata = env.worlds.sim.data
+        # Stationary 0.0 m/s -> strictly zero slide and hinge output
+        env.jump_commands.target_speed[:] = 0.0
+        sdata.sensordata[:, assist.load] = 3.0 * env.worlds.device.weight
+        sdata.sensordata[:, assist.hinge_pos] = 0.0
+        sdata.sensordata[:, assist.hinge_vel] = 0.0
+        still_ctrl = assist.controls(torch.tensor([[1., 1., 1., -1.], [1., 1., -1., 1.]]))
+        torch.testing.assert_close(still_ctrl, torch.zeros((2, 4)), atol=1e-6, rtol=0)
+
+        # Grounded moving -> bidirectional ±100 N·m
+        env.jump_commands.target_speed[:] = 1.5
+        gnd_ctrl = assist.controls(torch.tensor([[1., 1., 1., -1.], [1., 1., -.5, .5]]))
+        torch.testing.assert_close(gnd_ctrl[:, 2:4],
+                                   torch.tensor([[100., -100.], [-50., 50.]]), atol=1e-4, rtol=0)
+
+        # Airborne moving -> slide 0 N, hinge smoothly bounded to 20% (±20 N·m)
+        sdata.sensordata[:, assist.load] = 0.0
+        air_ctrl = assist.controls(torch.tensor([[1., 1., 1., -1.], [1., 1., -1., 1.]]))
+        torch.testing.assert_close(air_ctrl[:, :2], torch.zeros((2, 2)), atol=1e-6, rtol=0)
+        torch.testing.assert_close(air_ctrl[:, 2:4],
+                                   torch.tensor([[20., -20.], [-20., 20.]]), atol=1e-4, rtol=0)
+
+        # Motor back-EMF speed envelope: +8.5 rad/s cuts +1 motoring to 0, keeps -1 braking at -100 N·m
+        sdata.sensordata[:, assist.load] = 3.0 * env.worlds.device.weight
+        sdata.sensordata[:, assist.hinge_vel] = 8.5
+        spd_ctrl = assist.controls(torch.tensor([[0., 0., 1., -1.], [0., 0., 1., -1.]]))
+        torch.testing.assert_close(spd_ctrl[:, 2], torch.zeros(2), atol=1e-5, rtol=0)
+        torch.testing.assert_close(spd_ctrl[:, 3], torch.full((2,), -100.), atol=1e-4, rtol=0)
+        sdata.sensordata[:, assist.hinge_vel] = 0.0
+
+        # Zero hinge torque ablation
+        assist.hinge_torque_nm = 0.
+        abl_ctrl = assist.controls(torch.tensor([[1., 1., 1., -1.], [1., 1., -1., 1.]]))
+        torch.testing.assert_close(abl_ctrl[:, 2:4], torch.zeros((2, 2)), atol=1e-6, rtol=0)
+        assist.hinge_torque_nm = 100.
+
+        # Masked reset clears hinge ctrl and last_hinge_request only on reset world
+        sdata.ctrl[:, assist.hinge_actuators] = 75.
+        assist.last_hinge_request[:] = .75
+        assist.reset_controls(torch.tensor([True, False]))
+        torch.testing.assert_close(sdata.ctrl[:, assist.hinge_actuators],
+                                   torch.tensor([[0., 0.], [75., 75.]]))
+        torch.testing.assert_close(assist.last_hinge_request,
+                                   torch.tensor([[0., 0.], [.75, .75]]))
+
+        # Telemetry report includes hinge fields
+        rep = assist.report()
+        self.assertEqual(rep['mechanism'], HUT_HINGE_AFT_MECHANISM)
+        self.assertEqual(rep['hinge_torque_limit_per_side_nm'], 100.)
+        self.assertIn('peak_hinge_torque_per_env_nm', rep)
+        self.assertIn('hinge_positive_work_per_env_j', rep)
+        self.assertIn('exo_total_positive_work_per_env_j', rep)
+
+        # 3. Zero-shock warm-start from archived v27 checkpoint (obs +8, act +2 with 0.0 hinge bias)
+        v27_path = Path(__file__).resolve().parents[1] / (
+            'bests/exo_jump_force_wangyu_hut_ball_aft_v27_100m_boot18v_2026-11-23/model_399.pt')
+        if v27_path.is_file():
+            v27 = torch.load(v27_path, map_location='cpu', weights_only=True)
+            obs = env.get_observations()
+            obs_dim = obs['policy'].shape[-1]
+            v27_obs_dim = v27['actor_state_dict']['mlp.0.weight'].shape[-1]
+            self.assertEqual(obs_dim, v27_obs_dim + HINGE_OBSERVATIONS)
+            actor = MLPModel(obs, {'actor': ['policy']}, 'actor', env.num_actions,
+                             hidden_dims=(128, 128), activation='elu', obs_normalization=True,
+                             distribution_cfg={'class_name': 'rsl_rl.modules.GaussianDistribution',
+                                               'init_std': .25, 'std_type': 'scalar'})
+            migrated = exo_initial_state(v27['actor_state_dict'], actor.state_dict(),
+                                         initial_command=0., append_hinge_io=True)
+            actor.load_state_dict(migrated, strict=True)
+            actor.eval()
+            v27_actions = v27['actor_state_dict']['mlp.4.bias'].shape[0]
+            v27_obs = TensorDict({'policy': obs['policy'][:, :v27_obs_dim]}, batch_size=[2])
+            v27_actor = MLPModel(v27_obs, {'actor': ['policy']}, 'actor', v27_actions,
+                                 hidden_dims=(128, 128), activation='elu', obs_normalization=True,
+                                 distribution_cfg={'class_name': 'rsl_rl.modules.GaussianDistribution',
+                                                   'init_std': .25, 'std_type': 'scalar'})
+            v27_actor.load_state_dict(v27['actor_state_dict'], strict=True)
+            v27_actor.eval()
+            with torch.inference_mode():
+                out_new = actor(obs)
+                out_old = v27_actor(v27_obs)
+            torch.testing.assert_close(out_new[:, :v27_actions], out_old, atol=1e-5, rtol=1e-5)
+            torch.testing.assert_close(out_new[:, v27_actions:], torch.zeros((2, 2)), atol=1e-6, rtol=0)
+
 
 if __name__ == '__main__':
     unittest.main()

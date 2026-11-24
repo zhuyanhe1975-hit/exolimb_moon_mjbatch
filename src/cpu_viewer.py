@@ -96,6 +96,11 @@ class CpuDisplay:
         for name in ('qpos','qvel','act','mocap_pos','mocap_quat','ctrl'):
             getattr(self.data,name)[:] = getattr(self.source_data,name)
         self.data.time = self.source_data.time
+        for gname in getattr(self, 'state', {}).get('sync_geom_rgba', ()):
+            src_id = mujoco.mj_name2id(self.source_model, mujoco.mjtObj.mjOBJ_GEOM, gname)
+            dst_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, gname)
+            if src_id >= 0 and dst_id >= 0:
+                self.model.geom_rgba[dst_id] = self.source_model.geom_rgba[src_id]
         active = int(self.source_model.geom('terrain').dataid[0])
         changed = active != self._active
         for i in range(self.model.nhfield):
@@ -127,7 +132,8 @@ class CpuDisplay:
     def handle_key(self, key):
         """Display style never changes the meaning of an interaction key."""
         handled = self.controls.handle(key)
-        if not handled and key in ('[',']','R'):
+        extra = {k for k, _ in getattr(self, 'state', {}).get('extra_keys', ())}
+        if not handled and (key in ('[',']','R') or key in extra):
             self.key(ord(key))
             handled = True
         if handled and self.kind == 'studio':
@@ -160,7 +166,8 @@ class CpuDisplay:
             if pressed(chord):
                 self.handle_key(key)
                 return True
-        for code,name in ((ord('['),'LeftBracket'),(ord(']'),'RightBracket'),(ord('R'),'R')):
+        extra_studio = [(ord(k), name) for k, name in getattr(self, 'state', {}).get('extra_keys', ())]
+        for code,name in ((ord('['),'LeftBracket'),(ord(']'),'RightBracket'),(ord('R'),'R'), *extra_studio):
             if pressed(getattr(imgui.Key,name)):
                 self.handle_key(chr(code))
                 return True

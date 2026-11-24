@@ -1,0 +1,254 @@
+{
+  "task": "Wangyu-Replant-v12",
+  "checkpoint": "model_999.pt",
+  "geometry": "fit3d_18v",
+  "exo_mechanism": "hut_hinge_hoof_v8_detached",
+  "reference_revision": "wangyu_replant_ref_v8",
+  "reference_sha256": "53a99ea0740900d0ded6d9992332b652bd942187d32e26aba65c9e5e36ffbc2e",
+  "tensorboard_final": {
+    "Train/mean_reward": 547.95129,
+    "Train/mean_episode_length": 593.53564,
+    "Replant/human_q_rmse": 0.05882,
+    "Replant/tip_rmse": 0.01851,
+    "Replant/hoof_slip_mps": 0.00888,
+    "Replant/hip_peak_nm": 15.65676,
+    "Replant/knee_peak_nm": 20.09388,
+    "Replant/ankle_peak_nm": 10.20107,
+    "Replant/eva_rom_excess_deg": 0.77311,
+    "Loss/value": 0.09238
+  },
+  "cpu_audit_with_deploy": {
+    "with_deploy_prelude": true,
+    "deploy_duration_s": 2.35,
+    "deploy_min_strut_human_clearance_m": 0.0182,
+    "success": true,
+    "success_time_s": 8.917,
+    "failed": false,
+    "phase_transitions_s": {
+      "1": 3.483,
+      "2": 3.5,
+      "3": 4.15
+    },
+    "mean_human_q_rmse_deg": 3.448,
+    "mean_tip_rmse_m": 0.0188,
+    "min_strut_human_clearance_m": 0.0117,
+    "loaded_hoof_slip_mean_mps": 0.0107,
+    "left_foot_swing": {
+      "lift_s": 4.85,
+      "land_s": 5.983,
+      "duration_s": 1.133,
+      "peak_gap_m": 0.0889
+    },
+    "final_1s": {
+      "mean_z_m": 0.8088,
+      "min_upright": 0.9995,
+      "min_sole_load_n": 86.84,
+      "max_shin_load_n": 0.0,
+      "min_tip_load_n": 25.31,
+      "max_sole_dx_m": 0.0152
+    },
+    "lower_limb_joints": {
+      "robot/LeftHipPitch": {
+        "limit_deg": [
+          -100.0,
+          30.0
+        ],
+        "actual_deg": [
+          -80.64,
+          10.34
+        ],
+        "peak_nm": 99.07,
+        "rms_nm": 18.92
+      },
+      "robot/RightHipPitch": {
+        "limit_deg": [
+          -100.0,
+          30.0
+        ],
+        "actual_deg": [
+          -56.8,
+          11.29
+        ],
+        "peak_nm": 54.88,
+        "rms_nm": 14.7
+      },
+      "robot/LeftKnee": {
+        "limit_deg": [
+          0.0,
+          108.0
+        ],
+        "actual_deg": [
+          1.46,
+          104.69
+        ],
+        "peak_nm": 94.53,
+        "rms_nm": 20.29
+      },
+      "robot/RightKnee": {
+        "limit_deg": [
+          0.0,
+          108.0
+        ],
+        "actual_deg": [
+          2.25,
+          107.96
+        ],
+        "peak_nm": 56.92,
+        "rms_nm": 17.99
+      },
+      "robot/LeftAnkle": {
+        "limit_deg": [
+          -20.0,
+          18.0
+        ],
+        "actual_deg": [
+          -23.15,
+          0.09
+        ],
+        "peak_nm": 110.81,
+        "rms_nm": 14.09
+      },
+      "robot/RightAnkle": {
+        "limit_deg": [
+          -20.0,
+          18.0
+        ],
+        "actual_deg": [
+          -20.56,
+          10.51
+        ],
+        "peak_nm": 32.58,
+        "rms_nm": 7.34
+      },
+      "robot/WaistPitch": {
+        "limit_deg": [
+          -15.0,
+          35.0
+        ],
+        "actual_deg": [
+          -15.11,
+          5.21
+        ],
+        "peak_nm": 51.73,
+        "rms_nm": 21.53
+      }
+    }
+  },
+  "cpu_audit_direct": {
+    "with_deploy_prelude": false,
+    "deploy_duration_s": 0.0,
+    "deploy_min_strut_human_clearance_m": null,
+    "success": true,
+    "success_time_s": 8.917,
+    "failed": false,
+    "phase_transitions_s": {
+      "1": 3.217,
+      "2": 3.233,
+      "3": 4.15
+    },
+    "mean_human_q_rmse_deg": 3.392,
+    "mean_tip_rmse_m": 0.0168,
+    "min_strut_human_clearance_m": 0.0176,
+    "loaded_hoof_slip_mean_mps": 0.0102,
+    "left_foot_swing": {
+      "lift_s": 4.85,
+      "land_s": 5.983,
+      "duration_s": 1.133,
+      "peak_gap_m": 0.0889
+    },
+    "final_1s": {
+      "mean_z_m": 0.8087,
+      "min_upright": 0.9996,
+      "min_sole_load_n": 89.38,
+      "max_shin_load_n": 0.0,
+      "min_tip_load_n": 24.95,
+      "max_sole_dx_m": 0.0101
+    },
+    "lower_limb_joints": {
+      "robot/LeftHipPitch": {
+        "limit_deg": [
+          -100.0,
+          30.0
+        ],
+        "actual_deg": [
+          -80.06,
+          11.64
+        ],
+        "peak_nm": 98.07,
+        "rms_nm": 19.17
+      },
+      "robot/RightHipPitch": {
+        "limit_deg": [
+          -100.0,
+          30.0
+        ],
+        "actual_deg": [
+          -56.68,
+          12.55
+        ],
+        "peak_nm": 61.51,
+        "rms_nm": 14.52
+      },
+      "robot/LeftKnee": {
+        "limit_deg": [
+          0.0,
+          108.0
+        ],
+        "actual_deg": [
+          0.71,
+          103.36
+        ],
+        "peak_nm": 104.19,
+        "rms_nm": 20.35
+      },
+      "robot/RightKnee": {
+        "limit_deg": [
+          0.0,
+          108.0
+        ],
+        "actual_deg": [
+          2.29,
+          108.04
+        ],
+        "peak_nm": 66.19,
+        "rms_nm": 19.67
+      },
+      "robot/LeftAnkle": {
+        "limit_deg": [
+          -20.0,
+          18.0
+        ],
+        "actual_deg": [
+          -23.49,
+          0.07
+        ],
+        "peak_nm": 113.75,
+        "rms_nm": 13.98
+      },
+      "robot/RightAnkle": {
+        "limit_deg": [
+          -20.0,
+          18.0
+        ],
+        "actual_deg": [
+          -20.61,
+          11.23
+        ],
+        "peak_nm": 31.01,
+        "rms_nm": 7.25
+      },
+      "robot/WaistPitch": {
+        "limit_deg": [
+          -15.0,
+          35.0
+        ],
+        "actual_deg": [
+          -15.07,
+          5.14
+        ],
+        "peak_nm": 53.73,
+        "rms_nm": 21.71
+      }
+    }
+  }
+}

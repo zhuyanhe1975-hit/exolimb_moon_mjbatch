@@ -11,7 +11,8 @@ from moon_scene import SOLE_TERRAIN_CONTACTS, vertical_load_columns
 class CpuWorlds:
     def __init__(self, spec, count, terrain_idx, *, pushes=False, terrain_size=16,
                  use_mjbatch=False, workers=1, optimize_cpu=False, inward_heading=False,
-                 terrain_indices=None, spawn_seed=42, assist_force=None, edge_start=False):
+                 terrain_indices=None, spawn_seed=42, assist_force=None, hinge_torque=None,
+                 edge_start=False):
         self.model = spec.compile()
         load_sensor = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SENSOR,
                                         'contacts/robot/left_sole_terrain_load')
@@ -48,7 +49,7 @@ class CpuWorlds:
         self.exoskeleton = None
         if assist_force is not None:
             from exoskeleton import TelescopingAssist
-            self.exoskeleton = TelescopingAssist(self, assist_force)
+            self.exoskeleton = TelescopingAssist(self, assist_force, hinge_torque=hinge_torque)
         self._terrain_models = None
         if terrain_indices is not None:
             from local_lunar_terrain import sole_sampling

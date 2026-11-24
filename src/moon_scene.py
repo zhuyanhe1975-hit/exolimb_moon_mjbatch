@@ -193,6 +193,7 @@ def apply_wangyu_eva_physics(spec):
 
 def scene_spec(terrain_size=16, *, geometry=LEGACY, sole_probes=False, sole_collision=False,
                sole_edge_probes=False, exoskeleton=False, exo_pd_force=None, exo_mechanism=None,
+               exo_detached=False, exo_hoof_pad_collision=True,
                suit_ankle_roll=False, suit_ankle_pitch=False, suit_major_joints=False,
                relax_propulsion=False, apollo_mass=False, mass_profile=None,
                vertical_support=False, stance_transition=False, tiled_100m=False):
@@ -269,7 +270,8 @@ def scene_spec(terrain_size=16, *, geometry=LEGACY, sole_probes=False, sole_coll
     if exoskeleton:
         from exoskeleton import MECHANISM, add_exoskeleton
         add_exoskeleton(spec, pd_force=exo_pd_force, guard_action_force=suit_ankle_roll,
-                        contact_tangent=stance_transition, mechanism=exo_mechanism or MECHANISM)
+                        contact_tangent=stance_transition, mechanism=exo_mechanism or MECHANISM,
+                        detached=exo_detached, hoof_pad_collision=exo_hoof_pad_collision)
     if geometry == FITTED_3BOX:
         apply_3box_sole_collision(spec)
     elif geometry == BODYFIT_HULL:

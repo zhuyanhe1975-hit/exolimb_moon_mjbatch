@@ -17,16 +17,23 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from cpu_stand_env import CpuExoJumpEnv
+from cpu_stand_env import CpuExoHingeJumpEnv, CpuExoJumpEnv
 from rsl_rl.models import MLPModel
 
 
-def load_actor_and_env(ckpt_path: Path, terrain_idx: int, assist_force: float, seed: int):
+def load_actor_and_env(ckpt_path: Path, terrain_idx: int, assist_force: float, seed: int,
+                       hinge_torque: float | None = None):
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     cfg_path = ckpt_path.parent / "config.json"
     full_cfg = json.loads(cfg_path.read_text())
     cfg = full_cfg["env"]
-    env = CpuExoJumpEnv(
+    is_hinge = cfg.get("task") == "exo_hinge_jump" or "hinge_torque_nm" in cfg
+    env_cls = CpuExoHingeJumpEnv if is_hinge else CpuExoJumpEnv
+    extra = {}
+    if is_hinge:
+        default_ht = float(cfg.get("hinge_torque_nm", 100.0))
+        extra["hinge_torque"] = (default_ht if assist_force > 0.0 else 0.0) if hinge_torque is None else hinge_torque
+    env = env_cls(
         num_envs=1,
         terrain_idx=terrain_idx,
         pushes=False,
@@ -45,6 +52,7 @@ def load_actor_and_env(ckpt_path: Path, terrain_idx: int, assist_force: float, s
         economical_hops=True,
         long_hop_period=cfg.get("long_hop_period_s", 1.7),
         physics_backend="mjbatch",
+        **extra,
     )
     obs = env.get_observations()
     actor_cfg = dict(full_cfg["runner"]["actor"])
@@ -67,6 +75,10 @@ def run_episode(env: CpuExoJumpEnv, actor: MLPModel, target_speed: float, second
     exo.human_absolute_work_j.zero_()
     exo.human_metabolic_proxy_j.zero_()
     exo.peak_force_n.zero_()
+    if exo.has_hinge:
+        exo.hinge_positive_work_j.zero_()
+        exo.hinge_absolute_work_j.zero_()
+        exo.peak_hinge_torque_nm.zero_()
     exo.sample_seconds = 0.0
     obs = env.get_observations()
 
@@ -117,11 +129,12 @@ def run_episode(env: CpuExoJumpEnv, actor: MLPModel, target_speed: float, second
     h_pos = float(exo.human_positive_work_j[0])
     h_met = float(exo.human_metabolic_proxy_j[0])
     s_pos = exo.positive_work_j[0].tolist()
-    s_tot = sum(s_pos)
+    h_exo_pos = exo.hinge_positive_work_j[0].tolist() if exo.has_hinge else [0.0, 0.0]
+    s_tot = sum(s_pos) + sum(h_exo_pos)
     share = s_tot / max(s_tot + h_pos, 1e-6)
     sym = min(s_pos) / max(max(s_pos), 1e-6) if max(s_pos) > 1.0 else 0.0
     peak_f = exo.peak_force_n[0].tolist()
-    return {
+    res = {
         "speed_mps": mean_spd,
         "cruise_speed_mps": cruise_spd,
         "edge_resets": edge_resets,
@@ -137,6 +150,10 @@ def run_episode(env: CpuExoJumpEnv, actor: MLPModel, target_speed: float, second
         "max_foot_back_m": max_foot_back_1st,
         "max_tilt_1st_deg": max_tilt_1st,
     }
+    if exo.has_hinge:
+        res["hinge_pos_j"] = h_exo_pos
+        res["peak_hinge_nm"] = exo.peak_hinge_torque_nm[0].tolist()
+    return res
 
 
 def main():

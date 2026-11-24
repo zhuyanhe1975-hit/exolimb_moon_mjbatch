@@ -24,16 +24,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--num-envs', type=int, default=16)
     parser.add_argument('--iterations', type=int, default=2000)
-    parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump'), default='stand')
+    parser.add_argument('--task', choices=('stand', 'jump', 'forward_jump', 'exo_jump', 'exo_hinge_jump'), default='stand')
     parser.add_argument('--jump-height-range', nargs=2, type=float, metavar=('MIN_M', 'MAX_M'),
                         help='uniform jump goal range in meters (jump task only)')
     parser.add_argument('--jump-speed-range', nargs=2, type=float, metavar=('MIN_MPS', 'MAX_MPS'),
                         help='forward jump speed range in m/s (default: 0 1.5)')
     parser.add_argument('--assist-force', type=float, metavar='NEWTONS',
                         help='per-strut peak force in the exoskeleton task (default: 500 N)')
-    parser.add_argument('--exo-control', choices=('position-pd', 'force', 'force-policy', 'force-action', 'impedance-force'),
+    parser.add_argument('--hinge-torque', type=float, metavar='NM',
+                        help='per-side sagittal hinge peak torque in exo_hinge_jump (default: 100 N·m)')
+    parser.add_argument('--exo-control', choices=('position-pd', 'force', 'force-policy', 'force-action',
+                                                  'impedance-force', 'impedance-hinge-force'),
                         help='exoskeleton actuator mode (defaults to the checkpoint mode or position-pd)')
-    parser.add_argument('--exo-mechanism', choices=('hooke_slide_ball_v3', 'waist_clevis_v4', 'hut_ring_clevis_v5', 'hut_ball_aft_v6'),
+    parser.add_argument('--exo-mechanism', choices=('hooke_slide_ball_v3', 'waist_clevis_v4',
+                                                    'hut_ring_clevis_v5', 'hut_ball_aft_v6',
+                                                    'hut_hinge_aft_v7', 'hut_hinge_hoof_v8'),
                         help='exoskeleton mount geometry (default: checkpoint mechanism or hooke_slide_ball_v3)')
     parser.add_argument('--apollo-mass', action='store_true',
                         help='apply NASA Apollo A7LB + PLSS/OPS lunar EVA mass & inertia proportions')
@@ -110,27 +115,30 @@ def main():
     parser.add_argument('--init-checkpoint', type=Path,
                         help='initialize the jump actor/critic from a compatible checkpoint')
     args = parser.parse_args()
+    exo_tasks = ('exo_jump', 'exo_hinge_jump')
+    forward_tasks = ('forward_jump', *exo_tasks)
     if args.long_hop_period is not None:
-        if args.task != 'exo_jump' or not (math.isfinite(args.long_hop_period) and args.long_hop_period > 0):
-            parser.error('--long-hop-period requires exo_jump and a finite positive period')
+        if args.task not in exo_tasks or not (math.isfinite(args.long_hop_period) and args.long_hop_period > 0):
+            parser.error('--long-hop-period requires exo_jump / exo_hinge_jump and a finite positive period')
         args.economical_hops = True
         args.keep_strut_heads = True
     args.posture_balance = args.posture_balance or args.stance_transition
     args.vertical_support = args.vertical_support or args.posture_balance or args.economical_hops or args.roll_balance
     args.load_sharing = args.load_sharing or args.vertical_support
-    forward_tasks = ('forward_jump', 'exo_jump')
     full_cuda = args.physics_backend == 'warp'
-    if full_cuda and (args.task != 'exo_jump' or args.update_device not in ('auto', 'cuda')):
-        parser.error('--physics-backend warp requires --task exo_jump and --update-device cuda or auto')
+    if full_cuda and (args.task not in exo_tasks or args.update_device not in ('auto', 'cuda')):
+        parser.error('--physics-backend warp requires --task exo_jump / exo_hinge_jump and --update-device cuda or auto')
     if not math.isfinite(args.stance_center_weight) or args.stance_center_weight < 0:
         parser.error('--stance-center-weight must be finite and nonnegative')
-    if args.stance_center_weight and (args.task != 'exo_jump' or args.init_checkpoint is None):
-        parser.error('--stance-center-weight requires exo_jump and an explicit --init-checkpoint')
-    if args.load_sharing and args.task != 'exo_jump':
-        parser.error('--load-sharing requires exo_jump')
-    if args.assist_force is not None and args.task != 'exo_jump':
+    if args.stance_center_weight and (args.task not in exo_tasks or args.init_checkpoint is None):
+        parser.error('--stance-center-weight requires exo_jump / exo_hinge_jump and an explicit --init-checkpoint')
+    if args.load_sharing and args.task not in exo_tasks:
+        parser.error('--load-sharing requires exo_jump / exo_hinge_jump')
+    if args.assist_force is not None and args.task not in exo_tasks:
         parser.error('--assist-force 仅用于外骨骼跳跃任务')
-    if args.exo_control is not None and args.task != 'exo_jump':
+    if args.hinge_torque is not None and args.task != 'exo_hinge_jump':
+        parser.error('--hinge-torque 仅用于矢状面铰链外骨骼任务（--task exo_hinge_jump）')
+    if args.exo_control is not None and args.task not in exo_tasks:
         parser.error('--exo-control 仅用于外骨骼跳跃任务')
     if args.terrain_size == 100:
         if args.terrain_idx is not None or args.terrain_idxs is not None:
@@ -153,6 +161,9 @@ def main():
         args.init_checkpoint = ROOT / 'bests/jump_flow_rebound_2026-11-18/model_149.pt'
     if args.task == 'exo_jump' and args.init_checkpoint is None:
         args.init_checkpoint = ROOT / 'bests/forward_jump_boot_yaw_2026-11-18/model_104.pt'
+    if args.task == 'exo_hinge_jump' and args.init_checkpoint is None:
+        v27 = ROOT / 'bests/exo_jump_force_wangyu_hut_ball_aft_v27_100m_boot18v_2026-11-23/model_399.pt'
+        args.init_checkpoint = v27 if v27.is_file() else ROOT / 'bests/forward_jump_boot_yaw_2026-11-18/model_104.pt'
     physics_threads, torch_threads = default_threads(args.num_envs)
     if args.physics_workers is None:
         args.physics_workers = physics_threads
@@ -171,7 +182,7 @@ def main():
     from cpu_jump_task import (DEFAULT_JUMP_HEIGHT_RANGE, FORWARD_JUMP_ACTUATIONS,
                                FORWARD_FACING_BOOT_ACTUATION, FREE_HEIGHT_FORWARD_ACTUATIONS, HEIGHT_JUMP_ACTUATIONS,
                                validate_jump_height_range)
-    from cpu_stand_env import CpuExoJumpEnv, CpuForwardJumpEnv, CpuJumpEnv, CpuStandEnv
+    from cpu_stand_env import CpuExoHingeJumpEnv, CpuExoJumpEnv, CpuForwardJumpEnv, CpuJumpEnv, CpuStandEnv
     from provenance import save as save_terrain
 
     mps_available = torch.backends.mps.is_available()
@@ -199,7 +210,7 @@ def main():
             parser.error('初始化需要兼容的事件驱动跳跃检查点')
         if args.task == 'jump' and init_actuation in FORWARD_JUMP_ACTUATIONS:
             parser.error('原地跳跃任务需要原地跳跃检查点初始化')
-        if args.task == 'exo_jump' and init_actuation != FORWARD_FACING_BOOT_ACTUATION:
+        if args.task in exo_tasks and init_actuation != FORWARD_FACING_BOOT_ACTUATION:
             parser.error('外骨骼实验需要 v32 前进跳跃策略或由它续训的外骨骼策略')
         init_geom = init_info.get('geometry')
         fitted_family = {'fitted', 'fitted_3box', 'bodyfit_v2_hull', 'fit3d_18v'}
@@ -209,7 +220,8 @@ def main():
             else:
                 parser.error('初始化检查点的几何版本须与训练配置一致')
     env_class = {'stand': CpuStandEnv, 'jump': CpuJumpEnv,
-                 'forward_jump': CpuForwardJumpEnv, 'exo_jump': CpuExoJumpEnv}[args.task]
+                 'forward_jump': CpuForwardJumpEnv, 'exo_jump': CpuExoJumpEnv,
+                 'exo_hinge_jump': CpuExoHingeJumpEnv}[args.task]
     task_options = {}
     migrate_exo_policy = False
     try:
@@ -246,11 +258,13 @@ def main():
                 task_options['mass_profile'] = APOLLO_MASS_PROFILE
             elif init_mass_profile is not None:
                 task_options['mass_profile'] = init_mass_profile
-        if args.task == 'exo_jump':
-            from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, DIRECT_FORCE_REVISIONS,
-                                     FORCE_CONTROL_REVISIONS, FORCE_POLICY_IO, IMPEDANCE_FORCE_IO,
+        if args.task in exo_tasks:
+            from exoskeleton import (ACTION_FORCE_IO, DEFAULT_FORCE_N, DEFAULT_HINGE_TORQUE_NM,
+                                     DIRECT_FORCE_REVISIONS, FORCE_CONTROL_REVISIONS, FORCE_POLICY_IO,
+                                     HINGE_CONTROL_REVISIONS, HINGE_MECHANISMS, HUT_HINGE_AFT_MECHANISM,
+                                     IMPEDANCE_FORCE_IO, IMPEDANCE_HINGE_FORCE_IO,
                                      MECHANISM, MECHANISMS, POLICY_IO, POLICY_TIMED_FORCE_IO,
-                                     validate_assist_force, validate_policy_io)
+                                     validate_assist_force, validate_hinge_torque, validate_policy_io)
             requested = DEFAULT_FORCE_N if args.assist_force is None else args.assist_force
             task_options['assist_force'] = validate_assist_force(requested)
             task_options['stance_center_weight'] = args.stance_center_weight
@@ -258,15 +272,32 @@ def main():
             target_exo_io = {'position-pd': POLICY_IO, 'force': FORCE_POLICY_IO,
                              'force-policy': POLICY_TIMED_FORCE_IO,
                              'force-action': ACTION_FORCE_IO,
-                             'impedance-force': IMPEDANCE_FORCE_IO}.get(args.exo_control)
-            if target_exo_io is None:
-                target_exo_io = source_exo_io if source_exo_io in FORCE_CONTROL_REVISIONS else POLICY_IO
+                             'impedance-force': IMPEDANCE_FORCE_IO,
+                             'impedance-hinge-force': IMPEDANCE_HINGE_FORCE_IO}.get(args.exo_control)
+            if args.task == 'exo_hinge_jump':
+                target_exo_io = target_exo_io or IMPEDANCE_HINGE_FORCE_IO
+                if target_exo_io not in HINGE_CONTROL_REVISIONS:
+                    parser.error('--task exo_hinge_jump requires --exo-control impedance-hinge-force')
+                requested_hinge = DEFAULT_HINGE_TORQUE_NM if args.hinge_torque is None else args.hinge_torque
+                task_options['hinge_torque'] = validate_hinge_torque(requested_hinge)
+                exo_mech = args.exo_mechanism or HUT_HINGE_AFT_MECHANISM
+                if exo_mech not in HINGE_MECHANISMS:
+                    parser.error('--task exo_hinge_jump requires --exo-mechanism hut_hinge_aft_v7')
+                task_options['exo_mechanism'] = exo_mech
+            else:
+                if target_exo_io is None:
+                    target_exo_io = source_exo_io if source_exo_io in FORCE_CONTROL_REVISIONS else POLICY_IO
+                if target_exo_io in HINGE_CONTROL_REVISIONS:
+                    parser.error('impedance-hinge-force requires --task exo_hinge_jump')
+                init_mechanism = init_info.get('exo_mechanism')
+                if init_mechanism not in (None, *MECHANISMS):
+                    parser.error(f'未知的初始化外骨骼机构：{init_mechanism}')
+                exo_mech = args.exo_mechanism or init_mechanism or MECHANISM
+                if exo_mech in HINGE_MECHANISMS:
+                    parser.error('hut_hinge_aft_v7 requires --task exo_hinge_jump')
+                task_options['exo_mechanism'] = exo_mech
             if args.load_sharing and target_exo_io not in DIRECT_FORCE_REVISIONS:
-                parser.error('--load-sharing requires force-action or impedance-force control')
-            init_mechanism = init_info.get('exo_mechanism')
-            if init_mechanism not in (None, *MECHANISMS):
-                parser.error(f'未知的初始化外骨骼机构：{init_mechanism}')
-            task_options['exo_mechanism'] = args.exo_mechanism or init_mechanism or MECHANISM
+                parser.error('--load-sharing requires force-action, impedance-force, or impedance-hinge-force control')
             task_options['load_sharing'] = args.load_sharing
             task_options['vertical_support'] = args.vertical_support
             task_options['posture_balance'] = args.posture_balance
@@ -344,7 +375,8 @@ def main():
                        clip_param=.2, max_grad_norm=1., value_loss_coef=1.,
                        use_clipped_value_loss=True, normalize_advantage_per_mini_batch=False),
     )
-    log_root = 'cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'
+    log_root = ('cpu_exo_hinge_train' if args.task == 'exo_hinge_jump'
+                else ('cpu_exo_train' if args.task == 'exo_jump' else 'cpu_train'))
     log_dir = (args.log_dir or ROOT / 'logs' / log_root /
                datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')).resolve()
     log_dir.mkdir(parents=True, exist_ok=False)
@@ -367,14 +399,17 @@ def main():
         low, high = env.cfg['jump_speed_range_mps']
         print(f'[CPU train] Forward jump speed range: {low:g}–{high:g} m/s; free jump height', flush=True)
 
-    if args.task == 'exo_jump':
+    if args.task in exo_tasks:
+        hinge_desc = (f', ±{env.cfg["hinge_torque_nm"]:g} N·m sagittal hinge'
+                      if 'hinge_torque_nm' in env.cfg else '')
         print(f'[Train] Exoskeleton {env.cfg["exo_policy_io"]}: '
-              f'up to {env.cfg["assist_force_n"]:g} N per strut', flush=True)
+              f'up to {env.cfg["assist_force_n"]:g} N per strut{hinge_desc}', flush=True)
 
     class LocalRunner(OnPolicyRunner):
         def save(self, path, infos=None):
             keys = ('task', 'jump_actuation', 'jump_height_range_m', 'jump_speed_range_mps',
-                    'geometry', 'terrain_size_m', 'assist_force_n', 'exo_mechanism', 'exo_efficiency_reward',
+                    'geometry', 'terrain_size_m', 'assist_force_n', 'hinge_torque_nm',
+                    'exo_mechanism', 'exo_efficiency_reward',
                     'exo_policy_io', 'stance_center_weight', 'ankle_roll_profile', 'ankle_pitch_profile',
                     'suit_major_joints_profile', 'propulsion_profile', 'apollo_mass_profile',
                     'slope_adaptive_posture', 'exo_action_force_costs', 'economical_hops',
@@ -383,6 +418,13 @@ def main():
             super().save(path, {**(infos or {}), **task_info})
 
     runner = LocalRunner(env, cfg, log_dir=str(log_dir), device=env.device)
+    if hasattr(runner, 'logger') and hasattr(runner.logger, 'rewbuffer'):
+        from collections import deque
+        # Scale completed-episode moving window with batch size so 8192-env runs
+        # do not suffer severe 100-episode tail sampling noise in Train/mean_reward.
+        buf_size = max(100, min(4096, args.num_envs // 2))
+        runner.logger.rewbuffer = deque(maxlen=buf_size)
+        runner.logger.lenbuffer = deque(maxlen=buf_size)
     if init_state is not None:
         if args.task in forward_tasks:
             if init_actuation not in FREE_HEIGHT_FORWARD_ACTUATIONS:
@@ -398,8 +440,11 @@ def main():
                 std_key = 'distribution.std_param'
                 actor_state[std_key] = actor_state[std_key].clamp_min(.25)
         if migrate_exo_policy:
-            from exoskeleton import INITIAL_ASSIST_N, PD_KP, PD_MAX_ADVANCE_M, exo_initial_state
+            from exoskeleton import (IMPEDANCE_FORCE_IO, IMPEDANCE_HINGE_FORCE_IO,
+                                     INITIAL_ASSIST_N, PD_KP, PD_MAX_ADVANCE_M, exo_initial_state)
             force_cap = env.cfg['assist_force_n']
+            append_hinge = (source_exo_io == IMPEDANCE_FORCE_IO
+                            and target_exo_io == IMPEDANCE_HINGE_FORCE_IO)
             if target_exo_io in FORCE_CONTROL_REVISIONS:
                 # Start both force outputs at 80 N or the configured cap before gating.
                 command_fraction = min(INITIAL_ASSIST_N / force_cap, 1.) if force_cap else 0.
@@ -411,23 +456,28 @@ def main():
                 command = 2. * command_fraction - 1. if key == 'actor_state_dict' else None
                 init_state[key] = exo_initial_state(
                     init_state[key], model.state_dict(), initial_command=command,
-                    replace_strut_io=source_exo_io is not None,
+                    replace_strut_io=(source_exo_io is not None and not append_hinge),
+                    append_hinge_io=append_hinge,
                 )
-        if args.reset_strut_heads and args.task == 'exo_jump':
+        if args.reset_strut_heads and args.task in exo_tasks:
             actor = init_state['actor_state_dict']
             w = actor['mlp.4.weight'].clone()
             b = actor['mlp.4.bias'].clone()
-            w_mean = w[-2:].mean(dim=0, keepdim=True) * .25
-            w[-2:] = w_mean.expand(2, -1)
-            b[-2:] = .35
+            slide_start = env.num_actions - len(env.worlds.exoskeleton.actuators)
+            slide_slice = slice(slide_start, slide_start + 2)
+            w_mean = w[slide_slice].mean(dim=0, keepdim=True) * .25
+            w[slide_slice] = w_mean.expand(2, -1)
+            b[slide_slice] = .35
             actor['mlp.4.weight'] = w
             actor['mlp.4.bias'] = b
         elif mix_strut_heads:
             # Bring the two inherited output means closer for exploration. The
             # learned heads remain independent throughout optimization and replay.
             actor = init_state['actor_state_dict']
+            slide_start = env.num_actions - len(env.worlds.exoskeleton.actuators)
+            slide_slice = slice(slide_start, slide_start + 2)
             for key in ('mlp.4.weight', 'mlp.4.bias'):
-                rods = actor[key][-2:]
+                rods = actor[key][slide_slice]
                 rods.lerp_(rods.mean(dim=0, keepdim=True), .5)
         if args.min_init_std is not None or args.min_strut_std is not None:
             actor = init_state['actor_state_dict']
@@ -436,14 +486,15 @@ def main():
                 std_val = actor[std_key].clone()
                 if args.min_init_std is not None:
                     std_val.clamp_min_(args.min_init_std)
-                if args.min_strut_std is not None and args.task == 'exo_jump':
-                    std_val[-2:].clamp_min_(args.min_strut_std)
+                if args.min_strut_std is not None and args.task in exo_tasks:
+                    exo_w = len(env.worlds.exoskeleton.actuators)
+                    std_val[-exo_w:].clamp_min_(args.min_strut_std)
                 actor[std_key] = std_val
         runner.alg.load(init_state, {'actor': True, 'critic': True}, strict=True)
         print(f'[CPU train] Initialized from {args.init_checkpoint}', flush=True)
     with env:
         runner.learn(args.iterations, init_at_random_ep_len=True)
-    if args.task == 'exo_jump':
+    if args.task in exo_tasks:
         (log_dir / 'training_efficiency.json').write_text(
             json.dumps(env.worlds.exoskeleton.report(), indent=2) + '\n')
     print(f'[CPU train] checkpoint: {log_dir / f"model_{runner.current_learning_iteration}.pt"}')

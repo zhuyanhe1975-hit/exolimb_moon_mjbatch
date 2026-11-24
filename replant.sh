@@ -8,7 +8,7 @@ fi
 if [[ ! -x "$python_bin" && -z "${CPU_PYTHON:-}" && "${1:-}" != train ]]; then
   python_bin="$HOME/dev-envs/robotics-playground-py312/bin/python"
 fi
-if [[ "$(uname -s)" == Darwin && "${1:-}" == play && " $* " != *" --headless "* ]]; then
+if [[ "$(uname -s)" == Darwin && ( "${1:-}" == play || "${1:-}" == preview ) && " $* " != *" --headless "* && " $* " == *" --viewer classic "* ]]; then
   exec "$(dirname "$python_bin")/mjpython" "$root/scripts/replant.py" "$@"
 fi
 exec "$python_bin" "$root/scripts/replant.py" "$@"

@@ -1,0 +1,19 @@
+{
+  "selected_checkpoint": "model_1999.pt",
+  "task": "Wangyu-Replant-v11",
+  "source_training_run": "logs/wangyu_replant/2026-11-24_11-43-40_137485",
+  "geometry": "fit3d_18v",
+  "exo_mechanism": "hut_hinge_aft_v7_detached",
+  "reference_revision": "wangyu_replant_ref_v7",
+  "replay_command": "./replant.sh play bests/replant_wangyu_hut_hinge_aft_v11_2026-11-24/model_1999.pt",
+  "replay_command_best": "./replant.sh play --best",
+  "preview_command": "./replant.sh preview",
+  "sha256": {
+    "model_1999.pt": "80c615569685d566893b9797bd54e40a782d2e38b78b8c638a59e4e0d9a13cbc",
+    "config.json": "f39f805d1552315cb9678b6f71647a505ffdac7460f102d168d80ad0f8fd745a",
+    "reference_manifest.json": "9672f970382411f0066dbc66eb322f606247c2f153f9c0545b26738d4b87d4b5",
+    "final_verification.json": "a44acc00890cb11321ca50a89412df41034091a56876635e7e9eaa97a5f1e818",
+    "reference/motion.npz": "3555d14715c6f1e24528522bc93624c812b4924d61160b1be19a9fbd1530fe00",
+    "reference/manifest.json": "9672f970382411f0066dbc66eb322f606247c2f153f9c0545b26738d4b87d4b5"
+  }
+}

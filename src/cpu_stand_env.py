@@ -28,7 +28,7 @@ class CpuStandEnv(VecEnv):
 
     def __init__(self, num_envs, terrain_idx, pushes, physics_backend, workers, seed, *,
                  geometry=LEGACY, inward_heading=False, terrain_indices=None, terrain_size=16,
-                 assist_force=None,
+                 assist_force=None, hinge_torque=None,
                  exo_policy_io=None, exo_mechanism=None, vertical_support=False, stance_transition=False,
                  suit_ankle_pitch=False, suit_major_joints=False, relax_propulsion=False,
                  apollo_mass=False, mass_profile=None):
@@ -49,9 +49,15 @@ class CpuStandEnv(VecEnv):
         pd_force = None
         suit_ankle_roll = False
         if assist_force is not None:
-            from exoskeleton import (ACTION_FORCE_COSTS, DIRECT_FORCE_REVISIONS, MECHANISM, POLICY_IO)
+            from exoskeleton import (ACTION_FORCE_COSTS, DEFAULT_HINGE_TORQUE_NM, DIRECT_FORCE_REVISIONS,
+                                     HINGE_MECHANISMS, MECHANISM, POLICY_IO, validate_hinge_torque)
             mechanism = exo_mechanism or MECHANISM
             self.cfg.update(assist_force_n=assist_force, exo_mechanism=mechanism)
+            if mechanism in HINGE_MECHANISMS:
+                resolved_hinge = validate_hinge_torque(
+                    DEFAULT_HINGE_TORQUE_NM if hinge_torque is None else hinge_torque)
+                self.cfg['hinge_torque_nm'] = resolved_hinge
+                hinge_torque = resolved_hinge
             suit_ankle_roll = exo_policy_io in DIRECT_FORCE_REVISIONS
             if suit_ankle_roll:
                 self.cfg.update(ankle_roll_profile=SUIT_ANKLE_ROLL_PROFILE,
@@ -82,7 +88,8 @@ class CpuStandEnv(VecEnv):
             from warp_exo_worlds import WarpExoWorlds
             self.worlds = WarpExoWorlds(spec, num_envs, terrain_idx, pushes=pushes,
                                         terrain_indices=terrain_indices, seed=seed,
-                                        assist_force=assist_force, terrain_size=terrain_size)
+                                        assist_force=assist_force, hinge_torque=hinge_torque,
+                                        terrain_size=terrain_size)
             self.cfg['spawn_sampling'] = 'independent_position_and_36_uniform_headings_gpu_with_replacement'
             if terrain_size == 100:
                 self.cfg['warp_100m_tiles'] = f'{len(self.worlds.device.ground.zmin)}x20m'
@@ -94,7 +101,7 @@ class CpuStandEnv(VecEnv):
                                     use_mjbatch=physics_backend == 'mjbatch', workers=self.workers,
                                     optimize_cpu=True, inward_heading=inward_heading,
                                     terrain_indices=terrain_indices, spawn_seed=seed,
-                                    assist_force=assist_force)
+                                    assist_force=assist_force, hinge_torque=hinge_torque)
         self.episode_length_buf = torch.zeros(num_envs, dtype=torch.long, device=self.device)
         self.weights = torch.tensor(list(META['rewards'].values()), device=self.device)
         self.pool = None
@@ -225,10 +232,10 @@ class CpuForwardJumpEnv(CpuJumpEnv):
         if self.worlds.exoskeleton is not None:
             self.worlds.exoskeleton.bind(self.jump_commands, policy_io=exo_policy_io)
         if exo_policy_io is not None:
-            from exoskeleton import STRUT_ACTIONS, validate_policy_io
+            from exoskeleton import validate_policy_io
             if self.worlds.exoskeleton is None:
                 raise ValueError('Learned strut actions require an exoskeleton')
-            self.num_actions += STRUT_ACTIONS
+            self.num_actions += len(self.worlds.exoskeleton.actuators)
             self.cfg['exo_policy_io'] = validate_policy_io(exo_policy_io)
 
     def commands(self, actions):
@@ -340,3 +347,21 @@ class CpuExoJumpEnv(CpuForwardJumpEnv):
                     + self.speed_track_boost * moving * high * (improve - .75 * underspeed_pen - overspeed_pen)
                     - still_pen)
         return super().reward(measured) + rate * self.jump_commands.DT * ~measured['wangyu/failed']
+
+
+class CpuExoHingeJumpEnv(CpuExoJumpEnv):
+    task = 'exo_hinge_jump'
+    objective = 'forward_jump_with_sagittal_hinge_exoskeleton_assistance'
+
+    def __init__(self, *args, assist_force=None, hinge_torque=None, exo_mechanism=None,
+                 exo_policy_io=None, **kwargs):
+        from exoskeleton import (DEFAULT_FORCE_N, DEFAULT_HINGE_TORQUE_NM,
+                                 HUT_HINGE_AFT_MECHANISM, IMPEDANCE_HINGE_FORCE_IO)
+        super().__init__(
+            *args,
+            assist_force=DEFAULT_FORCE_N if assist_force is None else assist_force,
+            hinge_torque=DEFAULT_HINGE_TORQUE_NM if hinge_torque is None else hinge_torque,
+            exo_mechanism=exo_mechanism or HUT_HINGE_AFT_MECHANISM,
+            exo_policy_io=exo_policy_io or IMPEDANCE_HINGE_FORCE_IO,
+            **kwargs,
+        )
